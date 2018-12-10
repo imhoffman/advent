@@ -9,7 +9,7 @@ typedef struct {
  long int tell;
  unsigned int reg;
  bool is_child;
- short meta[1];   // fake size, must be packed last, intentionally overrun addresses within the malloc
+ short meta[1];   // fake size; must be packed last; intentionally overrun addresses within the malloc
 } node;
 
 static node* pb[MAX_NODES];  // irregular struct sizes, so array their addresses
@@ -22,10 +22,11 @@ node* alloc_node (short n, short m, long int loc, unsigned int registry, bool is
 		 );
  (*p).nchild = n;
  (*p).nmeta = m;
- (*p).addr = p;
+ (*p).addr = p;		// compilers may complain about this, but it can't fail
  (*p).tell = loc;
  (*p).reg = registry;
  (*p).is_child = is_child;
+// printf(" node %2d is a child: %s\n", registry, is_child ? "true" : "false");
  return p;
 }
 
@@ -46,6 +47,7 @@ unsigned int pop (int* q) {
  printf("\n node %2d popped off the queue\n", off);
  return (unsigned int) off;
 }
+
 
 // recursive branch walker
 void tree_to_structs (FILE* f, int* q, bool bottom) {
@@ -84,6 +86,7 @@ void metaop (void) {
  return;
 
 }
+
 
 int main(void) {
  FILE* f;
