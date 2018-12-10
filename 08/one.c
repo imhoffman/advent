@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
-#pragma pack(2)
+#pragma pack(1)
 
 #define MAX_NODES 2048
 typedef struct {
