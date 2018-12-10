@@ -1,8 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
+#pragma pack(2)
 
-#define MAX_NODES 128
+#define MAX_NODES 2048
 typedef struct {
  short nchild, nmeta;
  int* addr;
@@ -16,8 +17,9 @@ static node* pb[MAX_NODES];  // irregular struct sizes, so array their addresses
 static unsigned int inode=0; // should get this into main and pointed at from tree_
 
 node* alloc_node (short n, short m, long int loc, unsigned int registry, bool is_child) {
- node* p = (node *)malloc(
-		 (m+2)*sizeof(short)+sizeof(int*)+sizeof(long int)
+// node* p = (node *)malloc(
+ node* p = malloc(
+		 (m+2)*sizeof(short)+sizeof(node*)+sizeof(long int)
 		 +sizeof(unsigned int)+sizeof(bool)
 		 );
  (*p).nchild = n;
@@ -34,7 +36,7 @@ void push (unsigned int on, int* q) {
  int i=0;
  while ( q[i] != -1 ) { i++; }
  q[i] = on;
- printf("\n node %2d pushed to the queue\n", q[i]);
+// printf("\n node %2d pushed to the queue\n", q[i]);
  return;
 }
  
@@ -44,7 +46,7 @@ unsigned int pop (int* q) {
  while ( q[i] != -1 ) { i++; }
  off = q[i-1];
  q[i-1] = -1;
- printf("\n node %2d popped off the queue\n", off);
+// printf("\n node %2d popped off the queue\n", off);
  return (unsigned int) off;
 }
 
@@ -56,6 +58,7 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
 
  long int loc = ftell(f);
  fscanf(f, "%hd %hd", &n, &m);
+// printf(" about to allocate node number %2d\n", inode);
  pb[inode] = alloc_node(n,m,loc,inode,!bottom); push(inode, q); inode++;
 
  for ( i=0; i<n; i++ ) {
@@ -66,21 +69,22 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
  while ( current_fill != (*pb[k]).reg ) { k++; }
  for ( l=0; l < (*pb[k]).nmeta; l++ ) {
    fscanf(f, "%hd", &(pb[k]->meta[l]) );
-   printf(" filling a %2d\n", (*pb[k]).meta[l]);
+//   printf(" filling a %2d\n", (*pb[k]).meta[l]);
  }
 
  return;
 }
 
 
-void metaop (void) {
+void metaop_and_free (void) {
  int answer=0;
  unsigned short i, j;
  for ( j=0; j<inode; j++ ) {
   for ( i=0; i<(*pb[j]).nmeta; i++ ) {
-   printf(" node %2d: meta[%1d] = %hd\n", j, i, (*pb[j]).meta[i]);
+//   printf(" node %2d: meta[%1d] = %hd\n", j, i, (*pb[j]).meta[i]);
    answer = answer + (*pb[j]).meta[i];
   }
+  free( (*pb[j]).addr );
  }
  printf(" sum of metadata: %d\n", answer);
  return;
@@ -97,7 +101,7 @@ int main(void) {
  tree_to_structs(f, queue, true);
  fclose(f);
 
- metaop();
+ metaop_and_free();
 
  return 0;
 }
