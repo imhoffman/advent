@@ -8,19 +8,24 @@ typedef struct {
  int* addr;
  long int tell;
  unsigned int reg;
- short meta[1];   // fake size, must be packed last, we'll overrun addresses within the malloc
+ bool is_child;
+ short meta[1];   // fake size, must be packed last, intentionally overrun addresses within the malloc
 } node;
 
-static node* pb[MAX_NODES];
-static unsigned int inode=0; // get this into main and pointed at from tree_
+static node* pb[MAX_NODES];  // irregular struct sizes, so array their addresses
+static unsigned int inode=0; // should get this into main and pointed at from tree_
 
-node* alloc_node (short n, short m, long int loc, unsigned int registry) {
- node* p = (node *)malloc( (m+2)*sizeof(short)+sizeof(int*)+sizeof(long int)+sizeof(unsigned int) );
+node* alloc_node (short n, short m, long int loc, unsigned int registry, bool is_child) {
+ node* p = (node *)malloc(
+		 (m+2)*sizeof(short)+sizeof(int*)+sizeof(long int)
+		 +sizeof(unsigned int)+sizeof(bool)
+		 );
  (*p).nchild = n;
  (*p).nmeta = m;
  (*p).addr = p;
  (*p).tell = loc;
  (*p).reg = registry;
+ (*p).is_child = is_child;
  return p;
 }
 
@@ -43,16 +48,16 @@ unsigned int pop (int* q) {
 }
 
 // recursive branch walker
-void tree_to_structs (FILE* f, int* q) {
+void tree_to_structs (FILE* f, int* q, bool bottom) {
  unsigned short i, j, n, m, burn, k=0, l;
  unsigned int current_fill;
 
  long int loc = ftell(f);
  fscanf(f, "%hd %hd", &n, &m);
- pb[inode] = alloc_node(n,m,loc,inode); push(inode, q); inode++;
+ pb[inode] = alloc_node(n,m,loc,inode,!bottom); push(inode, q); inode++;
 
  for ( i=0; i<n; i++ ) {
-   tree_to_structs(f, q);
+   tree_to_structs(f, q, false);
  }
 
  current_fill = pop(q);
@@ -65,6 +70,7 @@ void tree_to_structs (FILE* f, int* q) {
  return;
 }
 
+
 void metaop (void) {
  int answer=0;
  unsigned short i, j;
@@ -76,6 +82,7 @@ void metaop (void) {
  }
  printf(" sum of metadata: %d\n", answer);
  return;
+
 }
 
 int main(void) {
@@ -84,7 +91,7 @@ int main(void) {
 
  f = fopen("license.txt", "r");
 
- tree_to_structs(f, queue);
+ tree_to_structs(f, queue, true);
  fclose(f);
 
  metaop();
