@@ -1,5 +1,5 @@
-Structure packing got me on the first task!
-I had to pack every 1 bytes in order to get it to run error free.
+Structure packing burned me on the first task!
+I had to pack every 1 bytes in order to get it to run error-free.
 Valgrind is happy now.
 
 ```

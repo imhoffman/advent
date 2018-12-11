@@ -75,8 +75,9 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
  return;
 }
 
-int value_of_node (int nnode) {
- return (int) (*pb[nnode]).nchild;
+int value_of_node (int nnode, bool bottom) {
+ if ( bottom ) { return (int) (*pb[nnode]).nchild; }
+ return 0;
 }
 
 
@@ -107,7 +108,7 @@ int main(void) {
  fclose(f);
 
  n = 119;
- printf("\n number of children of node %4d is %2d\n", n, (*pb[n]).nchild);
+ printf("\n number of children of node %4d is %2d\n", n, value_of_node((*pb[n]).nchild, true) );
 
  metaop_and_free();
 
