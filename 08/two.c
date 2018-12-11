@@ -75,8 +75,20 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
  return;
 }
 
-int value_of_node (int nnode, bool bottom) {
- if ( bottom ) { return (int) (*pb[nnode]).nchild; }
+int value_of_node (int nnode, int* answer, bool bottom) {
+ unsigned int i;
+ bool trick = true;
+
+ for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
+  if ( (*pb[nnode]).meta[i] <= (*pb[nnode]).nchild ) { trick = false; }
+ }
+ if ( trick ) { return 0; }
+
+ for ( i=0; i<(*pb[nnode]).nchild; i++ ) {
+  *answer = *answer + 2;
+//  *answer = *answer + value_of_node( nnode, answer, false );
+ }
+ if ( bottom ) { return *answer; }
  return 0;
 }
 
@@ -100,15 +112,15 @@ void metaop_and_free (void) {
 int main(void) {
  FILE* f;
  int queue[MAX_NODES] = { [0 ... MAX_NODES-1] = -1 };
- int n;
+ int n, value=4;
 
  f = fopen("license.txt", "r");
 
  tree_to_structs(f, queue, true);
  fclose(f);
 
- n = 119;
- printf("\n number of children of node %4d is %2d\n", n, value_of_node((*pb[n]).nchild, true) );
+ n = 0;
+ printf("\n the value of node %4d is %2d\n", n, value_of_node(n, &value, true) );
 
  metaop_and_free();
 
