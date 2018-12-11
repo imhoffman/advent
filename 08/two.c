@@ -32,6 +32,14 @@ node* alloc_node (short n, short m, long int loc, unsigned int registry, bool is
  return p;
 }
 
+void free_nodes (void) {
+ unsigned short i, j;
+ for ( j=0; j<inode; j++ ) {
+  free( (*pb[j]).addr );
+ }
+ return;
+}
+
 void push (unsigned int on, int* q) {
  int i=0;
  while ( q[i] != -1 ) { i++; }
@@ -58,8 +66,9 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
 
  long int loc = ftell(f);
  fscanf(f, "%hd %hd", &n, &m);
-// printf(" about to allocate node number %2d\n", inode);
- pb[inode] = alloc_node(n,m,loc,inode,!bottom); push(inode, q); inode++;
+ pb[inode] = alloc_node(n,m,loc,inode,!bottom);
+ push(inode, q);
+ inode++;
 
  for ( i=0; i<n; i++ ) {
    tree_to_structs(f, q, false);
@@ -69,60 +78,52 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
  while ( current_fill != (*pb[k]).reg ) { k++; }
  for ( l=0; l < (*pb[k]).nmeta; l++ ) {
    fscanf(f, "%hd", &(pb[k]->meta[l]) );
-//   printf(" filling a %2d\n", (*pb[k]).meta[l]);
  }
 
  return;
 }
 
-int value_of_node (int nnode, int* answer, bool bottom) {
+int value_of_node (int nnode, int* answer, int* q, bool bottom) {
  unsigned int i;
  bool trick = true;
 
+ // if no children
+ if ( (*pb[nnode]).nchild == 0 ) {
+  for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
+   *answer = *answer + (*pb[nnode]).meta[i];
+  }
+  return *answer;
+ }
+
+ // the case of a nonsense child reference
  for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
   if ( (*pb[nnode]).meta[i] <= (*pb[nnode]).nchild ) { trick = false; }
  }
  if ( trick ) { return 0; }
 
+ // looping through children
  for ( i=0; i<(*pb[nnode]).nchild; i++ ) {
   *answer = *answer + 2;
-//  *answer = *answer + value_of_node( nnode, answer, false );
+//  *answer = *answer + value_of_node( nnode, answer, q, false );
  }
  if ( bottom ) { return *answer; }
  return 0;
 }
 
 
-void metaop_and_free (void) {
- int answer=0;
- unsigned short i, j;
- for ( j=0; j<inode; j++ ) {
-  for ( i=0; i<(*pb[j]).nmeta; i++ ) {
-//   printf(" node %2d: meta[%1d] = %hd\n", j, i, (*pb[j]).meta[i]);
-   answer = answer + (*pb[j]).meta[i];
-  }
-  free( (*pb[j]).addr );
- }
- printf(" sum of metadata: %d\n", answer);
- return;
-
-}
-
-
 int main(void) {
  FILE* f;
  int queue[MAX_NODES] = { [0 ... MAX_NODES-1] = -1 };
- int n, value=4;
+ int n, value=0;
 
  f = fopen("license.txt", "r");
-
  tree_to_structs(f, queue, true);
  fclose(f);
 
  n = 0;
- printf("\n the value of node %4d is %2d\n", n, value_of_node(n, &value, true) );
+ printf("\n the value of node %4d is %2d\n", n, value_of_node(n, &value, queue, true) );
 
- metaop_and_free();
+ free_nodes();
 
  return 0;
 }
