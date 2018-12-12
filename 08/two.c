@@ -84,18 +84,19 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
 }
 
 int value_of_node (int nnode, int* answer, int* q, bool bottom) {
- unsigned int i, current;
+ unsigned int i, j, k, n, m, offset;
+ int return_val;
  bool trick = true;
-
- push(nnode, q);
 
  // if no children
  if ( (*pb[nnode]).nchild == 0 ) {
   for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
    *answer = *answer + (*pb[nnode]).meta[i];
   }
-  pop(q);
-  return *answer;
+  printf("\n no children return of %d\n", *answer);
+  return_val = *answer;
+  *answer = 0;
+  return return_val;
  }
 
  // the case of a nonsense child reference
@@ -103,17 +104,27 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
   if ( (*pb[nnode]).meta[i] <= (*pb[nnode]).nchild ) { trick = false; }
  }
  if ( trick ) {
-  pop(q);
+  printf("\n       trick return of 0\n");
   return 0;
  }
 
- // looping through children
- for ( i=0; i<(*pb[nnode]).nchild; i++ ) {
-  *answer = *answer + 2;
-//  *answer = *answer + value_of_node( nnode, answer, q, false );
+ // looping through meta-referred children
+ // find node number of next child; the node must have children if at this point, so j=1
+ for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
+  // value of meta[i]th child
+  offset = 0;
+  for ( m=0; m<(*pb[nnode]).meta[i]; m++ ) {
+    for ( j=1; j<(*pb[nnode]).nchild+1; j++ ) {
+     offset = offset + (*pb[nnode+j]).nchild;
+    }
+  }
+  printf("\n offset: %d\n", offset);
+  *answer = *answer + value_of_node( nnode+offset, answer, q, false );
  }
- if ( bottom ) { return *answer; }
- return 0;
+
+ return_val = *answer;
+ *answer = 0;
+ return return_val;
 }
 
 
@@ -127,8 +138,6 @@ int main(void) {
  fclose(f);
 
  n = 0;
- printf("\n leading queue entry is %d\n", queue[0]);
- printf("\n     nth queue entry is %d\n", queue[n]);
  printf("\n the value of node %4d is %2d\n\n", n, value_of_node(n, &value, queue, true) );
 
  free_nodes();
