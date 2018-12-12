@@ -87,7 +87,6 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
  unsigned int i, j, k, n, m, offset;
  int return_val;
  bool trick = true;
- *answer = 0;
 
  // if no children
  if ( (*pb[nnode]).nchild == 0 ) {
@@ -120,11 +119,13 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
      offset = offset + (*pb[nnode+j]).nchild;
     }
   }
+  printf(" \n answer before recursive call %d\n", *answer);
   *answer = *answer + value_of_node( nnode+offset, answer, q, false );
+  printf(" \n  answer after recursive call %d\n", *answer);
  }
 
- return_val = *answer;
- *answer = 0;
+// return_val = *answer;
+// if ( bottom ) { *answer = 0; }
  return return_val;
 }
 
