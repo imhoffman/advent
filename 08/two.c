@@ -84,14 +84,17 @@ void tree_to_structs (FILE* f, int* q, bool bottom) {
 }
 
 int value_of_node (int nnode, int* answer, int* q, bool bottom) {
- unsigned int i;
+ unsigned int i, current;
  bool trick = true;
+
+ push(nnode, q);
 
  // if no children
  if ( (*pb[nnode]).nchild == 0 ) {
   for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
    *answer = *answer + (*pb[nnode]).meta[i];
   }
+  pop(q);
   return *answer;
  }
 
@@ -99,7 +102,10 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
  for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
   if ( (*pb[nnode]).meta[i] <= (*pb[nnode]).nchild ) { trick = false; }
  }
- if ( trick ) { return 0; }
+ if ( trick ) {
+  pop(q);
+  return 0;
+ }
 
  // looping through children
  for ( i=0; i<(*pb[nnode]).nchild; i++ ) {
@@ -121,7 +127,9 @@ int main(void) {
  fclose(f);
 
  n = 0;
- printf("\n the value of node %4d is %2d\n", n, value_of_node(n, &value, queue, true) );
+ printf("\n leading queue entry is %d\n", queue[0]);
+ printf("\n     nth queue entry is %d\n", queue[n]);
+ printf("\n the value of node %4d is %2d\n\n", n, value_of_node(n, &value, queue, true) );
 
  free_nodes();
 
