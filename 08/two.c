@@ -87,6 +87,7 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
  unsigned int i, j, k, n, m, offset;
  int return_val;
  bool trick = true;
+ *answer = 0;
 
  // if no children
  if ( (*pb[nnode]).nchild == 0 ) {
@@ -104,8 +105,9 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
   if ( (*pb[nnode]).meta[i] <= (*pb[nnode]).nchild ) { trick = false; }
  }
  if ( trick ) {
+  *answer = 0;
   printf("\n       trick return of 0\n");
-  return 0;
+  return *answer;
  }
 
  // looping through meta-referred children
@@ -118,7 +120,6 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
      offset = offset + (*pb[nnode+j]).nchild;
     }
   }
-  printf("\n offset: %d\n", offset);
   *answer = *answer + value_of_node( nnode+offset, answer, q, false );
  }
 
