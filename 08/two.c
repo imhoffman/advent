@@ -110,9 +110,9 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
  }
 
  // looping through meta-referred children
- // find node number of next child; the node must have children if at this point, so j=1
  for ( i=0; i<(*pb[nnode]).nmeta; i++ ) {
   // value of meta[i]th child
+  // find node number of next child; the node must have children if at this point, so j=1
   offset = 0;
   for ( m=0; m<(*pb[nnode]).meta[i]; m++ ) {
     for ( j=1; j<(*pb[nnode]).nchild+1; j++ ) {
@@ -120,12 +120,13 @@ int value_of_node (int nnode, int* answer, int* q, bool bottom) {
     }
   }
   printf(" \n answer before recursive call %d\n", *answer);
-  *answer = *answer + value_of_node( nnode+offset, answer, q, false );
+  *answer = *answer + value_of_node( nnode+offset, answer, q, false ); // can't use or zero the answer pointer here !
   printf(" \n  answer after recursive call %d\n", *answer);
  }
 
-// return_val = *answer;
+ return_val = *answer;
 // if ( bottom ) { *answer = 0; }
+ *answer = 0;
  return return_val;
 }
 
