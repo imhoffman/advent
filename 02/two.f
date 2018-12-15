@@ -18,42 +18,44 @@
       end program two
 !
 !
-!
-!
       subroutine compid(a)
       implicit none
       character (len=*), dimension(*) :: a
       character b*(len(a)), c*(len(a))
       integer i, j, k, m
-      logical match
-!      do i = 1,   ! use scan by going letter by letter though a
-!      comparison; keep the return so that the index can be used to
-!      remove the letter later; the comparison will be the scan of one
-!      entire string with each successive letter of the next string
+      logical hope
 !      write(6,*) sizeof(a), sizeof(a(1))  ! how to get size of an array of strings?
       do i = 1, 250
-       match = .false.
        b = a(i)
        do j = i+1, 250
-       c = a(j)
-        do k = 1, len(a)
-         m = scan(b,c(k:k))
-         write(6,*) b, ' ', c(k:k), m
-         if ( m .ne. 0 ) then
-          if ( match ) then 
+        c = a(j)
+        hope = .false.
+        do k = 1, len(c)
+!         m = scan(b,c(k:k))
+         if ( b(k:k) .eq. c(k:k) ) then
+         write(6,*) b
+         write(6,*) c
+         write(6,*) c(k:k), k
+         write(6,*) 
+          if ( hope ) then 
+!           write(6,*) ' fail: found too many matches'
            goto 300
           else
-           match = .true.
+!           write(6,*) ' hope: found one match!'
+           hope = .true.
+           goto 250
           endif
          endif
-         if ( k .eq. len(a) .and. match ) then
+!         if ( hope ) then
+         if ( k .eq. len(c)-1 .and. hope ) then
           write(6,*) ' match!'
           write(6,*) b
           write(6,*) c
-          write(6,*) b(1:m-1)//b(m+1:)
-          write(6,*) c(1:m-1)//c(m+1:)
-          goto 400
+          write(6,*) trim(b(1:k-1))//trim(b(k+1:))
+          write(6,*) trim(c(1:k-1))//trim(c(k+1:))
+          return
          end if
+250      continue
         end do
 300     continue
        end do
@@ -61,8 +63,6 @@
       end do
 400   return
       end subroutine compid
-!
-!
 !
 !
       subroutine counter(a, n2, n3)
@@ -80,10 +80,8 @@
       do i = 1, len(a)
        occ = 0
        s = a(i:i)
-!        write(6,*) ' done=',done, ' s=',s, scan(done,s)
        if ( scan(done,s) .gt. 0 ) goto 90
        do j = i, len(a)
-!        write(6,*) ' a=',a, ' s=',s, ' a(j)=', a(j:j), ' occ=',occ
         if ( s .eq. a(j:j) ) occ = occ + 1
        end do
        if ( occ .eq. 2 .and. twos ) then
@@ -94,7 +92,6 @@
         threes = .false.
        endif
        done = trim(done)//s
-!       write(6,*) done
  90    continue
       end do
       goto 120
