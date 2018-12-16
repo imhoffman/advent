@@ -42,9 +42,11 @@ typedef struct {
  
 
 int main (void) {
- reg R;
+ FILE *f;
+ reg R, Ri, Rf;
  mnemonics m;
- int n;
+ char before[21], after[21]; 
+ int opcode, A, B, C, n=0;
 
  // populate struct
  const char names[][5] = {
@@ -57,6 +59,16 @@ int main (void) {
  };
  memcpy(&(m.name), &names, sizeof(m.name));
  memcpy(&(m.instr), &instrs, sizeof(m.instr));
+
+ f = fopen("input.txt","r");
+ while ( n < 10 ) {
+  fscanf(f, "%s", &before);
+  fscanf(f, "%d %d %d %d", &opcode, &A, &B, &C);
+  fscanf(f, "%s", &after);
+  printf("%d %d %d %d\n", opcode, A, B, C);
+  n++;
+ }
+ fclose(f);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  n = 2;
