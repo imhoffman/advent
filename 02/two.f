@@ -1,7 +1,7 @@
       program two
       implicit none
       integer label_len, max_lines
-      parameter ( label_len = 26, max_lines = 250 )
+      parameter ( label_len = 32, max_lines = 256 )
 
       character (len=label_len), dimension(max_lines) :: s
       integer i
@@ -12,22 +12,23 @@
       end do
 100   close(10)
 
-      call compid(s)
+      call compid(s, i-1)
 
       stop
       end program two
 !
 !
-      subroutine compid(a)
+      subroutine compid(a, n)
       implicit none
       character (len=*), dimension(*) :: a
-      character b*(len(a)), c*(len(a))
+      integer n
+      character b*(n), c*(n)
       integer i, j, k, m
       logical hope
 !      write(6,*) sizeof(a), sizeof(a(1))  ! how to get dimension of an array of strings?
-      do i = 1, 250
+      do i = 1, n
        b = a(i)
-       do j = i+1, 250
+       do j = i+1, n
         c = a(j)
         hope = .false.
         m = 0
@@ -39,7 +40,7 @@
 !         write(6,*) 
           if ( hope ) then 
 !           write(6,*) ' fail: found too many differences
-           m = 0
+!           m = 0
            goto 300
           else
 !           write(6,*) ' hope: found one difference!'
