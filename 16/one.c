@@ -44,6 +44,9 @@ typedef struct {
 int main (void) {
  reg R;
  mnemonics m;
+ int n;
+
+ // populate struct
  const char names[][5] = {
   "addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori",
   "setr", "seti", "gtir", "gtri", "gtrr", "eqir", "eqri", "eqrr"
@@ -56,19 +59,28 @@ int main (void) {
  memcpy(&(m.instr), &instrs, sizeof(m.instr));
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
- printf("\n before mulr 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- m.instr[2] ( &R, 2, 1, 2);
- printf("\n  after mulr 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
+ n = 2;
+ printf("\n before %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
+ m.instr[n] ( &R, 2, 1, 2);
+ printf("\n  after %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
- printf("\n before addi 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- m.instr[1] ( &R, 2, 1, 2 );
- printf("\n  after addi 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
+ n = 1;
+ printf("\n before %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
+ m.instr[n] ( &R, 2, 1, 2);
+ printf("\n  after %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
- printf("\n before seti 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- m.instr[9] ( &R, 2, 1, 2 );
- printf("\n  after seti 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
+ n = 9;
+ printf("\n before %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
+ m.instr[n] ( &R, 2, 1, 2);
+ printf("\n  after %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
+
+ R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
+ n = 6;
+ printf("\n before %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
+ m.instr[n] ( &R, 2, 1, 2);
+ printf("\n  after %s 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", m.name[n], R.R[0], R.R[1], R.R[2], R.R[3]);
 
  return 0;
 }
