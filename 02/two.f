@@ -30,29 +30,31 @@
        do j = i+1, 250
         c = a(j)
         hope = .false.
+        m = 0
         do k = 1, len(c)
-!         m = scan(b,c(k:k))
-         if ( b(k:k) .eq. c(k:k) ) then
-         write(6,*) b
-         write(6,*) c
-         write(6,*) c(k:k), k
-         write(6,*) 
+         if ( b(k:k) .ne. c(k:k) ) then
+!         write(6,*) b
+!         write(6,*) c
+!         write(6,*) c(k:k), k
+!         write(6,*) 
           if ( hope ) then 
-!           write(6,*) ' fail: found too many matches'
+!           write(6,*) ' fail: found too many differences
+           m = 0
            goto 300
           else
-!           write(6,*) ' hope: found one match!'
+!           write(6,*) ' hope: found one difference!'
+           m = k
            hope = .true.
            goto 250
           endif
          endif
 !         if ( hope ) then
-         if ( k .eq. len(c)-1 .and. hope ) then
-          write(6,*) ' match!'
+         if ( k .eq. len(c) .and. hope ) then
+          write(6,*) ' match! at location', m
           write(6,*) b
           write(6,*) c
-          write(6,*) trim(b(1:k-1))//trim(b(k+1:))
-          write(6,*) trim(c(1:k-1))//trim(c(k+1:))
+          write(6,*) trim(b(1:m-1))//trim(b(m+1:))
+          write(6,*) trim(c(1:m-1))//trim(c(m+1:))
           return
          end if
 250      continue
