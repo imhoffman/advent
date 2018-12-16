@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 typedef struct {
  int R[4];
@@ -34,26 +35,39 @@ void eqrr (reg* R, int A, int B, int C) {
  if ( (*R).R[A] == (*R).R[B] ) { (*R).R[C] = 1; return; }
  else { (*R).R[C] = 0; return; } }
 
+typedef struct {
+ char name[16][5];
+ void (*instr[16])(reg* R, int A, int B, int C);
+} mnemonics;
+ 
+
 int main (void) {
  reg R;
- void (*instr[16])(reg* R, int A, int B, int C) = {
+ mnemonics m;
+ const char names[][5] = {
+  "addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori",
+  "setr", "seti", "gtir", "gtri", "gtrr", "eqir", "eqri", "eqrr"
+ };
+ const void (*instrs[]) = {
   &addr, &addi, &mulr, &muli, &banr, &bani, &borr, &bori,
   &setr, &seti, &gtir, &gtri, &gtrr, &eqir, &eqri, &eqrr
  };
+ memcpy(&(m.name), &names, sizeof(m.name));
+ memcpy(&(m.instr), &instrs, sizeof(m.instr));
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  printf("\n before mulr 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- instr[2] ( &R, 2, 1, 2);
+ m.instr[2] ( &R, 2, 1, 2);
  printf("\n  after mulr 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  printf("\n before addi 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- instr[1] ( &R, 2, 1, 2 );
+ m.instr[1] ( &R, 2, 1, 2 );
  printf("\n  after addi 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  printf("\n before seti 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- instr[9] ( &R, 2, 1, 2 );
+ m.instr[9] ( &R, 2, 1, 2 );
  printf("\n  after seti 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
 
  return 0;
