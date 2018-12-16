@@ -36,20 +36,24 @@ void eqrr (reg* R, int A, int B, int C) {
 
 int main (void) {
  reg R;
+ void (*instr[16])(reg* R, int A, int B, int C) = {
+  &addr, &addi, &mulr, &muli, &banr, &bani, &borr, &bori,
+  &setr, &seti, &gtir, &gtri, &gtrr, &eqir, &eqri, &eqrr
+ };
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  printf("\n before mulr 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- mulr ( &R, 2, 1, 2);
+ instr[2] ( &R, 2, 1, 2);
  printf("\n  after mulr 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  printf("\n before addi 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- addi ( &R, 2, 1, 2 );
+ instr[1] ( &R, 2, 1, 2 );
  printf("\n  after addi 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  printf("\n before seti 2 1 2: [ %2d, %2d, %2d, %2d ]\n", R.R[0], R.R[1], R.R[2], R.R[3]);
- seti ( &R, 2, 1, 2 );
+ instr[9] ( &R, 2, 1, 2 );
  printf("\n  after seti 2 1 2: [ %2d, %2d, %2d, %2d ]\n\n", R.R[0], R.R[1], R.R[2], R.R[3]);
 
  return 0;
