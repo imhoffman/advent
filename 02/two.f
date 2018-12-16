@@ -24,7 +24,7 @@
       character b*(len(a)), c*(len(a))
       integer i, j, k, m
       logical hope
-!      write(6,*) sizeof(a), sizeof(a(1))  ! how to get size of an array of strings?
+!      write(6,*) sizeof(a), sizeof(a(1))  ! how to get dimension of an array of strings?
       do i = 1, 250
        b = a(i)
        do j = i+1, 250
@@ -48,7 +48,6 @@
            goto 250
           endif
          endif
-!         if ( hope ) then
          if ( k .eq. len(c) .and. hope ) then
           write(6,*) ' match! at location', m
           write(6,*) b
