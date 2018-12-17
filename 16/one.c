@@ -45,7 +45,7 @@ int main (void) {
  FILE *f;
  reg R, Ri, Rf;
  mnemonics m;
- char before[21], after[21]; 
+ char junk[10];
  int opcode, A, B, C, n=0;
 
  // populate struct
@@ -60,11 +60,15 @@ int main (void) {
  memcpy(&(m.name), &names, sizeof(m.name));
  memcpy(&(m.instr), &instrs, sizeof(m.instr));
 
+ size_t length=21;
+ char* buffer = malloc(length);
+ free(buffer);
  f = fopen("input.txt","r");
  while ( n < 10 ) {
-  fscanf(f, "%s", &before);
-  fscanf(f, "%d %d %d %d", &opcode, &A, &B, &C);
-  fscanf(f, "%s", &after);
+  getline(&buffer,&length,f);
+  sscanf(buffer, "%9s%1d,%2d,%2d,%2d]\n", &junk,&(Ri.R[0]),&(Ri.R[1]),&(Ri.R[2]));
+  fscanf(f, "%d %d %d %d\n", &opcode, &A, &B, &C);
+  fscanf(f, "%9s%1d,%2d,%2d,%2d]\n", &junk,&(Rf.R[0]),&(Rf.R[1]),&(Rf.R[2]));
   printf("%d %d %d %d\n", opcode, A, B, C);
   n++;
  }
