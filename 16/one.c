@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<stdbool.h>
 
 typedef struct {
  int R[4];
@@ -45,7 +46,7 @@ int main (void) {
  FILE *f;
  reg R, Ri, Rf;
  mnemonics m;
- int opcode, A, B, C, n=0;
+ int opcode, A, B, C, n=0, i, k;
 
  // populate struct
  const char names[][5] = {
@@ -61,20 +62,31 @@ int main (void) {
 
  char buffer[24]="\0", junk[11];
  f = fopen("input.txt","r");
- while ( n < 10 ) {
-  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
+ while ( 1 ) {
+  if ( fgets(buffer, 24, f) == NULL ) { break; }
   sscanf(buffer, "%9s %1s%1d,%2d,%2d,%2d]\n", junk,junk,&(Ri.R[0]),&(Ri.R[1]),&(Ri.R[2]),&(Ri.R[3]));
-  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
+  if ( fgets(buffer, 24, f) == NULL ) { break; }
   sscanf(buffer, "%d %d %d %d\n", &opcode, &A, &B, &C);
-  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
+  if ( fgets(buffer, 24, f) == NULL ) { break; }
   sscanf(buffer, "%9s %1s%1d,%2d,%2d,%2d]\n", junk,junk,&(Rf.R[0]),&(Rf.R[1]),&(Rf.R[2]),&(Rf.R[3]));
-  printf(" register before: %2d %2d %2d %2d\n",Ri.R[0],Ri.R[1],Ri.R[2],Ri.R[3]);
-  printf("%d %d %d %d\n", opcode, A, B, C);
-  printf("  register after: %2d %2d %2d %2d\n",Rf.R[0],Rf.R[1],Rf.R[2],Rf.R[3]);
-  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
-  n++;
+//  printf(" register before: %2d %2d %2d %2d\n",Ri.R[0],Ri.R[1],Ri.R[2],Ri.R[3]);
+//  printf("%d %d %d %d\n", opcode, A, B, C);
+//  printf("  register after: %2d %2d %2d %2d\n",Rf.R[0],Rf.R[1],Rf.R[2],Rf.R[3]);
+  if ( fgets(buffer, 24, f) == NULL ) { break; }
+  k = 0;
+  for ( i=0; i<16; i++ ) {
+   R = Ri;
+//   printf("       before R : %2d %2d %2d %2d\n",R.R[0],R.R[1],R.R[2],R.R[3]);
+   m.instr[i] ( &R, A, B, C);
+//   printf("        after Ri: %2d %2d %2d %2d\n",Ri.R[0],Ri.R[1],Ri.R[2],Ri.R[3]);
+//   printf("        after R : %2d %2d %2d %2d\n",R.R[0],R.R[1],R.R[2],R.R[3]);
+//   printf("        after Rf: %2d %2d %2d %2d\n\n",Rf.R[0],Rf.R[1],Rf.R[2],Rf.R[3]);
+   if ( Rf.R[0]==R.R[0] && Rf.R[1]==R.R[1] && Rf.R[2]==R.R[2] && Rf.R[3]==R.R[3] ) { k++; }
+  }
+  if ( k >= 3 ) { n++; }
  }
  fclose(f);
+ printf("\n number of thrice-possibles: %d\n\n",n);
 
  R.R[0] =  3; R.R[1] =  2; R.R[2] =  1; R.R[3] =  1;
  n = 2;
