@@ -45,7 +45,6 @@ int main (void) {
  FILE *f;
  reg R, Ri, Rf;
  mnemonics m;
- char junk[10];
  int opcode, A, B, C, n=0;
 
  // populate struct
@@ -60,16 +59,20 @@ int main (void) {
  memcpy(&(m.name), &names, sizeof(m.name));
  memcpy(&(m.instr), &instrs, sizeof(m.instr));
 
- size_t length=21;
- char* buffer = malloc(length);
- free(buffer);
+ char buffer[24]="\0", junk[10];
  f = fopen("input.txt","r");
  while ( n < 10 ) {
-  getline(&buffer,&length,f);
-  sscanf(buffer, "%9s%1d,%2d,%2d,%2d]\n", &junk,&(Ri.R[0]),&(Ri.R[1]),&(Ri.R[2]));
-  fscanf(f, "%d %d %d %d\n", &opcode, &A, &B, &C);
-  fscanf(f, "%9s%1d,%2d,%2d,%2d]\n", &junk,&(Rf.R[0]),&(Rf.R[1]),&(Rf.R[2]));
+  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
+//  printf("%s",buffer);
+  sscanf(buffer, "%8s[%1d,%2d,%2d,%2d]\n", junk,&Ri->R[0],&(Ri.R[1]),&(Ri.R[2]),&(Ri.R[3]));
+  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
+  sscanf(buffer, "%d %d %d %d\n", &opcode, &A, &B, &C);
+  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
+  sscanf(buffer, "%9s%1d,%2d,%2d,%2d]\n", junk,&(Rf.R[0]),&(Rf.R[1]),&(Rf.R[2]),&(Rf.R[3]));
+  printf(" register before: %2d %2d %2d %2d\n",Ri.R[0],Ri.R[1],Ri.R[2],Ri.R[3]);
   printf("%d %d %d %d\n", opcode, A, B, C);
+  printf("  register after: %2d %2d %2d %2d\n",Rf.R[0],Rf.R[1],Rf.R[2],Rf.R[3]);
+  if ( fgets(buffer, 24, f) == NULL ) { return 1; }
   n++;
  }
  fclose(f);
