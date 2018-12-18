@@ -92,18 +92,43 @@ int main (void) {
  }
  fclose(f);
 
- for ( i=0; i<16; i++ ) {
-  printf(" i: %2d, 0x%04x\n", i, codes[i]);
- }
+// for ( i=0; i<16; i++ ) {
+//  printf(" i: %2d, 0x%04x\n", i, codes[i]);
+// }
 
  for ( i=0; i<16; i++ ) {
   printf("\n opcode %2d could be: ", i);
   for ( j=0; j<16; j++ ) {
-   if ( !(codes[i] & ( 1 << j )) ) { printf(" %s", m.name[j]); }
+   if ( !(codes[i] & ( 1 << j )) ) { printf(" %s", m.name[j]); } else { printf("     "); }
   }
  }
  printf("\n\n");
  
+ f = fopen("prog.txt","r");
+ i = 0;
+ while ( fgets(buffer, 24, f) != NULL ) {
+  sscanf(buffer, "%d %d %d %d\n", &opcode, &A, &B, &C);
+  if ( opcode == i ) {
+//   printf(" %2d\n", opcode);
+   i++;
+   fseek(f,0L,SEEK_SET);
+  }
+ }
+ fclose(f);
+
+ mnemonics g;
+
+ // populate struct
+ const char gnames[][5] = {
+  "addi", "bani", "gtir", "borr", "eqrr", "bori", "gtrr", "setr",
+  "mulr", "seti", "banr", "gtri", "eqir", "eqri", "addr", "muli"
+ };
+ const void (*ginstrs[]) = {
+  &addi, &bani, &gtir, &borr, &eqrr, &bori, &gtrr, &setr,
+  &mulr, &seti, &banr, &gtri, &eqir, &eqri, &addr, &muli
+ };
+ memcpy(&(g.name), &gnames, sizeof(g.name));
+ memcpy(&(g.instr), &ginstrs, sizeof(g.instr));
 
  return 0;
 }
