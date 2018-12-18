@@ -117,18 +117,30 @@ int main (void) {
  fclose(f);
 
  mnemonics g;
-
  // populate struct
  const char gnames[][5] = {
   "addi", "bani", "gtir", "borr", "eqrr", "bori", "gtrr", "setr",
-  "mulr", "seti", "banr", "gtri", "eqir", "eqri", "addr", "muli"
+  "muli", "seti", "banr", "gtri", "eqir", "eqri", "addr", "mulr"
  };
  const void (*ginstrs[]) = {
   &addi, &bani, &gtir, &borr, &eqrr, &bori, &gtrr, &setr,
-  &mulr, &seti, &banr, &gtri, &eqir, &eqri, &addr, &muli
+  &muli, &seti, &banr, &gtri, &eqir, &eqri, &addr, &mulr
  };
  memcpy(&(g.name), &gnames, sizeof(g.name));
  memcpy(&(g.instr), &ginstrs, sizeof(g.instr));
 
+ f = fopen("prog.txt","r");
+ R.R[0] =  0; R.R[1] =  0; R.R[2] =  0; R.R[3] =  0;
+ while ( fgets(buffer, 24, f) != NULL ) {
+  sscanf(buffer, "%d %d %d %d\n", &opcode, &A, &B, &C);
+  printf(" executing %s %d %d %d\n",g.name[opcode],A,B,C);
+  g.instr[opcode] ( &R, A, B, C );
+ }
+ fclose(f);
+ n = 0;
+ printf("\n\n register %d at the end of the program has value %d\n\n",n,R.R[n]);
+
  return 0;
 }
+
+// That's not the right answer; your answer is too low. (You guessed 466.)
