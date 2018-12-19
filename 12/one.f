@@ -4,7 +4,7 @@
       parameter ( npot0 = 99, ngen = 20, m = 5, nrule = 32,
      $            npots = npot0+2*ngen )
 
-      integer i, j, k, n, ival
+      integer i, j, k, n, ival, total
       character (len=npots), dimension(ngen)    :: state
       character (len=m),     dimension(nrule,2) :: grow
       character junk*(15), fill*(9), current*(npots), empty*(npots)
@@ -29,22 +29,28 @@
        empty(i:i) = "."
       end do
 
-! need to fill state with .
       do i = 2, ngen
        current = empty
        do j = 3, npots-m
         do k = 1, nrule
-         if ( state(i-1)(j-2:j-2+m) .eq. grow(k,1) ) then
-          write(6,*) 'got in'
+         if ( state(i-1)(j-2:j-2+m-1) .eq. grow(k,1) ) then
           current(j:j) = grow(k,2)
          end if
         end do
        end do
        state(i) = current
-       write(6,*) state(i)
+!       write(6,*) state(i)
       end do
-
       close(10)
+
+      total = 0
+      do i = 1, npots
+       if ( current(i:i) .eq. '#' ) then
+        total = total + ival(i)
+       end if
+      end do
+      write(6,*) 'sum of plant indices:', total
+      ! 2656 too low
 
       stop
       end program one
