@@ -1,8 +1,8 @@
       program one
       implicit none
       integer npot0, npots, ngen, nrule, m
-      parameter ( npot0 = 99, ngen = 20, m = 5, nrule = 32,
-     $            npots = npot0+2*ngen )
+      parameter ( npot0 = 99, ngen = 21, m = 5, nrule = 32,
+     $            npots = npot0+2*ngen+2 )
 
       integer i, j, k, n, ival, total
       character (len=npots), dimension(ngen)    :: state
@@ -14,8 +14,8 @@
       read(10,fill) junk, state(1)
       state(1) = '....................'
      $  //trim(state(1))//
-     $  '....................' 
-!      write(6,*) state(1)
+     $  '........................' 
+      write(6,*) state(1)
 
       read(10,*)     ! blank line after initial state
 
@@ -29,17 +29,20 @@
        empty(i:i) = "."
       end do
 
+!      do i = 2, 3
       do i = 2, ngen
        current = empty
        do j = 3, npots-m
         do k = 1, nrule
+!         if ( state(i-1)(j-2:j-2+m-1) .eq. "....#" )
+!     $                            write(6,*) 'index :', j
          if ( state(i-1)(j-2:j-2+m-1) .eq. grow(k,1) ) then
           current(j:j) = grow(k,2)
          end if
         end do
        end do
        state(i) = current
-!       write(6,*) state(i)
+       write(6,*) state(i)
       end do
       close(10)
 
@@ -50,7 +53,7 @@
        end if
       end do
       write(6,*) 'sum of plant indices:', total
-      ! 2656 too low
+      ! 2656 is too low, 2883 is wrong
 
       stop
       end program one
@@ -58,6 +61,6 @@
 !
       function ival(i)
       integer i
-      ival = i - 23
+      ival = i - 21
       return
       end function ival
