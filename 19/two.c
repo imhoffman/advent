@@ -59,7 +59,7 @@ typedef struct {
 int main (void) {
  FILE *f;
  prog* p = malloc(sizeof(int)+MAX_PROG_LINES*sizeof(prog_line));
- reg R, Ri, Rf;
+ reg R;
  mnemonics m;
  int A, B, C, n=0, i, j, k, Nlines;
 
@@ -79,13 +79,13 @@ int main (void) {
  f = fopen("input.txt","r");
 
  fgets(buffer, 24, f);                        // read header line
- sscanf(buffer, "%s %d\n", &junk, &(p->ipreg) );
+ sscanf(buffer, "%s %d\n", junk, &(p->ipreg) );
  printf(" instruction pointer register: %d\n",(*p).ipreg);
 
  k = 0;
  while ( fgets(buffer, 24, f) != NULL ) {     // read lines of program
   sscanf(buffer, "%s %d %d %d\n",
-		  &(p->line[k].mn), &(p->line[k].A), &(p->line[k].B), &(p->line[k].C));
+		  (p->line[k].mn), &(p->line[k].A), &(p->line[k].B), &(p->line[k].C));
   k++;
  }
  fclose(f);
@@ -93,19 +93,19 @@ int main (void) {
  printf(" Nlines = %2d\n",Nlines);
 
  for (i=0;i<6;i++) { R.R[i]=0; }     // initialize register
+ R.R[0] = 1;
  k=0;
  while ( true ) {
 //  printf(" ip = %2d\n",R.R[(*p).ipreg]);
   k = R.R[(*p).ipreg];
   for ( i=0; i<16; i++ ) {
    if ( !strcmp(m.name[i], (*p).line[k].mn ) ) {
-//    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
+    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
 //    printf(" executing %s %d %d %d\n",m.name[i],(*p).line[k].A,(*p).line[k].B,(*p).line[k].C);
     m.instr[i] ( &R, (*p).line[k].A, (*p).line[k].B, (*p).line[k].C);
-//    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
+    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
    }
   }
-  // does "instruction pointer is incremented" mean "stored in the ip register?"
   if ( R.R[(*p).ipreg]+1 > Nlines-1 ) { break; }
   R.R[(*p).ipreg]++;
  }
