@@ -61,7 +61,7 @@ int main (void) {
  prog* p = malloc(sizeof(int)+MAX_PROG_LINES*sizeof(prog_line));
  reg R, Ri, Rf;
  mnemonics m;
- int A, B, C, n=0, i, j, k, nlines;
+ int A, B, C, n=0, i, j, k, nline, Nlines;
 
  // populate struct
  const char names[][5] = {
@@ -90,19 +90,21 @@ int main (void) {
  }
  fclose(f);
 
- nlines = k-1; k=0;
- for (i=0;i<6;i++) { R.R[i]=0; }
- while ( k < nlines ) {
-//  eventually, test for halting with line > nlines
+ Nlines = k-1; k=0;
+ for (i=0;i<6;i++) { R.R[i]=0; }     // initialize register
+ while ( true ) {
+  printf(" ip = %2d\n",R.R[(*p).ipreg]);
+  k = R.R[(*p).ipreg];
+  if ( k > Nlines ) { break; }
   for ( i=0; i<16; i++ ) {
    if ( !strcmp(m.name[i], (*p).line[k].mn ) ) {
-    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
+//    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
     printf(" executing %s %d %d %d\n",m.name[i],(*p).line[k].A,(*p).line[k].B,(*p).line[k].C);
     m.instr[i] ( &R, (*p).line[k].A, (*p).line[k].B, (*p).line[k].C);
-    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
+//    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
    }
   }
-  k++;
+  R.R[(*p).ipreg]++;
  }
 
  n = 0;
