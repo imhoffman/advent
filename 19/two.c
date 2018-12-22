@@ -100,10 +100,10 @@ int main (void) {
   k = R.R[(*p).ipreg];
   for ( i=0; i<16; i++ ) {
    if ( !strcmp(m.name[i], (*p).line[k].mn ) ) {
-    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
+//    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
 //    printf(" executing %s %d %d %d\n",m.name[i],(*p).line[k].A,(*p).line[k].B,(*p).line[k].C);
     m.instr[i] ( &R, (*p).line[k].A, (*p).line[k].B, (*p).line[k].C);
-    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
+//    printf(" ["); for (j=0;j<6;j++) { printf(" %d,", R.R[j]); } printf("]\n");
    }
   }
   if ( R.R[(*p).ipreg]+1 > Nlines-1 ) { break; }
