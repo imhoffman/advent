@@ -85,5 +85,14 @@ int main (void) {
  n = 9;
  printf("\n\n immune group %1d has %d hp for %d units\n\n",n,immune[n].hp,immune[n].units);
 
+ n = 0;
+ infect[n].units=148; infect[n].hp=31914; infect[n].init=4; infect[n].adam=416;
+ infect[n].atype=0; infect[n].atype |= (1<<cold);
+ infect[n].weak=0; infect[n].weak |= (1<<bludgeoning);
+ infect[n].imm=0; infect[n].imm |= (1<<radiation); infect[n].imm |= (1<<cold); infect[n].imm |= (1<<fire);
+
+
+
+
  return 0;
 }
