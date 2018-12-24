@@ -8,22 +8,18 @@
 #define slashing    3
 #define cold        4
 
+#define army0       0
+#define army1       1
+
 typedef struct {
- int units, adam, atype, init, hp, weak, imm, order, attacking;
+ int army, units, adam, atype, init, hp, weak, imm, order, attacking;
 } group;
 
 void data_entry ( group* immune, group* infect );
 
 void target_selection ( group* mune, group* fect ) {
  int n=sizeof(mune)/sizeof(mune[0]), m=sizeof(fect)/sizeof(fect[0]);
- group armies[n+m];
  int i, j, k, higher=INT_MAX, current=0, turn=0;
-
- for ( i=0; i<n; i++ ) {
-  for ( j=0; j<m; j++ ) {
-   if ( 
-   
-
 
  mune[2].attacking = 5;
  return;
@@ -33,22 +29,23 @@ int main (void) {
  FILE* f;
  int i, j, k, n;
 
- group immune[10]; group infect[10]; data_entry( immune, infect );
- n = 3;
- printf("\n immune group %1d has weaknesses 0x%04x and immunities 0x%04x\n",n,immune[n].weak,immune[n].imm);
- n = 6;
- printf("\n infect group %1d has weaknesses 0x%04x and immunities 0x%04x\n",n,infect[n].weak,infect[n].imm);
+ group armies[20];
+ data_entry( armies );
+// n = 3;
+// printf("\n immune group %1d has weaknesses 0x%04x and immunities 0x%04x\n",n,immune[n].weak,immune[n].imm);
+// n = 6;
+// printf("\n infect group %1d has weaknesses 0x%04x and immunities 0x%04x\n",n,infect[n].weak,infect[n].imm);
 
- target_selection( immune, infect );
- printf("\n\n immune group %1d is attacking infect group %1d\n\n",2,immune[2].attacking);
+ target_selection( armies );
+// printf("\n\n immune group %1d is attacking infect group %1d\n\n",2,immune[2].attacking);
 
  return 0;
 }
 
-void data_entry ( group* immune, group* infect ) {
+void data_entry ( group* armies ) {
  int n;
 
- n = 0;
+ n = 0; armies[n].army=army0;
  immune[n].units=479; immune[n].hp=3393; immune[n].init=8; immune[n].adam=66;
  immune[n].atype=0; immune[n].atype |= (1<<cold);
  immune[n].weak=0; immune[n].weak |= (1<<radiation);
