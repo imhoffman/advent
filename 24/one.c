@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<stdint.h>
-#include<stdbool.h>
+#include<limits.h>
 
 #define radiation   0
 #define bludgeoning 1
@@ -16,7 +15,16 @@ typedef struct {
 void data_entry ( group* immune, group* infect );
 
 void target_selection ( group* mune, group* fect ) {
- // determine order from effective power; record order in struct...
+ int n=sizeof(mune)/sizeof(mune[0]), m=sizeof(fect)/sizeof(fect[0]);
+ group armies[n+m];
+ int i, j, k, higher=INT_MAX, current=0, turn=0;
+
+ for ( i=0; i<n; i++ ) {
+  for ( j=0; j<m; j++ ) {
+   if ( 
+   
+
+
  mune[2].attacking = 5;
  return;
 }
