@@ -12,17 +12,29 @@
 #define army1       1
 
 typedef struct {
- int army, units, adam, atype, init, hp, weak, imm, order, attacking;
+ int army, units, adam, atype, init, hp, weak, imm, order, attacking, epow;
 } group;
 
 void data_entry ( group* armies );
 
 void target_selection ( group* a ) {
- int n=sizeof(a)/sizeof(a[0]);
- int i, j, k, higher=INT_MAX, current=0, turn=0;
+// int N=sizeof(a)/sizeof(a[0]);
+ int N=20;
+ int i, j, k, higher=INT_MAX, current=0, turn, iturn=0;
 
- a[2].attacking = 5;
- a[2].order = 12;
+// printf("\n %d groups in the fight\n\n",N);
+ for ( i=0; i<N; i++ ) {
+  a[i].epow = a[i].units * a[i].adam;
+ }
+
+ // epow ordering...still need to add initiative for epow ties
+ for ( turn=0; turn<N; turn++ ) {
+  for ( i=0; i<N; i++ ) {
+   if ( a[i].epow > current && a[i].epow < higher ) { current = a[i].epow; iturn = i; }
+  }
+  higher = current; current = 0; a[iturn].order = turn;
+ }
+
  return;
 }
 
@@ -39,8 +51,9 @@ int main (void) {
  printf(" group %2d is in army %d and has weaknesses 0x%04x and immunities 0x%04x\n",n,armies[n].army,armies[n].weak,armies[n].imm);
 
  target_selection( armies );
- n = 02;
- printf(" group %2d is in army %d and is attacking group %2d with rank %2d\n",n,armies[n].army,armies[n].attacking,armies[n].order);
+ for ( i=0; i<20; i++ ) {
+  printf(" group %2d is in army %d, has effective power %d, and is attacking with rank %2d\n",i,armies[i].army,armies[i].epow,armies[i].order);
+ }
 
  return 0;
 }
