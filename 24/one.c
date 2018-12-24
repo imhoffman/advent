@@ -10,15 +10,35 @@
 #define cold        4
 
 typedef struct {
- int units, adam, atype, init, hp, weak, imm;
+ int units, adam, atype, init, hp, weak, imm, order, attacking;
 } group;
+
+void data_entry ( group* immune, group* infect );
+
+void target_selection ( group* mune, group* fect ) {
+ // determine order from effective power; record order in struct...
+ mune[2].attacking = 5;
+ return;
+}
 
 int main (void) {
  FILE* f;
  int i, j, k, n;
 
- group immune[10];
- group infect[10];
+ group immune[10]; group infect[10]; data_entry( immune, infect );
+ n = 3;
+ printf("\n immune group %1d has weaknesses 0x%04x and immunities 0x%04x\n",n,immune[n].weak,immune[n].imm);
+ n = 6;
+ printf("\n infect group %1d has weaknesses 0x%04x and immunities 0x%04x\n",n,infect[n].weak,infect[n].imm);
+
+ target_selection( immune, infect );
+ printf("\n\n immune group %1d is attacking infect group %1d\n\n",2,immune[2].attacking);
+
+ return 0;
+}
+
+void data_entry ( group* immune, group* infect ) {
+ int n;
 
  n = 0;
  immune[n].units=479; immune[n].hp=3393; immune[n].init=8; immune[n].adam=66;
@@ -80,11 +100,6 @@ int main (void) {
  immune[n].weak=0; immune[n].weak |= (1<<cold); immune[n].weak |= (1<<fire);
  immune[n].imm=0; immune[n].imm |= (1<<slashing);
 
- n = 2;
- printf("\n\n immune group %1d has a weakness of 0x%04x\n\n",n,immune[n].weak);
- n = 9;
- printf("\n\n immune group %1d has %d hp for %d units\n\n",n,immune[n].hp,immune[n].units);
-
  n = 0;
  infect[n].units=148; infect[n].hp=31914; infect[n].init=4; infect[n].adam=416;
  infect[n].atype=0; infect[n].atype |= (1<<cold);
@@ -145,10 +160,5 @@ int main (void) {
  infect[n].weak=0; infect[n].weak |= (1<<slashing);
  infect[n].imm=0;
 
- n = 4;
- printf("\n\n infect group %1d has a weakness of 0x%04x\n\n",n,infect[n].weak);
- n = 5;
- printf("\n\n infect group %1d has %d hp for %d units\n\n",n,infect[n].hp,infect[n].units);
-
- return 0;
+ return;
 }
