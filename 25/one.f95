@@ -6,7 +6,8 @@
 
       open(10,file="scan.dat")
       do i = 1, n
-       read(10,*,err=100,end=100) x(i,1), x(i,2), x(i,3), x(i,4) 
+       read(10,*,err=100,end=100) x(i,1), x(i,2), x(i,3), x(i,4)
+       x(i,5) = -1
       end do
 100   close(10)
 
