@@ -1,4 +1,5 @@
       module subs
+      implicit none
       contains
 
 ! nearby
@@ -17,7 +18,6 @@
 
 ! finder
       recursive subroutine finder ( n, x )
-      implicit none
       integer (kind=4)                 :: n
       integer (kind=4), dimension(n,5) :: x
 !      logical, external                :: nearby
