@@ -15,7 +15,7 @@
 #define army1       1
 
 typedef struct {
- int army, units, adam, atype, init, hp, weak, imm, order, attacking, epow;
+ int army, units, adam, atype, init, hp, weak, imm, order, attacking, epow, foe;
  bool ranked;
 } group;
 
@@ -47,17 +47,26 @@ void power_rank ( group* b ) {
  return;
 }
 
+int damage ( group attacker, group defender ) {
+ int factor=1;
+ if ( attacker.atype & defender.weak ) { factor=2; }
+ return attacker.epow*factor;
+}
+
 // for determining max-damage foe
 void select_foe ( group* b, bool bottom ) {
  bool changes=false;
- int i, j, N=Ngroups;
+ int i, j, N=Ngroups, best=0;
 
- for ( i=0; i<N; i++ ) {
-  for ( j=0; j<N; j++ ) {
-   if ( i < j && b[i].epow == b[j].epow && b[i].init < b[j].init ) {
+ for ( i=0; i<N; i++ ) {    // i is the aggressor
+  for ( j=0; j<N; j++ ) {   // j is the potential foe
+   if ( i != j && b[i].army != b[j].army && !(b[i].atype & b[j].imm) && damage(b[i],b[j])>best ) {
+//    printf(" in select_foe with i=%d and j=%d\n",i,j);
+    best = damage(b[i],b[j]);    // doesn't yet account for tie-breaking initiative
+    b[i].foe = j;
     changes=true;
    } } }
- if ( changes || bottom ) { arrange_init ( b, false ); }
+ if ( changes || bottom ) { select_foe ( b, false ); }
  return;
 }
 
@@ -67,11 +76,12 @@ void target_selection ( group* a ) {
 
 // load in effective powers for this round's ranking
  for ( i=0; i<N; i++ ) {
-  a[i].epow = a[i].units * a[i].adam; a[i].ranked = false;
+  a[i].epow = a[i].units * a[i].adam; a[i].ranked = false; a[i].foe=-1;
  }
 
  arrange_init(a,true);
  power_rank(a);
+ select_foe(a,true);
 
  return;
 }
