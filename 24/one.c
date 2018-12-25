@@ -56,19 +56,19 @@ int damage ( group attacker, group defender ) {
 // for determining max-damage foe
 void select_foe ( group* b, bool bottom ) {
  bool changes=false;
- int i=0, j=0, N=Ngroups, best=0;
+ int i=0, j=0, N=Ngroups, best=0, idone=-1;
 
  while ( i<N ) {    // i is the aggressor
   while ( j<N ) {   // j is the potential foe
    if ( i != j && b[i].army != b[j].army && !(b[i].atype & b[j].imm) && damage(b[i],b[j])>best && !b[i].ordered ) {
-//    printf(" in select_foe with i=%d and j=%d; damage of i on j is %d\n",i,j,damage(b[i],b[j]));
     best = damage(b[i],b[j]);    // doesn't yet account for tie-breaking initiative
     b[i].foe = j;
+    idone = i;
     changes=true;
    } j++;
   } i++;
- }
- if ( changes ) { select_foe ( b, false ); } else { b[j].ordered=true; }
+ } if ( idone != -1 ) { b[idone].ordered=true; }
+ if ( changes || bottom ) { select_foe ( b, false ); }
  return;
 }
 
@@ -102,7 +102,7 @@ int main (void) {
 
  target_selection( armies );
  for ( i=0; i<Ngroups; i++ ) {
-  printf(" group %2d is in army %d, has effective power %d, and is attacking with rank %2d\n",i,armies[i].army,armies[i].epow,armies[i].order);
+  printf(" group %2d is in army %d, has effective power %d, and is attacking group %d with rank %2d\n",i,armies[i].army,armies[i].epow,armies[i].foe,armies[i].order);
  }
 
  return 0;
