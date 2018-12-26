@@ -9,6 +9,7 @@
       if ( abs(s1(1)-s2(1)) + abs(s1(2)-s2(2)) + &
      &      abs(s1(3)-s2(3)) + abs(s1(4)-s2(4)) .le. 3 ) then
        nearby = .true.
+       write(6,*) 'match!'
       else
        nearby = .false.
       end if
@@ -24,13 +25,19 @@
 !      logical, external                   :: nearby
       integer (kind=4)                    :: i, j
 
-      x(k,5) = c
+      if (new) then
+       x(k,5) = c
+      else
+       c = x(k,5)
+      end if
 
       do i = 1, n
+        write(6,'(A16,I3,A9,I3,A18,I3)')&
+     &  'considering star',k,' and star',i,' for constellation',c
         if ( x(i,5).eq.-1 .and. nearby( x(k,:), x(i,:)) ) then
           x(i,5) = x(k,5)
           write(6,*) 'calling finder on existing constellation',c
-          call finder(nmax,n,x,i,c,.false.)
+          call finder(nmax,n,x,i,x(k,5),.false.)
         end if
       end do
 
