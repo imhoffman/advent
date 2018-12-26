@@ -17,13 +17,13 @@
       end function nearby
 
 ! finder
-      recursive subroutine finder ( n, x )
-      integer (kind=4)                 :: n
+      recursive subroutine finder ( c, n, x, bottom )
+      integer (kind=4)                 :: c, n
       integer (kind=4), dimension(n,5) :: x
+      logical                          :: bottom
 !      logical, external                :: nearby
-      integer (kind=4)                 :: i, j, c
+      integer (kind=4)                 :: i, j
 
-      c = 0
       do i = 1, n
        if ( x(i,5) .ne. -1 ) then
         do j = 1, n
@@ -46,7 +46,7 @@
       use subs
       implicit none
       integer, parameter               :: n = 1080
-      integer (kind=4)                 :: i, j, k, c
+      integer (kind=4)                 :: i, j, k
       integer (kind=4), dimension(n,5) :: x
 
       open(10,file="scan.dat")
@@ -57,7 +57,7 @@
 100   close(10)
       x(1,5) = 1
 
-      call finder(n,x)
+      call finder(1,n,x,.true.)
 
       stop
       end program one
