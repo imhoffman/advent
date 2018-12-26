@@ -6,6 +6,7 @@
       logical function nearby ( s1, s2 )
       integer (kind=4), dimension(5) :: s1, s2
 
+      write(6,*) 'checking',s1,s2
       if ( abs(s1(1)-s2(1)) + abs(s1(2)-s2(2)) + &
      &      abs(s1(3)-s2(3)) + abs(s1(4)-s2(4)) .le. 3 ) then
        nearby = .true.
@@ -17,22 +18,31 @@
       end function nearby
 
 ! finder
-      recursive subroutine finder ( c, n, x, bottom )
-      integer (kind=4)                 :: c, n
+      recursive subroutine finder ( n, x, k, c, new )
+      integer (kind=4)                 :: c, k, n
       integer (kind=4), dimension(n,5) :: x
-      logical                          :: bottom
+      logical                          :: new
 !      logical, external                :: nearby
       integer (kind=4)                 :: i, j
 
+      write(6,*) x(4,:)
+      x(k,5) = c
+
       do i = 1, n
-       if ( x(i,5) .ne. -1 ) then
-        do j = 1, n
-         if ( i.ne.j .and. x(j,5).eq.-1 .and. nearby(x(i,:), x(j,:)) ) then
-          x(j,5) = x(i,5)
-          write(6,*) 'got in here'
-         end if
-        end do
-       end if
+      write(6,*) 'inside finder loop with',x(k,5),x(i,5)
+        if ( x(i,5).eq.-1 .and. nearby( x(k,:), x(i,:)) ) then
+          x(i,5) = x(k,5)
+          write(6,*) 'calling finder on existing constellation',c
+          call finder(n,x,i,c,.false.)
+        end if
+      end do
+
+      do i = 1, n
+        if ( x(i,5).eq.-1 ) then
+          c = c + 1
+          write(6,*) 'calling finder on new constellation',c
+          call finder(n,x,i,c,.true.)
+        end if
       end do
 
       return
@@ -46,18 +56,22 @@
       use subs
       implicit none
       integer, parameter               :: n = 1080
-      integer (kind=4)                 :: i, j, k
+      integer (kind=4)                 :: i, j, k, c, filelen
       integer (kind=4), dimension(n,5) :: x
 
       open(10,file="scan.dat")
+      filelen = 0
       do i = 1, n
        read(10,*,err=100,end=100) x(i,1), x(i,2), x(i,3), x(i,4)
+       filelen = filelen + 1
        x(i,5) = -1
       end do
 100   close(10)
-      x(1,5) = 1
 
-      call finder(1,n,x,.true.)
+      c = 1
+      call finder(filelen,x,1,c,.true.)
+      write(6,*) c
+! 567 is too high
 
       stop
       end program one
