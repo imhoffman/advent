@@ -9,7 +9,6 @@
       if ( abs(s1(1)-s2(1)) + abs(s1(2)-s2(2)) + &
      &      abs(s1(3)-s2(3)) + abs(s1(4)-s2(4)) .le. 3 ) then
        nearby = .true.
-       write(6,*) 'match!'
       else
        nearby = .false.
       end if
@@ -32,9 +31,12 @@
       end if
 
       do i = 1, n
+!        if ( x(i,5).eq.-1 .and. nearby( x(k,:), x(i,:)) ) then
+        if ( x(i,5).ne.x(k,5) .and. nearby( x(k,:), x(i,:)) ) then
+
         write(6,'(A16,I3,A9,I3,A18,I3)')&
-     &  'considering star',k,' and star',i,' for constellation',c
-        if ( x(i,5).eq.-1 .and. nearby( x(k,:), x(i,:)) ) then
+     &  '   matching star',k,' and star',i,'  in constellation',c
+
           x(i,5) = x(k,5)
           write(6,*) 'calling finder on existing constellation',c
           call finder(nmax,n,x,i,x(k,5),.false.)
