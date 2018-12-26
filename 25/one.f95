@@ -43,6 +43,8 @@
         end if
       end do
 
+      if ( .not. new ) return
+
       do i = 1, n
         if ( x(i,5).eq.-1 ) then
           c = c + 1
