@@ -1,7 +1,7 @@
       module subs
       implicit none
 
-      integer, parameter :: nmax = 1080
+      integer, parameter :: nmax = 2048
 
       contains
 
@@ -25,7 +25,7 @@
       integer (kind=4), dimension(nmax,5) :: x
       logical                             :: new
 !      logical, external                   :: nearby
-      integer (kind=4)                    :: i, j
+      integer (kind=4)                    :: i
 
       if (new) then
        x(k,5) = c
@@ -65,7 +65,7 @@
       program two
       use subs
       implicit none
-      integer (kind=4)                    :: i, j, k, c, filelen
+      integer (kind=4)                    :: i, c, filelen
       integer (kind=4), dimension(nmax,5) :: x
 !      integer (kind=4), allocatable, dimension(:,5) :: x
 
