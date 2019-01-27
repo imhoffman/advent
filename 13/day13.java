@@ -41,8 +41,25 @@ class cart {
 class parser {
  static char[][] map (File filename) throws IOException {
   FileReader input = new FileReader(filename);
-  char[][] output = { "/-----\\".toCharArray(), "\\-----/".toCharArray() };
+  char[] a = new char[1];  // .read takes a char array
+  char[][] temp = new char[2048][2048];
+  int i=0, j=0, rows=1, cols=0;
+
+  while ( input.read(a) != -1 ) {
+   if ( a[0] == '\n' || a[0] == '\r' ) { j++; rows++; cols = i; i = 0; }
+   else { temp[i][j] = a[0]; i++; }
+//   System.out.format("not there yet; j = %d\n", j);
+  }
+  input.close();
+  char[][] output = new char[cols][rows-1];
+  for ( i=0; i<cols; i++ ) {
+   for ( j=0; j<rows-1; j++ ) {
+    output[i][j] = temp[i][j];
+   }
+  }
+  System.out.format("returning array of dim %d,%d\n", cols, rows-1);
   
+//  char[][] output = { "/-----\\".toCharArray(), "\\-----/".toCharArray() };
   return output;
  }
 }
