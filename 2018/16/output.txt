@@ -1,0 +1,18 @@
+
+ opcode  0 could be:       addi mulr muli banr           bori setr seti gtir                         
+ opcode  1 could be:                      banr bani borr bori           gtir gtri gtrr eqir eqri eqrr
+ opcode  2 could be:                                                    gtir gtri gtrr eqir eqri eqrr
+ opcode  3 could be:                      banr bani borr bori setr seti gtir gtri                    
+ opcode  4 could be:                                                                             eqrr
+ opcode  5 could be:                      banr bani borr bori setr seti gtir gtri                    
+ opcode  6 could be:                                                         gtri gtrr eqir eqri     
+ opcode  7 could be:                                          setr seti gtir gtri                    
+ opcode  8 could be:            mulr muli banr bani           setr seti gtir gtri gtrr eqir eqri eqrr
+ opcode  9 could be:                      banr bani borr bori      seti gtir gtri gtrr eqir eqri eqrr
+ opcode 10 could be:                      banr bani borr bori           gtir gtri gtrr eqir eqri eqrr
+ opcode 11 could be:                                                         gtri gtrr eqir eqri eqrr
+ opcode 12 could be:                                                         gtri gtrr eqir eqri eqrr
+ opcode 13 could be:                                                                   eqir eqri eqrr
+ opcode 14 could be:  addr addi mulr muli banr bani borr bori setr seti gtir gtri gtrr eqir eqri eqrr
+ opcode 15 could be:       addi mulr muli banr      borr bori setr seti      gtri gtrr eqir eqri eqrr
+
