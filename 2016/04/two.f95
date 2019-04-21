@@ -5,12 +5,12 @@
  module types
   use iso_fortran_env
   implicit none
-  integer, parameter :: iw = int64
-  integer, parameter :: max_lines = 16384
-  integer, parameter :: max_checksum = 8
-  integer, parameter :: strlen = 80
-  character (len=26) :: alpha="abcdefghijklmnopqrstuvwxyz"
-  character (len=10) :: numer="0123456789"
+  integer, parameter            :: iw = int64
+  integer, parameter            :: max_lines = 16384
+  integer, parameter            :: max_checksum = 8
+  integer, parameter            :: strlen = 80
+  character (len=26), parameter :: alpha="abcdefghijklmnopqrstuvwxyz"
+  character (len=10), parameter :: numer="0123456789"
   type record
     character (len=strlen)       :: listing
     integer (kind=iw)            :: id
@@ -72,7 +72,7 @@
    type(record), dimension(:) :: g
    character (len=max_checksum) :: checksum
    integer :: i, j, k, m1, m2, m3, mm, nthis, nnext, nlast
-   integer :: m4, rotate
+   integer :: m4, rotate, oldch, newch
 
    do i = 1, size( g )
      g(i)%is_real = .false.
@@ -117,14 +117,23 @@
      420 continue
 
      if ( g(i)%is_real ) then
-       m4 = scan( g(i)%encrypted, ' ' ) - 1
+       m4 = scan( g(i)%encrypted, ' ' ) - 2
        rotate = mod( g(i)%id, len(alpha) )
-       if ( len(alpha) - scan( alpha, g(i)%encrypted(j:j) )  .gt.  rotate ) then
-         write(6,'(A,I4)') ' wrapping around for ', i
-       end if
+       ! rule set
        do j = 1, m4
-         continue
+         if ( g(i)%encrypted(j:j) .eq. '-' ) then
+           g(i)%decrypted(j:j) = ' '
+         else
+           oldch = scan( alpha, g(i)%encrypted(j:j) ) 
+           if ( rotate + oldch  .gt.  len(alpha) ) then
+             newch = oldch + rotate - len(alpha) 
+           else
+             newch = oldch + rotate
+           end if
+           g(i)%decrypted(j:j) = alpha( newch:newch )
+         end if
        end do
+       write(6,'(I5,2X,A)') g(i)%id, g(i)%decrypted(:m4)
      end if
     end do
 
