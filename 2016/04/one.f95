@@ -9,7 +9,7 @@
   character (len=10) :: numer="0123456789"
   type record
     character (len=strlen)       :: listing
-    integer (kind=iw)            :: val              ! explicit bit width ?  failing on test.txt on msi
+    integer (kind=iw)            :: val
     character (len=max_checksum) :: checksum
   end type record
  end module types
@@ -96,6 +96,7 @@
      nthis = counter(0,       registry(i)%checksum(k:k)       ,registry(i)%listing(:m1-1))
      nnext = counter(0,     registry(i)%checksum(k+1:k+1)     ,registry(i)%listing(:m1-1))
      nlast = counter(0, registry(i)%checksum(m2-m1-1:m2-m1-1) ,registry(i)%listing(:m1-1))
+     ! rule set
      if ( &
          &         nlast .gt. 0 &
          & .and. ( nthis .gt. nnext &
@@ -114,7 +115,7 @@
    420 continue
   end do
 
-  write(6,'(A,I0)') ' total = ',total
+  write(6,'(A,I0)') ' total = ', total
 
   deallocate ( registry )
   stop
