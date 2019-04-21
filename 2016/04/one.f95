@@ -1,5 +1,7 @@
  module types
+  use iso_fortran_env
   implicit none
+  integer, parameter :: iw = int64
   integer, parameter :: max_lines = 16384
   integer, parameter :: max_checksum = 8
   integer, parameter :: strlen = 80
@@ -7,7 +9,7 @@
   character (len=10) :: numer="0123456789"
   type record
     character (len=strlen)       :: listing
-    integer                      :: val
+    integer (kind=iw)            :: val              ! explicit bit width ?  failing on test.txt on msi
     character (len=max_checksum) :: checksum
   end type record
  end module types
@@ -61,7 +63,8 @@
   character (len=strlen), dimension(max_lines) :: temp
   type(record), dimension(:), allocatable :: registry
   character (len=max_checksum) :: checksum
-  integer :: fileunit=10, total, Nrooms, nthis, nnext, nlast
+  integer :: fileunit=10, Nrooms, nthis, nnext, nlast
+  integer (kind=iw) :: total
   integer :: i, j, k, m1, m2, m3, mm
 
   open(fileunit,file="input.txt")
