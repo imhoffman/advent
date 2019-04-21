@@ -5,7 +5,11 @@
   integer, parameter :: strlen = 80
   character (len=26) :: alpha="abcdefghijklmnopqrstuvwxyz"
   character (len=10) :: numer="0123456789"
-  ! make a struct of id, value, and checksum
+  type record
+    character (len=strlen)       :: listing
+    integer                      :: val
+    character (len=max_checksum) :: checksum
+  end type record
  end module types
 
  module subs
@@ -55,8 +59,7 @@
   use subs
   implicit none
   character (len=strlen), dimension(max_lines) :: temp
-  character (len=strlen), dimension(:), allocatable :: rooms
-  integer,                dimension(:), allocatable :: val
+  type(record), dimension(:), allocatable :: registry
   character (len=max_checksum) :: checksum
   integer :: fileunit=10, total, Nrooms, nthis, nnext, nlast
   integer :: i, j, k, m1, m2, m3, mm
@@ -64,51 +67,53 @@
   open(fileunit,file="input.txt")
   call reader ( fileunit, Nrooms, temp )
   close(fileunit)
-  allocate ( rooms(Nrooms), val(Nrooms) ) 
+  allocate ( registry(Nrooms) )
 
   do i = 1, Nrooms
-   !rooms(i) = ''        ! initialize the blank here if trimming within this loop
-   rooms(i) = temp(i)
-   !rooms(i) = trim( rooms(i) )
+   registry(i)%listing = ''
+   registry(i)%listing = temp(i)
+   registry(i)%listing = trim( registry(i)%listing )
   end do
 
   do i = 1, Nrooms
-   m1 = scan( rooms(i), "[" )
-   m2 = scan( rooms(i), "]" )
+   m1 = scan( registry(i)%listing, "[" )
+   m2 = scan( registry(i)%listing, "]" )
 
+   ! poor man's is_number...
    m3 = 1024
    do j = 1, len(numer)
-    mm = scan( rooms(i)(:m1-1), numer(j:j) )
+    mm = scan( registry(i)%listing(:m1-1), numer(j:j) )
     if ( mm .lt. m3  .and.  mm .gt. 0 ) m3 = mm
    end do
-   if ( m3 .gt. 0 ) read( rooms(i)(m3:m1-1), * ) val(i)
+   ! store value
+   if ( m3 .gt. 0 ) read( registry(i)%listing(m3:m1-1), * ) registry(i)%val
 
-   checksum = rooms(i)(m1+1:m2-1)
-   !write(6,'(4A)')    ' checksum of ',rooms(i)(:m2),' is ',checksum
-   !write(6,'(3A,I3)') '    value of ',rooms(i)(:m2),' is ',val(i)
+   registry(i)%checksum = registry(i)%listing(m1+1:m2-1)
    do k = 1, m2-m1-2
-     nthis = counter(0,       checksum(k:k)       ,rooms(i)(:m1-1))
-     nnext = counter(0,     checksum(k+1:k+1)     ,rooms(i)(:m1-1))
-     nlast = counter(0, checksum(m2-m1-1:m2-m1-1) ,rooms(i)(:m1-1))
+     nthis = counter(0,       registry(i)%checksum(k:k)       ,registry(i)%listing(:m1-1))
+     nnext = counter(0,     registry(i)%checksum(k+1:k+1)     ,registry(i)%listing(:m1-1))
+     nlast = counter(0, registry(i)%checksum(m2-m1-1:m2-m1-1) ,registry(i)%listing(:m1-1))
      if ( &
          &         nlast .gt. 0 &
          & .and. ( nthis .gt. nnext &
          &        .or. ( &
          &              nthis .eq. nnext &
-         &  .and. ( scan( alpha, checksum(k:k) ) .lt. scan( alpha, checksum(k+1:k+1) ) ) &
+         &  .and. ( scan( alpha, registry(i)%checksum(k:k) ) &
+         &             .lt. &
+         &          scan( alpha, registry(i)%checksum(k+1:k+1) ) ) &
          & ) ) ) then
        continue
      else
        goto 420
      end if
    end do
-   total = total + val(i)
+   total = total + registry(i)%val
    420 continue
   end do
 
   write(6,'(A,I0)') ' total = ',total
 
-  deallocate ( rooms, val )
+  deallocate ( registry )
   stop
  end program main
 
