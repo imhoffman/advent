@@ -54,6 +54,13 @@
 
    return
   end function counter
+
+  subroutine totaller ( g )
+   type(record), dimension(:), intent(in) :: g
+
+   return
+  end subroutine totaller
+
  end module subs
 
  program main
@@ -73,9 +80,9 @@
   allocate ( registry(Nrooms) )
 
   do i = 1, Nrooms
-   registry(i)%listing = ''
+   !registry(i)%listing = ''
    registry(i)%listing = temp(i)
-   registry(i)%listing = trim( registry(i)%listing )
+   !registry(i)%listing = trim( registry(i)%listing )
   end do
 
   do i = 1, Nrooms
