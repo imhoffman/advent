@@ -64,7 +64,7 @@
   type(record), dimension(:), allocatable :: registry
   character (len=max_checksum) :: checksum
   integer :: fileunit=10, Nrooms, nthis, nnext, nlast
-  integer (kind=iw) :: total
+  integer (kind=iw) :: total=0
   integer :: i, j, k, m1, m2, m3, mm
 
   open(fileunit,file="input.txt")
