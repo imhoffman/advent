@@ -57,6 +57,9 @@
 
   subroutine totaller ( g )
    type(record), dimension(:), intent(in) :: g
+   integer :: n
+
+   n = size( g )
 
    return
   end subroutine totaller
@@ -67,23 +70,26 @@
   use types
   use subs
   implicit none
-  character (len=strlen), dimension(max_lines) :: temp
+  character (len=strlen), dimension(:), allocatable :: temp
   type(record), dimension(:), allocatable :: registry
   character (len=max_checksum) :: checksum
   integer :: fileunit=10, Nrooms, nthis, nnext, nlast
   integer (kind=iw) :: total=0
   integer :: i, j, k, m1, m2, m3, mm
 
+  allocate( temp(max_lines) )
   open(fileunit,file="input.txt")
   call reader ( fileunit, Nrooms, temp )
   close(fileunit)
   allocate ( registry(Nrooms) )
 
+  !call totaller( registry )
   do i = 1, Nrooms
    !registry(i)%listing = ''
    registry(i)%listing = temp(i)
    !registry(i)%listing = trim( registry(i)%listing )
   end do
+  deallocate( temp )
 
   do i = 1, Nrooms
    m1 = scan( registry(i)%listing, "[" )
