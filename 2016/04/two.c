@@ -1,53 +1,53 @@
 // *** Advent of Code 2016 Day 04
 #include<stdio.h>
 #include<math.h>
+#include<string.h>
+#include<stdlib.h>
+#include<stdbool.h>
 
-const int iw = 32;
-const int max_lines = 16384;
-const int max_checksum = 8;
-const int strlen = 80;
-const char[] alpha="abcdefghijklmnopqrstuvwxyz";
-const char[] numer="0123456789";
+#define iw            32
+#define lenstr        80
+#define max_lines     16384
+#define max_checksum  8
+const char alpha[]="abcdefghijklmnopqrstuvwxyz";
+const char numer[]="0123456789";
 
 typedef struct {
-  char[strlen]        listing;
-  int                      id:iw;
-  char[strlen]      encrypted;
-  char[strlen]      decrypted;
-  char[max_checksum] checksum;
+  char        listing[lenstr];
+  int              id:iw;
+  char      encrypted[lenstr];
+  char      decrypted[lenstr];
+  char checksum[max_checksum];
   bool                is_real;
 } record;
 
-void reader ( FILE* f, int* n, char* lines ) {
-  char[strlen] buffer = "\0";
+void reader ( FILE* f, int* n, char lines[][lenstr] ) {
+  char buffer[lenstr] = {'\0'};
 
   *n = 0;
-  while ( fgets(buffer, strlen, f) != NULL ) {
-    lines[*n] = buffer;
-    *n++;
+  while ( fgets(buffer, lenstr, f) != NULL ) {
+    //printf("read line %d as %s\n", *n, buffer);
+    strcpy( lines[*n], buffer );
+    (*n)++;
   }
+  (*n)--;
+  //printf("\n\n The %dth line in the file is %s\n\n",3,&lines[3-1][0]);
+  return;
 }
 
+int counter ( int n, const char ch, char str[] ) {
+  char* rem;
 
-  !! letter-occurence counter
-  recursive function counter ( n, ch, str ) result ( k )
-   integer, intent(in)             :: n       ! the running count when called
-   character ( len=1 ), intent(in) :: ch
-   character ( len=* ), intent(in) :: str
-   integer                         :: k, m=-1
+  if ( str[0] == '\0' ) { return 0; }
 
-   k = 0
+  rem = strchr( str, ch );
 
-   if ( len(str) .eq. 0 ) return
+  if ( rem != NULL ) { return 1 + counter( n+1, ch, rem+1 ); }
 
-   m = scan( str, ch ) 
-   if ( m .gt. 0 ) then
-    k = 1 + counter( n+1, ch, str(m+1:) )
-   end if
+  return 0;
+}
 
-   return
-  end function counter
-
+/*
   !! puzzle ruleset
   subroutine decrypter ( g )
    type(record), dimension(:) :: g
@@ -121,14 +121,26 @@ void reader ( FILE* f, int* n, char* lines ) {
    return
   end subroutine decrypter
  end module subs
+ */
 
-!!
-!! main program
-!!
- program main
-  use types
-  use subs
-  implicit none
+int main( int argc, char *argv[] ) {
+ FILE* fp;
+ int n;
+ char temp[max_lines][lenstr];
+
+ fp = fopen("input.txt","r");
+ reader( fp, &n, temp );
+ fclose(fp);
+ printf(" file has %d lines\n",n+1);
+
+ // how to malloc an array of strings... ?
+ //   - malloc temp so that it can be freed after reader
+ //   - malloc the struct for subsequent use
+
+
+ return 0;
+}
+/*
   character (len=strlen), dimension(:), allocatable :: temp
   type(record), dimension(:), allocatable :: registry
   integer :: fileunit=10, Nrooms
@@ -153,4 +165,4 @@ void reader ( FILE* f, int* n, char* lines ) {
   deallocate ( registry )
   stop
  end program main
-
+*/
