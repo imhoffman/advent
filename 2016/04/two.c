@@ -1,9 +1,9 @@
 // *** Advent of Code 2016 Day 04
 #include<stdio.h>
-#include<math.h>
-#include<string.h>
 #include<stdlib.h>
+#include<string.h>
 #include<stdbool.h>
+#include<stddef.h>
 
 #define iw            32
 #define lenstr        80
@@ -46,12 +46,19 @@ int counter ( int n, const char ch, char str[] ) {
   return 0;
 }
 
+// fortran scan
+int scan ( const char str[], const char ch ) {
+ return (int)( strchr(str,ch) - &str[0] );     // cast from size_t
+}
+
 void decrypter ( record g[], size_t N ) {
   int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4, rotate, oldch, newch;
   char checksum[max_checksum];
 
-  printf(" passed struct array has %zu elements\n\n", N );
-  printf(" %s has %d %c's\n\n", g[99].listing, counter(0,'t',g[99].listing), 't');
+  //printf(" passed struct array has %zu elements\n\n", N );
+  //printf(" %s has %d %c's\n\n", g[99].listing, counter(0,'t',g[99].listing), 't');
+  //printf(" the index of the first 't' is %zu\n", strchr(g[99].listing,'t') - &g[99].listing[0]); 
+  //printf(" a 'scan' for 't' returns %d\n", scan(g[99].listing,'t'));
 
   for( i=0; i<N; i++ ) {
    g[i].is_real = false;
@@ -143,6 +150,7 @@ int main( int argc, char *argv[] ) {
 
  record registry[n];
  for( i=0; i<n; i++ ) {
+  memset(registry[i].listing, '\0', sizeof( registry[i].listing ) );
   strcpy( registry[i].listing, temp[i] );
  }
  free( temp );
