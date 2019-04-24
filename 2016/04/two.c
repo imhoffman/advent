@@ -46,18 +46,21 @@ int counter ( int n, const char ch, char str[] ) {
   return 0;
 }
 
-void decrypter ( record g[] ) {
-  int n = sizeof( g )/sizeof( g[0] );
+void decrypter ( record g[], size_t N ) {
+  int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4, rotate, oldch, newch;
+  char checksum[max_checksum];
+
+  printf(" passed struct array has %zu elements\n\n", N );
+  printf(" %s has %d %c's\n\n", g[99].listing, counter(0,'t',g[99].listing), 't');
+
+  for( i=0; i<N; i++ ) {
+   g[i].is_real = false;
+  }
 
   return;
 }
 /*
-  !! puzzle ruleset
   subroutine decrypter ( g )
-   type(record), dimension(:) :: g
-   character (len=max_checksum) :: checksum
-   integer :: i, j, k, m1, m2, m3, mm, nthis, nnext, nlast
-   integer :: m4, rotate, oldch, newch
 
    do i = 1, size( g )
      g(i)%is_real = .false.
@@ -144,7 +147,7 @@ int main( int argc, char *argv[] ) {
  }
  free( temp );
 
- decrypter( registry );
+ decrypter( registry , sizeof(registry)/sizeof(registry[0]) );  // must pass array size from calling unit
 
  return 0;
 }
