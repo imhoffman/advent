@@ -30,7 +30,6 @@ void reader ( FILE* f, int* n, char lines[][lenstr] ) {
     strcpy( lines[*n], buffer );
     (*n)++;
   }
-  (*n)--;
   //printf("\n\n The %dth line in the file is %s\n\n",3,&lines[3-1][0]);
   return;
 }
@@ -47,6 +46,11 @@ int counter ( int n, const char ch, char str[] ) {
   return 0;
 }
 
+void decrypter ( record g[] ) {
+  int n = sizeof( g )/sizeof( g[0] );
+
+  return;
+}
 /*
   !! puzzle ruleset
   subroutine decrypter ( g )
@@ -125,39 +129,26 @@ int counter ( int n, const char ch, char str[] ) {
 
 int main( int argc, char *argv[] ) {
  FILE* fp;
- int n;
- char temp[max_lines][lenstr];
+ int i, n;
+ // how to malloc an array of strings ... pretty
+ char (*temp)[lenstr] = malloc( max_lines * sizeof( *temp ) );
 
  fp = fopen("input.txt","r");
  reader( fp, &n, temp );
  fclose(fp);
- printf(" file has %d lines\n",n+1);
+ printf(" file has %d lines\n",n);
 
- // how to malloc an array of strings... ?
- //   - malloc temp so that it can be freed after reader
- //   - malloc the struct for subsequent use
+ record registry[n];
+ for( i=0; i<n; i++ ) {
+  strcpy( registry[i].listing, temp[i] );
+ }
+ free( temp );
 
+ decrypter( registry );
 
  return 0;
 }
 /*
-  character (len=strlen), dimension(:), allocatable :: temp
-  type(record), dimension(:), allocatable :: registry
-  integer :: fileunit=10, Nrooms
-  integer :: i
-
-  ! read external file into temporary array
-  allocate( temp(max_lines) )
-  open(fileunit,file="input.txt")
-  call reader ( fileunit, Nrooms, temp )
-  close(fileunit)
-
-  ! populate registry and free reading buffer
-  allocate ( registry(Nrooms) )
-  do i = 1, Nrooms
-   registry(i)%listing = temp(i)
-  end do
-  deallocate( temp )
 
   ! decrypt as per puzzle rules
   call decrypter( registry )
