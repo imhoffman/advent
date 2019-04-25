@@ -4,6 +4,7 @@
 #include<string.h>
 #include<stdbool.h>
 #include<stddef.h>
+#include<ctype.h>
 
 #define iw            32
 #define lenstr        80
@@ -14,7 +15,7 @@ const char numer[]="0123456789";
 
 typedef struct {
   char        listing[lenstr];
-  int              id:iw;
+  int              id;
   char      encrypted[lenstr];
   char      decrypted[lenstr];
   char checksum[max_checksum];
@@ -55,14 +56,29 @@ void decrypter ( record g[], size_t N ) {
   int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4, rotate, oldch, newch;
   char checksum[max_checksum];
 
-  //printf(" passed struct array has %zu elements\n\n", N );
+  printf(" passed struct array has %zu elements\n\n", N );
   //printf(" %s has %d %c's\n\n", g[99].listing, counter(0,'t',g[99].listing), 't');
   //printf(" the index of the first 't' is %zu\n", strchr(g[99].listing,'t') - &g[99].listing[0]); 
   //printf(" a 'scan' for 't' returns %d\n", scan(g[99].listing,'t'));
 
   for( i=0; i<N; i++ ) {
    g[i].is_real = false;
+   m1 = scan( g[i].listing, '[' );
+   m2 = scan( g[i].listing, ']' );
+   for ( j=0; j<m1; j++ ) { 
+     if ( isdigit( g[i].listing[j] ) ) { m3 = j; break; }
+   }
+   sscanf( memchr(&g[i].listing[m3],g[i].listing[m3],(size_t)(m1-m3)), "%d", &(g[i].id) );
+   //if ( i == 99 ) {
+   //  printf(" %.*s has '%c' at %d and id = %d\n\n", m2+1, g[i].listing, g[i].listing[m3], m3, g[i].id );
+   //}
+   strncpy( &(g[i].encrypted[0]), &(g[i].listing[0]), m3 );
+   //strncpy( g[i].encrypted, g[i].listing, m3 ); // same as above
+   strncpy( &(g[i].checksum[0]), &(g[i].listing[m1+1]), m2-m1-1 );
+   //printf(" %.*s has checksum '%s'\n", m2+1, g[i].listing, g[i].checksum );
+   //printf(" %s has checksum '%s'\n", g[i].encrypted, g[i].checksum );
   }
+  
 
   return;
 }
@@ -70,22 +86,6 @@ void decrypter ( record g[], size_t N ) {
   subroutine decrypter ( g )
 
    do i = 1, size( g )
-     g(i)%is_real = .false.
-     m1 = scan( g(i)%listing, "[" )
-     m2 = scan( g(i)%listing, "]" )
-
-     ! poor man's is_number...
-     m3 = 1024
-     do j = 1, len(numer)
-       mm = scan( g(i)%listing(:m1-1), numer(j:j) )
-       if ( mm .lt. m3  .and.  mm .gt. 0 ) m3 = mm
-     end do
-     ! store sector id
-     if ( m3 .gt. 0 ) read( g(i)%listing(m3:m1-1), * ) g(i)%id
-     ! store encrypted prefix
-     g(i)%encrypted = trim( g(i)%listing(:m3-1) )
-     ! store checksum
-     g(i)%checksum = g(i)%listing(m1+1:m2-1)
 
      ! determine decoys
      do k = 1, m2-m1-2
@@ -146,16 +146,19 @@ int main( int argc, char *argv[] ) {
  fp = fopen("input.txt","r");
  reader( fp, &n, temp );
  fclose(fp);
- printf(" file has %d lines\n",n);
 
  record registry[n];
  for( i=0; i<n; i++ ) {
-  memset(registry[i].listing, '\0', sizeof( registry[i].listing ) );
+  memset(registry[i].listing,   '\0', sizeof( registry[i].listing ) );
+  memset(registry[i].encrypted, '\0', sizeof( registry[i].encrypted ) );
+  memset(registry[i].decrypted, '\0', sizeof( registry[i].decrypted ) );
+  memset(registry[i].checksum,  '\0', sizeof( registry[i].checksum ) );
   strcpy( registry[i].listing, temp[i] );
  }
  free( temp );
 
- decrypter( registry , sizeof(registry)/sizeof(registry[0]) );  // must pass array size from calling unit
+ // must pass array size from calling unit
+ decrypter( registry , sizeof(registry)/sizeof(registry[0]) );
 
  return 0;
 }
