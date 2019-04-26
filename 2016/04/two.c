@@ -77,6 +77,29 @@ void decrypter ( record g[], size_t N ) {
    strncpy( &(g[i].checksum[0]), &(g[i].listing[m1+1]), m2-m1-1 );
    //printf(" %.*s has checksum '%s'\n", m2+1, g[i].listing, g[i].checksum );
    //printf(" %s has checksum '%s'\n", g[i].encrypted, g[i].checksum );
+
+   for ( k=0; k<m2-m1-2; k++ ) {
+     nthis = counter(0,    g[i].checksum[k]     ,g[i].encrypted);
+     nnext = counter(0,   g[i].checksum[k+1]    ,g[i].encrypted);
+     nlast = counter(0, g[i].checksum[m2-m1-1]  ,g[i].encrypted);
+     if (  nlast > 0 
+        && (  nthis > nnext
+           || ( nthis == nnext
+               &&  scan(alpha,g[i].checksum[k])<scan(alpha,g[i].checksum[k+1]) ) ) )
+      { g[i].is_real = true;  } else {
+        g[i].is_real = false;
+     }
+   }
+   if ( g[i].is_real ) {
+     m4 = scan( g[i].encrypted, '\0' ) - 2;
+     rotate =  g[i].id % strlen(alpha) ;
+     for ( j=0; j<m4; j++ ) {
+       if ( g[i].encrypted[j] == '-' ) { g[i].decrypted[j] = ' '; }
+       else {
+       }
+     }
+   }
+
   }
   
 
@@ -86,30 +109,6 @@ void decrypter ( record g[], size_t N ) {
   subroutine decrypter ( g )
 
    do i = 1, size( g )
-
-     ! determine decoys
-     do k = 1, m2-m1-2
-       nthis = counter(0,       g(i)%checksum(k:k)       ,g(i)%listing(:m1-1))
-       nnext = counter(0,     g(i)%checksum(k+1:k+1)     ,g(i)%listing(:m1-1))
-       nlast = counter(0, g(i)%checksum(m2-m1-1:m2-m1-1) ,g(i)%listing(:m1-1))
-       ! checksum rule set
-       if ( &
-           &         nlast .gt. 0 &
-           & .and. ( nthis .gt. nnext &
-           &        .or. ( &
-           &              nthis .eq. nnext &
-           &  .and. ( scan( alpha, g(i)%checksum(k:k) ) &
-           &             .lt. &
-           &          scan( alpha, g(i)%checksum(k+1:k+1) ) ) &
-           & ) ) ) then
-         continue
-       else
-         goto 420
-       end if
-     end do
-     g(i)%is_real = .true.
-     !write(6,'(I5,A)') i, ' is a real room!'
-     420 continue
 
      if ( g(i)%is_real ) then
        m4 = scan( g(i)%encrypted, ' ' ) - 2
