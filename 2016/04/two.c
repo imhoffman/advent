@@ -61,10 +61,11 @@ int scan ( const char str[], const char ch ) {
 void decrypter ( record g[], size_t N ) {
   int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4;
   long total=0L;
+  bool stop;
 
   //printf(" passed struct array has %zu elements\n\n", N );
 
-  for( i=0; i<N; i++ ) {
+  for( i=0; i<(int)N; i++ ) {
    g[i].is_real = false;
    m1 = scan( g[i].listing, '[' );
    m2 = scan( g[i].listing, ']' );
@@ -76,17 +77,16 @@ void decrypter ( record g[], size_t N ) {
    //strncpy( g[i].encrypted, g[i].listing, m3 ); // same as above
    strncpy( &(g[i].checksum[0]), &(g[i].listing[m1+1]), m2-m1-1 );
 
-   for ( k=0; k<m2-m1-2; k++ ) {
+   stop = false;
+   for ( k=0; k<m2-m1-2 && !stop; k++ ) {
      nthis = counter(0,    g[i].checksum[k]     ,g[i].encrypted);
      nnext = counter(0,   g[i].checksum[k+1]    ,g[i].encrypted);
-     nlast = counter(0, g[i].checksum[m2-m1-1]  ,g[i].encrypted);
-     if (  nlast > 0 
+     nlast = counter(0, g[i].checksum[m2-m1-2]  ,g[i].encrypted);
+     if (  nlast > 0
         && (  nthis > nnext
            || ( nthis == nnext
                &&  scan(alpha,g[i].checksum[k])<scan(alpha,g[i].checksum[k+1]) ) ) )
-      { g[i].is_real = true;  } else {
-        g[i].is_real = false;
-     }
+      { g[i].is_real = true; } else { g[i].is_real = false; stop = true; }
    }
    if ( g[i].is_real ) {
      total =(long) total + g[i].id;
