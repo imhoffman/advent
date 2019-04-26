@@ -18,8 +18,8 @@ typedef struct {
   int              id;
   char      encrypted[lenstr];
   char      decrypted[lenstr];
-  char checksum[max_checksum];
-  bool                is_real;
+  char       checksum[max_checksum];
+  bool         is_real;
 } record;
 
 void reader ( FILE* f, int* n, char lines[][lenstr] ) {
@@ -27,11 +27,9 @@ void reader ( FILE* f, int* n, char lines[][lenstr] ) {
 
   *n = 0;
   while ( fgets(buffer, lenstr, f) != NULL ) {
-    //printf("read line %d as %s\n", *n, buffer);
     strcpy( lines[*n], buffer );
     (*n)++;
   }
-  //printf("\n\n The %dth line in the file is %s\n\n",3,&lines[3-1][0]);
   return;
 }
 
@@ -41,10 +39,20 @@ int counter ( int n, const char ch, char str[] ) {
   if ( str[0] == '\0' ) { return 0; }
 
   rem = strchr( str, ch );
-
   if ( rem != NULL ) { return 1 + counter( n+1, ch, rem+1 ); }
 
   return 0;
+}
+
+// cypher rules
+char caesar ( const int orig, const int rotate ) {
+  int new;
+  if ( orig + rotate > strlen(alpha) - 1 ) { 
+    new = orig + rotate - strlen(alpha) ;
+  } else {
+    new = orig + rotate;
+  }
+  return alpha[new];
 }
 
 // fortran scan
@@ -53,13 +61,10 @@ int scan ( const char str[], const char ch ) {
 }
 
 void decrypter ( record g[], size_t N ) {
-  int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4, rotate, oldch, newch;
+  int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4;
   char checksum[max_checksum];
 
-  printf(" passed struct array has %zu elements\n\n", N );
-  //printf(" %s has %d %c's\n\n", g[99].listing, counter(0,'t',g[99].listing), 't');
-  //printf(" the index of the first 't' is %zu\n", strchr(g[99].listing,'t') - &g[99].listing[0]); 
-  //printf(" a 'scan' for 't' returns %d\n", scan(g[99].listing,'t'));
+  //printf(" passed struct array has %zu elements\n\n", N );
 
   for( i=0; i<N; i++ ) {
    g[i].is_real = false;
@@ -69,14 +74,9 @@ void decrypter ( record g[], size_t N ) {
      if ( isdigit( g[i].listing[j] ) ) { m3 = j; break; }
    }
    sscanf( memchr(&g[i].listing[m3],g[i].listing[m3],(size_t)(m1-m3)), "%d", &(g[i].id) );
-   //if ( i == 99 ) {
-   //  printf(" %.*s has '%c' at %d and id = %d\n\n", m2+1, g[i].listing, g[i].listing[m3], m3, g[i].id );
-   //}
    strncpy( &(g[i].encrypted[0]), &(g[i].listing[0]), m3 );
    //strncpy( g[i].encrypted, g[i].listing, m3 ); // same as above
    strncpy( &(g[i].checksum[0]), &(g[i].listing[m1+1]), m2-m1-1 );
-   //printf(" %.*s has checksum '%s'\n", m2+1, g[i].listing, g[i].checksum );
-   //printf(" %s has checksum '%s'\n", g[i].encrypted, g[i].checksum );
 
    for ( k=0; k<m2-m1-2; k++ ) {
      nthis = counter(0,    g[i].checksum[k]     ,g[i].encrypted);
@@ -91,51 +91,22 @@ void decrypter ( record g[], size_t N ) {
      }
    }
    if ( g[i].is_real ) {
-     m4 = scan( g[i].encrypted, '\0' ) - 2;
-     rotate =  g[i].id % strlen(alpha) ;
+     m4 = scan( g[i].encrypted, '\0' ) - 1;
      for ( j=0; j<m4; j++ ) {
        if ( g[i].encrypted[j] == '-' ) { g[i].decrypted[j] = ' '; }
        else {
+         g[i].decrypted[j] = caesar( scan( alpha, g[i].encrypted[j] ), g[i].id % strlen(alpha) );
        }
      }
+     printf("%5d  %s\n", g[i].id, g[i].decrypted);
    }
-
   }
-  
-
   return;
 }
-/*
-  subroutine decrypter ( g )
 
-   do i = 1, size( g )
-
-     if ( g(i)%is_real ) then
-       m4 = scan( g(i)%encrypted, ' ' ) - 2
-       rotate = mod( g(i)%id, len(alpha) )
-       ! rule set
-       do j = 1, m4
-         if ( g(i)%encrypted(j:j) .eq. '-' ) then
-           g(i)%decrypted(j:j) = ' '
-         else
-           oldch = scan( alpha, g(i)%encrypted(j:j) ) 
-           if ( rotate + oldch  .gt.  len(alpha) ) then
-             newch = oldch + rotate - len(alpha) 
-           else
-             newch = oldch + rotate
-           end if
-           g(i)%decrypted(j:j) = alpha( newch:newch )
-         end if
-       end do
-       write(6,'(I5,2X,A)') g(i)%id, g(i)%decrypted(:m4)
-     end if
-    end do
-
-   return
-  end subroutine decrypter
- end module subs
- */
-
+//
+// main program
+//
 int main( int argc, char *argv[] ) {
  FILE* fp;
  int i, n;
@@ -161,12 +132,3 @@ int main( int argc, char *argv[] ) {
 
  return 0;
 }
-/*
-
-  ! decrypt as per puzzle rules
-  call decrypter( registry )
-
-  deallocate ( registry )
-  stop
- end program main
-*/
