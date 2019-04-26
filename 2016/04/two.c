@@ -6,12 +6,10 @@
 #include<stddef.h>
 #include<ctype.h>
 
-#define iw            32
 #define lenstr        80
 #define max_lines     16384
 #define max_checksum  8
 const char alpha[]="abcdefghijklmnopqrstuvwxyz";
-const char numer[]="0123456789";
 
 typedef struct {
   char        listing[lenstr];
@@ -62,7 +60,7 @@ int scan ( const char str[], const char ch ) {
 
 void decrypter ( record g[], size_t N ) {
   int i, j, k, m1, m2, m3, mm, nthis, nnext, nlast, m4;
-  char checksum[max_checksum];
+  long total=0L;
 
   //printf(" passed struct array has %zu elements\n\n", N );
 
@@ -91,6 +89,7 @@ void decrypter ( record g[], size_t N ) {
      }
    }
    if ( g[i].is_real ) {
+     total =(long) total + g[i].id;
      m4 = scan( g[i].encrypted, '\0' ) - 1;
      for ( j=0; j<m4; j++ ) {
        if ( g[i].encrypted[j] == '-' ) { g[i].decrypted[j] = ' '; }
@@ -101,6 +100,7 @@ void decrypter ( record g[], size_t N ) {
      printf("%5d  %s\n", g[i].id, g[i].decrypted);
    }
   }
+  printf(" total of real sector ids = %ld\n", total);
   return;
 }
 
