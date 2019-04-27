@@ -31,14 +31,15 @@ def sumcheck ( x, y ):
         else: return False
     return True
 
-def decrypter ( r ):
+def caesar ( r ):
     s = ""
     rotate = r[0] % len( C.alpha() )
     for i in range( len( r[1] ) ):
         if r[1][i] == '-': s = s + ' '
         else:
-            if C.alpha().index(r[1][i]) + rotate < len( C.alpha() ): s = s + C.alpha()[rotate]
-            else: s = s + C.alpha()[ rotate-len(C.alpha()) ] 
+            m = C.alpha().index(r[1][i])
+            if m + rotate < len( C.alpha() ): s = s + C.alpha()[m]
+            else: s = s + C.alpha()[ m-len(C.alpha()) ] 
     return s
 
 # poor man's struct
@@ -88,8 +89,8 @@ for i in range(n):
             sub = sub + s[j]
     sector_id.append( int( sub ) )
 
-[ decrypted.append( decrypter([sector_id[i],encrypted[i]]) ) for i in range( len(listing) ) ]
-[ print( sector_id[i], decrypted[i] ) for i in range(n) ]
+[ decrypted.append( caesar([sector_id[i],encrypted[i]]) ) for i in range( len(listing) ) ]
+[ print( sector_id[i], decrypted[i] ) for i in range(n) if is_real[i] ]
 print( f" total of real sector ids = {sum( [ sector_id[i] for i in range(n) if is_real[i] ] ):d}" )
 
 #n = 15
