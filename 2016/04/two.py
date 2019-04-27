@@ -1,3 +1,4 @@
+# v >= 3.6 for f-strings
 import sys
 def printf(format, *args):
     sys.stdout.write(format % args)
@@ -13,14 +14,17 @@ def counter ( ch, string ):
     return sum( [ x is ch for x in string ] )
 
 def sumcheck ( x, y ):
-    for i in range( len(y)-1 ):
-      if ( x.count(y[-1]) > 0 and
-           ( ( x.count(y[i]) > x.count(y[i+1]) ) or
-             ( ( x.count(y[i]) == x.count(y[i+1]) ) and
-               ( C.alpha().index(y[i]) > C.alpha().index(y[i+1]) )
-             )
-           ) ): continue
-      else: return False
+    counts = [ x.count(ch) for ch in y ]
+    if 0 in counts: return False
+    for k in range( len(counts)-1 ):
+        if ( ( counts[k] > counts[k+1] )
+                or
+                ( ( counts[k] == counts[k+1] )
+                    and
+                    ( ( C.alpha().index(y[k]) < C.alpha().index(y[k+1]) ) )
+                ) 
+            ): continue
+        else: return False
     return True
 
 # poor man's struct
@@ -68,8 +72,8 @@ for i in range(n):
         if ( nums[j] ):
             sub = sub + s[j]
     sector_id.append( int( sub ) )
-    print( encrypted[i], sector_id[i] )
-print( sum( [ sector_id[i] for i in range(n) if is_real[i] ] ) )
+#[ print( listing[i], sector_id[i], is_real[i] ) for i in range(n) ]
+print( f" total of real sector ids = {sum( [ sector_id[i] for i in range(n) if is_real[i] ] ):d}" )
 
 #n = 15
 #print ( f" the {n:2d}th letter of alpha() is {C.alpha()[n-1]!r}\n" )
