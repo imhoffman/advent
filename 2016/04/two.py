@@ -13,8 +13,7 @@ def counter ( ch, string ):
     return sum( [ x is ch for x in string ] )
 
 def sumcheck ( x, y ):
-    n = len(y)
-    for i in range(n-1):
+    for i in range( len(y)-1 ):
       if ( x.count(y[-1]) > 0 and
            ( ( x.count(y[i]) > x.count(y[i+1]) ) or
              ( ( x.count(y[i]) == x.count(y[i+1]) ) and
@@ -59,12 +58,18 @@ fo.close()
 #print( f" {n:d} lines in file\n" )
 
 [ checksum.append( x[ x.index('[')+1 : x.index(']') ] ) for x in listing ]
-[ is_real.append( sumcheck(listing[i],checksum[i]) ) for i in range(n) ]
-n1 = 0
-while ( not x.isdigit()
-sum( [ int(x[n1:n2]) for i in range(n) for x in listing if is_real[i] ] )
-
-
+[ encrypted.append( x[ :x.index('[')-3 ] ) for x in listing ]
+[ is_real.append( sumcheck(encrypted[i],checksum[i]) ) for i in range(n) ]
+for i in range(n):
+    s = listing[i]
+    nums = [ ch.isdigit() for ch in s ]
+    sub = ""
+    for j in range(len(s)):
+        if ( nums[j] ):
+            sub = sub + s[j]
+    sector_id.append( int( sub ) )
+    print( encrypted[i], sector_id[i] )
+print( sum( [ sector_id[i] for i in range(n) if is_real[i] ] ) )
 
 #n = 15
 #print ( f" the {n:2d}th letter of alpha() is {C.alpha()[n-1]!r}\n" )
