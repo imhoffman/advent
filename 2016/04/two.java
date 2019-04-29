@@ -39,11 +39,11 @@ class puzzler {
  }
 
  // recursive char counter
- static int counter ( int n, char ch, String str ) {
+ static int counter ( char ch, String str ) {
    int m = -1;
    if ( str.length() == 0 || str.isEmpty() ) { return 0; }
    if ( ( m = str.indexOf(ch) ) != -1 ) {
-     return 1 + counter( n+1, ch, str.substring(m+1) );
+     return 1 + counter( ch, str.substring(m+1) );
    }
    return 0;
  }
@@ -55,10 +55,10 @@ class puzzler {
    int i, nthis, nnext, nlast;
    boolean stop=false, isReal=false;
 
-   nlast = counter(0, checksum.charAt(checksum.length()-1), encrypted);
+   nlast = counter( checksum.charAt(checksum.length()-1), encrypted);
    for( i=0; i<checksum.length()-1 && !stop; i++ ) {
-     nthis = counter(0,  checksum.charAt(i)  , encrypted);
-     nnext = counter(0, checksum.charAt(i+1) , encrypted);
+     nthis = counter( checksum.charAt(i)  , encrypted);
+     nnext = counter(checksum.charAt(i+1) , encrypted);
      if (  nlast > 0
         && (  nthis > nnext
            || ( nthis == nnext
