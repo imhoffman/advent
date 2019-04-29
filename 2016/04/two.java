@@ -1,5 +1,6 @@
 import java.io.*;
 import java.lang.String;
+import java.lang.Character;
 
 public class two {
  final static int max_lines = 16384;
@@ -23,7 +24,6 @@ public class two {
    //System.gc();
 
    puzzler p = new puzzler( listing ) ;
-   System.out.println( p.Nrooms() );
    p.puzzle( 3 );
 
  }
@@ -39,10 +39,7 @@ class puzzler {
    N = r.length;
  }
 
- static int Nrooms () {
-   return N;
- }
-
+ // recursive char counter
  static int counter ( int n, char ch, String str ) {
    int m = -1;
 
@@ -55,23 +52,34 @@ class puzzler {
    return 0;
  }
 
+ // checksum ruleset
  static boolean sumcheck ( String s ) {
-   String checksum = new String( s.substring( s.indexOf('[')+1, s.indexOf(']')-1 ) );
+   String checksum = new String( s.substring( s.indexOf('[')+1, s.indexOf(']') ) );
    String encrypted = new String( s.substring( 0, s.lastIndexOf('-') ) );
    int i, nthis, nnext, nlast;
    boolean stop=false, isReal=false;
 
-   for( i=0; i<checksum.length()-2 && !stop; i++ ) {
-     nthis = counter(0,         checksum.charAt(i)          , encrypted);
-     nnext = counter(0,        checksum.charAt(i+1)         , encrypted);
-     nlast = counter(0, checksum.charAt(checksum.length()-1), encrypted);
+   nlast = counter(0, checksum.charAt(checksum.length()-1), encrypted);
+   for( i=0; i<checksum.length()-1 && !stop; i++ ) {
+     nthis = counter(0,  checksum.charAt(i)  , encrypted);
+     nnext = counter(0, checksum.charAt(i+1) , encrypted);
      if (  nlast > 0
         && (  nthis > nnext
            || ( nthis == nnext
-               &&  alpha.indexOf(checksum.charAt(i))< alpha.indexOf(checksum.charAt(i+1)) ) ) ) { isReal = true; } else { isReal=false; stop=true; }
+               &&  alpha.indexOf(checksum.charAt(i)) < alpha.indexOf(checksum.charAt(i+1)) ) ) ) { isReal = true; } else { isReal=false; stop=true; }
    }
 
    return isReal;
+ }
+
+ // parse sector id from registry listing
+ static long sector ( String s ) {
+   String nums = new String("");
+   int i;
+   for( i=0; i<s.length(); i++ ) {
+     if ( Character.isDigit( s.charAt(i) ) ) { nums = nums.concat( s.substring(i,i+1) ); }
+   }
+   return Long.parseLong( nums );
  }
 
  // cypher rules
@@ -85,6 +93,7 @@ class puzzler {
    return alpha.charAt(newchi);
  }
 
+
  static void decrypter ( String s ) {
    return;
  }
@@ -92,11 +101,12 @@ class puzzler {
 
  static void puzzle ( int part ) {
    int i;
+   long total=0L;
    for ( i=0; i<N; i++ ) {
-     System.out.printf( r[i] + " %b\n", sumcheck( r[i] ) );
+     if ( sumcheck( r[i] ) ) { total = total + sector( r[i] ); }
    }
-   if ( (part & 1)==1 ) { System.out.println(" part one selected."); }
-   if ( (part & 2)==2 ) { System.out.println(" part two selected."); }
+   if ( (part & 2)==2 ) { System.out.println(" part two answer pending..."); }
+   if ( (part & 1)==1 ) { System.out.printf(" Total of real sector ids = %d\n", total); }
    return;
  }
 
