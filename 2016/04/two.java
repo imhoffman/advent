@@ -20,12 +20,11 @@ public class two {
    for ( i=0; i<listing.length; i++ ) {
      listing[i] = temp[i];
    }
-   //temp = null;
+   //temp = null;       // free temp ?
    //System.gc();
 
    puzzler p = new puzzler( listing ) ;
-   p.puzzle( 3 );
-
+   p.puzzle( 3 );       // bit vector
  }
 }
 
@@ -42,13 +41,10 @@ class puzzler {
  // recursive char counter
  static int counter ( int n, char ch, String str ) {
    int m = -1;
-
    if ( str.length() == 0 || str.isEmpty() ) { return 0; }
-
    if ( ( m = str.indexOf(ch) ) != -1 ) {
      return 1 + counter( n+1, ch, str.substring(m+1) );
    }
-
    return 0;
  }
 
@@ -66,7 +62,9 @@ class puzzler {
      if (  nlast > 0
         && (  nthis > nnext
            || ( nthis == nnext
-               &&  alpha.indexOf(checksum.charAt(i)) < alpha.indexOf(checksum.charAt(i+1)) ) ) ) { isReal = true; } else { isReal=false; stop=true; }
+               &&  alpha.indexOf(checksum.charAt(i)) < alpha.indexOf(checksum.charAt(i+1)) )
+           )
+        ) { isReal = true; } else { isReal=false; stop=true; }
    }
 
    return isReal;
@@ -93,19 +91,34 @@ class puzzler {
    return alpha.charAt(newchi);
  }
 
-
- static void decrypter ( String s ) {
-   return;
+ // apply cypher to string
+ static String decrypter ( String s ) {
+   String encrypted = new String( s.substring( 0, s.lastIndexOf('-') ) );
+   char[] decrypted = new char[encrypted.length()];
+   int i;
+   for( i=0; i<encrypted.length(); i++ ) {
+     if ( encrypted.charAt(i) == '-' ) {
+       decrypted[i] = ' ';
+     } else {
+      decrypted[i] = caesar( alpha.indexOf(encrypted.charAt(i)), (int)sector(s)%alpha.length() );
+     }
+   }
+   return String.valueOf(decrypted);
  }
      
-
+ // report desired results
  static void puzzle ( int part ) {
    int i;
-   long total=0L;
+   long id, total=0L;
    for ( i=0; i<N; i++ ) {
-     if ( sumcheck( r[i] ) ) { total = total + sector( r[i] ); }
+     if ( sumcheck( r[i] ) ) {
+       id = sector( r[i] );
+       total = total + id;
+       if ( (part & 2)==2 ) {
+         System.out.printf( "%5d %s\n", id, decrypter( r[i] ) );
+       }
+     }
    }
-   if ( (part & 2)==2 ) { System.out.println(" part two answer pending..."); }
    if ( (part & 1)==1 ) { System.out.printf(" Total of real sector ids = %d\n", total); }
    return;
  }
