@@ -31,13 +31,13 @@ void reader ( FILE* f, int* n, char lines[][lenstr] ) {
   return;
 }
 
-int counter ( int n, const char ch, char str[] ) {
+int counter ( const char ch, char str[] ) {
   char* rem;
 
   if ( str[0] == '\0' ) { return 0; }
 
   rem = strchr( str, ch );
-  if ( rem != NULL ) { return 1 + counter( n+1, ch, rem+1 ); }
+  if ( rem != NULL ) { return 1 + counter( ch, rem+1 ); }
 
   return 0;
 }
@@ -79,9 +79,9 @@ void decrypter ( record g[], size_t N ) {
 
    stop = false;
    for ( k=0; k<m2-m1-2 && !stop; k++ ) {
-     nthis = counter(0,    g[i].checksum[k]     ,g[i].encrypted);
-     nnext = counter(0,   g[i].checksum[k+1]    ,g[i].encrypted);
-     nlast = counter(0, g[i].checksum[m2-m1-2]  ,g[i].encrypted);
+     nthis = counter(    g[i].checksum[k]     ,g[i].encrypted);
+     nnext = counter(   g[i].checksum[k+1]    ,g[i].encrypted);
+     nlast = counter( g[i].checksum[m2-m1-2]  ,g[i].encrypted);
      if (  nlast > 0
         && (  nthis > nnext
            || ( nthis == nnext

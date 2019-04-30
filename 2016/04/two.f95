@@ -49,8 +49,7 @@
   end subroutine reader
 
   !! letter-occurence counter
-  recursive function counter ( n, ch, str ) result ( k )
-   integer, intent(in)             :: n       ! the running count when called
+  recursive function counter ( ch, str ) result ( k )
    character ( len=1 ), intent(in) :: ch
    character ( len=* ), intent(in) :: str
    integer                         :: k, m=-1
@@ -61,7 +60,7 @@
 
    m = scan( str, ch ) 
    if ( m .gt. 0 ) then
-    k = 1 + counter( n+1, ch, str(m+1:) )
+    k = 1 + counter( ch, str(m+1:) )
    end if
 
    return
@@ -94,9 +93,9 @@
 
      ! determine decoys
      do k = 1, m2-m1-2
-       nthis = counter(0,       g(i)%checksum(k:k)       ,g(i)%listing(:m1-1))
-       nnext = counter(0,     g(i)%checksum(k+1:k+1)     ,g(i)%listing(:m1-1))
-       nlast = counter(0, g(i)%checksum(m2-m1-1:m2-m1-1) ,g(i)%listing(:m1-1))
+       nthis = counter(       g(i)%checksum(k:k)       ,g(i)%listing(:m1-1))
+       nnext = counter(     g(i)%checksum(k+1:k+1)     ,g(i)%listing(:m1-1))
+       nlast = counter( g(i)%checksum(m2-m1-1:m2-m1-1) ,g(i)%listing(:m1-1))
        ! checksum rule set
        if ( &
            &         nlast .gt. 0 &
