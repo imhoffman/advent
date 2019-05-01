@@ -60,7 +60,7 @@ with open("input.txt") as fo:
   if not line: break
   listing.append(line)
   n = n + 1
-fo.close()
+#fo.close()
 
 # populate lists...each independently since no structs
 [ checksum.append( x[ x.index('[')+1 : x.index(']') ] ) for x in listing ]
