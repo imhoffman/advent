@@ -126,11 +126,11 @@
 
 (setf total 0)
 (loop for s in registry do
-  (if (sumcheck s) (progn
-    (setf total (+ total (get_id s)))
-    (format t "~& ~5d ~a~%" (get_id s) (decrypter s))
-    )
-  )
-)
+  (let ((id (get_id s)))
+    (if (sumcheck s) (progn
+      (setf total (+ total id))
+      (format t "~& ~5d ~a~%" id (decrypter s))
+    ))
+  ))
 (format t "~&~% total of read sector ids: ~d~%~%" total)
 
