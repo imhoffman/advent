@@ -1,6 +1,7 @@
 ;;
 ;;  constants
 (defconstant ALPHA (string "abcdefghijklmnopqrstuvwxyz"))
+
 ;;
 ;;  unused range function
 (defun range (min max &optional (step 1))
@@ -15,7 +16,6 @@
   (let ((i 0))
   (loop for j from 0 to (- (length str) 1) do
     (if (string= ch (char str j)) (setf i (+ i 1))))
-  ;;(return-from counter i)
   i
   )
 )
@@ -67,6 +67,7 @@
       (if (string= #\[ (char str j)) (setf bracketed t))
     )
     (setf checksum (concatenate 'string (nreverse checksum)))
+    ;;  checksum ruleset
     (if (= 0 (counter (char checksum (- (length checksum) 1)) listing)) (return-from sumcheck nil))
     (loop for j from 0 to (- (length checksum) 2) do
        (if (= 0 (counter (char checksum j) listing)) (return-from sumcheck nil))
@@ -75,9 +76,7 @@
 		    (< (ialpha (char checksum j)) (ialpha (char checksum (+ j 1))))
 	       )
 	   ) (continue) (return-from sumcheck nil)
-       )
-    )
-  )
+       )))
   (return-from sumcheck t)
 )
 
@@ -85,10 +84,13 @@
 ;;  ceasar
 (defun caesar (ch rotate)
   (let ( (n (ialpha ch)) )
-    (if (> (+ n rotate) (- (length ALPHA) 1)) (return-from caesar (char ALPHA (- (+ n rotate) (length ALPHA)))) (return-from caesar (char ALPHA (+ n rotate))))
+    (if (> (+ n rotate) (- (length ALPHA) 1))
+      (return-from caesar (char ALPHA (- (+ n rotate) (length ALPHA))))
+      (return-from caesar (char ALPHA (+ n rotate)))
+    )
   )
-  ;;(format t "~& rotate ~a by ~d~%" ch rotate)
 )
+
 ;;
 ;;  decryption
 (defun decrypter (str)
