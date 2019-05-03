@@ -1,5 +1,8 @@
 ;;
-;; unused range function
+;;  constants
+(defconstant ALPHA (string "abcdefghijklmnopqrstuvwxyz"))
+;;
+;;  unused range function
 (defun range (min max &optional (step 1))
   (when (<= min max)
     (cons min (range (+ min step) max step)))
@@ -50,9 +53,7 @@
 ;;
 ;;  location in alphabet
 (defun ialpha (ch)
-  (let ((alpha (string "abcdefghijklmnopqrstuvwxyz")))
-    (search (string ch) alpha)
-  )
+  (search (string ch) ALPHA)
 )
 
 ;;
@@ -66,7 +67,6 @@
       (if (string= #\[ (char str j)) (setf bracketed t))
     )
     (setf checksum (concatenate 'string (nreverse checksum)))
-    ;;(format t "~&~% type-of checksum: ~a, checksum: '~a'~%" (type-of checksum) checksum)
     (if (= 0 (counter (char checksum (- (length checksum) 1)) listing)) (return-from sumcheck nil))
     (loop for j from 0 to (- (length checksum) 2) do
        (if (= 0 (counter (char checksum j) listing)) (return-from sumcheck nil))
@@ -79,6 +79,31 @@
     )
   )
   (return-from sumcheck t)
+)
+
+;;
+;;  ceasar
+(defun caesar (ch rotate)
+  (let ( (n (ialpha ch)) )
+    (if (> (+ n rotate) (- (length ALPHA) 1)) (return-from caesar (char ALPHA (- (+ n rotate) (length ALPHA)))) (return-from caesar (char ALPHA (+ n rotate))))
+  )
+  ;;(format t "~& rotate ~a by ~d~%" ch rotate)
+)
+;;
+;;  decryption
+(defun decrypter (str)
+  (let ( (rotate (mod (get_id str) (length ALPHA))) (encrypted (list)) (decrypted (list)) )
+    (block number-search
+      (loop for j from 0 to (- (length str) 1) do
+        (if (not (isdigit (char str j))) (push (char str j) encrypted) (return-from number-search))
+      )
+    )
+    (setf encrypted (concatenate 'string (nreverse encrypted)))
+    (loop for j from 0 to (- (length encrypted) 1) do
+      (if (string= "-" (char encrypted j)) (push #\Space decrypted) (push (caesar (char encrypted j) rotate ) decrypted))
+    )
+  (return-from decrypter (concatenate 'string (nreverse decrypted)))
+  )
 )
 
 ;;
@@ -99,8 +124,11 @@
 
 (setf total 0)
 (loop for s in registry do
-  (if (sumcheck s) (setf total (+ total (get_id s))))
-  ;;(format t "~& ~03d ~a is~aa real room~%" (get_id s) s (if (sumcheck s) (string " ") (string " not ")))
+  (if (sumcheck s) (progn
+    (setf total (+ total (get_id s)))
+    (format t "~& ~5d ~a~%" (get_id s) (decrypter s))
+    )
+  )
 )
 (format t "~&~% total of read sector ids: ~d~%~%" total)
 
