@@ -12,13 +12,14 @@
   (let ((i 0))
   (loop for j from 0 to (- (length str) 1) do
     (if (string= ch (char str j)) (setf i (+ i 1))))
+  ;;(return-from counter i)
   i
   )
 )
-(setf s (string "the change has come she's under my thumb"))
-(setf ch "e")
-(format t "~& '~a' has ~d '~a's in it~%" s (counter ch s) ch)
-(format t "~& '~a' has ~d '~a's in it~%" s (count (coerce "e" 'character) s) ch)
+;;(setf s (string "the change has come she's under my thumb"))
+;;(setf ch "e")
+;;(format t "~& '~a' has ~d '~a's in it~%" s (counter ch s) ch)
+;;(format t "~& '~a' has ~d '~a's in it~%" s (count (coerce "e" 'character) s) ch)
 
 ;;
 ;;  numeral locator...though I have since learned about 'count-if'
@@ -30,9 +31,9 @@
     nil
   )
 )
-(setf s "7")
-(format t "~& ~a is~aa digit~%" s (if (isdigit s) (string " ") (string " not ")))
-(format t "~& ~a is~aa digit~%" s (if (= 1 (count-if #'digit-char-p s)) (string " ") (string " not ")))
+;;(setf s "7")
+;;(format t "~& ~a is~aa digit~%" s (if (isdigit s) (string " ") (string " not ")))
+;;(format t "~& ~a is~aa digit~%" s (if (= 1 (count-if #'digit-char-p s)) (string " ") (string " not ")))
 
 ;;
 ;;  extract sector id from file listing
@@ -41,9 +42,43 @@
     (loop for j from 0 to (- (length str) 1) do
       (if (isdigit (char str j)) (push (char str j) val))
     )
-    (nreverse val)
+    (nreverse val)    ;; why doesn't reverse work here ?
     (parse-integer (concatenate 'string val))
   )
+)
+
+;;
+;;  location in alphabet
+(defun ialpha (ch)
+  (let ((alpha (string "abcdefghijklmnopqrstuvwxyz")))
+    (search (string ch) alpha)
+  )
+)
+
+;;
+;;  checksum verification
+(defun sumcheck (str)
+  (let ( (bracketed nil) (checksum (list)) )    ;; local variables
+    (loop for j from 0 to (- (length str) 1) do
+      (if (and bracketed (not (string= #\] (char str j))))
+	(push (char str j) checksum)
+	(setf listing (subseq str 0 (search (string #\[) str))))
+      (if (string= #\[ (char str j)) (setf bracketed t))
+    )
+    (setf checksum (concatenate 'string (nreverse checksum)))
+    ;;(format t "~&~% type-of checksum: ~a, checksum: '~a'~%" (type-of checksum) checksum)
+    (if (= 0 (counter (char checksum (- (length checksum) 1)) listing)) (return-from sumcheck nil))
+    (loop for j from 0 to (- (length checksum) 2) do
+       (if (= 0 (counter (char checksum j) listing)) (return-from sumcheck nil))
+       (if (or (> (counter (char checksum j) listing) (counter (char checksum (+ j 1)) listing))
+	       (and (= (counter (char checksum j) listing) (counter (char checksum (+ j 1)) listing))
+		    (< (ialpha (char checksum j)) (ialpha (char checksum (+ j 1))))
+	       )
+	   ) (continue) (return-from sumcheck nil)
+       )
+    )
+  )
+  (return-from sumcheck t)
 )
 
 ;;
@@ -62,6 +97,10 @@
 )
 (setf registry (reverse registry))
 
+(setf total 0)
 (loop for s in registry do
-  (format t "~& ~03d ~a~%" (get_id s) s))
+  (if (sumcheck s) (setf total (+ total (get_id s))))
+  ;;(format t "~& ~03d ~a is~aa real room~%" (get_id s) s (if (sumcheck s) (string " ") (string " not ")))
+)
+(format t "~&~% total of read sector ids: ~d~%~%" total)
 
