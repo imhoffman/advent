@@ -28,7 +28,8 @@
   (newline)
   ) registry)
 
-
+;;  this works
+;; (define f (lambda (a b) (if (= b 0) 0 (+ a (f a (- b 1))))))
 
 (define counter
  (lambda (ch s)
