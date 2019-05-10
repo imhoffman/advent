@@ -1,5 +1,10 @@
+;; empty list to eventually hold contents of input file
 (define registry (list))
 
+;; read in the file
+;;  perhaps cons a (string line) rather than redefining registry,
+;;  that way the close could be inside a lambda, a la
+;;  https://scheme.com/tspl4/io.html#./io:h9
 (define file (open-input-file "input.txt"))
 (do ((line (read-line file) (read-line file))) ((eof-object? line))
         (set! registry (append registry (list line))))
@@ -22,5 +27,18 @@
       (string-find-next-char s #\])))
   (newline)
   ) registry)
+
+
+
+(define counter
+ (lambda (ch s)
+  (let ((k (string-find-next-char s ch)))
+   (if (k)
+    (begin (if (= k (string-length s))
+            0
+            (+ 1 (counter ch (substring s k (string-length s))))))
+   0))))
+
+(counter #\r "baseball been berry berry good to me")
 
 (exit)
