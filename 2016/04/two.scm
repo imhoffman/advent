@@ -1,6 +1,9 @@
 ;;  options
+;;   as per https://www.gnu.org/software/mit-scheme/documentation/mit-scheme-ref/Format.html
 (load-option 'format)
+
 ;;  constants
+;;   as a list, will string->list as needed for char-set
 (define alpha "abcdefghijklmnopqrstuvwxyz")
 
 ;; empty list to eventually hold contents of input file
@@ -14,26 +17,22 @@
         (set! registry (append registry (list line))))
 (close-input-port file)
 
-;; since 'numeric' is built in, no need for this
-;(define nums (char-set #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
-;(for-each (lambda (s) (display (substring s (string-find-next-char-in-set s nums) (string-find-next-char s #\[)))(newline)) registry)
 
-(for-each
- (lambda (s)
-  (display s)
-  (display
-    (substring s
-      (string-find-next-char-in-set s char-set:numeric)
-      (string-find-next-char s #\[)))
-  (display
-    (substring s
-      (+ (string-find-next-char s #\[) 1)
-      (string-find-next-char s #\])))
-  (newline)
-  ) registry)
+;;  diagnose read and parsing
+;(for-each
+; (lambda (s)
+;  (format #t " ~a has id: ~a and checksum: ~a~%"
+;   s
+;   (substring s
+;      (string-find-next-char-in-set s char-set:numeric)
+;      (string-find-next-char s #\[))
+;   (substring s
+;      (+ 1 (string-find-next-char s #\[))
+;      (string-find-next-char s #\]))
+;  )) registry)
 
 
-;; scheme seems to lack this
+;; scheme seems to lack this function
 (define string->char
  (lambda (s)
   (car (string->list s))))
@@ -49,8 +48,18 @@
             (+ 1 (counter ch (substring s (+ 1 k) (string-length s))))))
    0))))
 
-(let ((ch "r") (s "baseball been berry berry good to me"))
-(format #t "~% The string '~a' has ~a '~a's~%" s (counter (string->char ch) s) (string->char ch))
-)
+
+(define sumcheck
+ (lambda (s)
+  (let ( (id (substring s
+              (string-find-next-char-in-set s char-set:numeric)
+              (string-find-next-char s #\[)))
+         (checksum (substring s
+                    (+ 1 (string-find-next-char s #\[))
+                    (string-find-next-char s #\])))
+         (test (car (string->list "ebchf"))) )
+  (format #t " The string '~a' has ~a '~a's~%" s (counter test s) test))))
+
+(for-each sumcheck registry)
 
 (exit)
