@@ -1,6 +1,10 @@
+;;  options
+(load-option 'format)
+;;  constants
+(define alpha "abcdefghijklmnopqrstuvwxyz")
+
 ;; empty list to eventually hold contents of input file
 (define registry (list))
-
 ;; read in the file
 ;;  perhaps cons a (string line) rather than redefining registry,
 ;;  that way the close could be inside a lambda, a la
@@ -28,18 +32,25 @@
   (newline)
   ) registry)
 
-;;  this works
-;; (define f (lambda (a b) (if (= b 0) 0 (+ a (f a (- b 1))))))
 
+;; scheme seems to lack this
+(define string->char
+ (lambda (s)
+  (car (string->list s))))
+
+
+;;  recursive occurrence counter
 (define counter
  (lambda (ch s)
   (let ((k (string-find-next-char s ch)))
-   (if (k)
+   (if k
     (begin (if (= k (string-length s))
-            0
-            (+ 1 (counter ch (substring s k (string-length s))))))
+            1
+            (+ 1 (counter ch (substring s (+ 1 k) (string-length s))))))
    0))))
 
-(counter #\r "baseball been berry berry good to me")
+(let ((ch "r") (s "baseball been berry berry good to me"))
+(format #t "~% The string '~a' has ~a '~a's~%" s (counter (string->char ch) s) (string->char ch))
+)
 
 (exit)
