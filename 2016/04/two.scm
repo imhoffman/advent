@@ -18,20 +18,6 @@
 (close-input-port file)
 
 
-;;  diagnose read and parsing
-;(for-each
-; (lambda (s)
-;  (format #t " ~a has id: ~a and checksum: ~a~%"
-;   s
-;   (substring s
-;      (string-find-next-char-in-set s char-set:numeric)
-;      (string-find-next-char s #\[))
-;   (substring s
-;      (+ 1 (string-find-next-char s #\[))
-;      (string-find-next-char s #\]))
-;  )) registry)
-
-
 ;; scheme seems to lack this function
 (define string->char
  (lambda (s)
@@ -42,6 +28,7 @@
 (define counter
  (lambda (ch s)
   (let ((k (string-find-next-char s ch)))
+   ;(format #t " checking for ~a in ~a~%" ch s)
    (if k
     (begin (if (= k (string-length s))
             1
@@ -65,22 +52,35 @@
                     (+ 1 (string-find-next-char s #\[))
                     (string-find-next-char s #\])))
          (encrypted (substring s 0
-                     (string-find-next-char s #\[)))
-         (done #f))
-  (if (= 0 (counter (string-ref checksum (- (string-length checksum) 1)) encrypted)) (set! done #t))
-  (for-each
-   (lambda (ch)
-     (if (and (not done) (or
-          (> (counter ch encrypted)
-             (counter (string-ref checksum (+ 1 (string-find-next-char checksum ch))) encrypted))
-          (and
-           (= (counter ch encrypted)
-              (counter (string-ref checksum (+ 1 (string-find-next-char checksum ch))) encrypted))
-           (< (string-find-next-char alpha ch)
-              (string-find-next-char alpha (string-ref checksum (string-find-next-char checksum ch)))))))
-         (set! done #f) (set! done #t))
-   )
-   (reverse (cdr (reverse (string->list checksum)))))  ; loop over all but the final char
+                     (string-find-next-char-in-set s char-set:numeric)))
+         (done #f) )
+  (if (= 0 (counter
+             (string-ref
+               checksum
+               (- (string-length checksum) 1))
+             encrypted))
+      (set! done #t))
+    (for-each
+     (lambda (ch)
+       (if (and (not done) (or
+            (> (counter ch encrypted)
+               (counter (string-ref
+                         checksum
+                         (+ 1 (string-find-next-char checksum ch)))
+                 encrypted))
+            (and
+             (= (counter ch encrypted)
+                (counter (string-ref
+                          checksum
+                          (+ 1 (string-find-next-char checksum ch)))
+                  encrypted))
+             (< (string-find-next-char alpha ch)
+                (string-find-next-char alpha
+                      (string-ref checksum (+ 1 (string-find-next-char checksum ch))))))))
+           (set! done #f) (set! done #t))
+     )
+     (reverse (cdr (reverse (string->list checksum)))))  ; loop over all but the final char
+   ;; return
    (if done #f #t)
   )))
          
@@ -88,7 +88,7 @@
 (let ((total 0))
 (for-each
  (lambda (s)
-  (display s)(format #t " ~a ~a" (get-id s) (sumcheck s))(newline)
+  ;(display s)(newline)(format #t " ~a ~a" (get-id s) (sumcheck s))(newline)
   (if (sumcheck s) (set! total (+ total (get-id s))))
  ) registry)
 (format #t "~% total of real sector ids: ~a~%~%" total))
