@@ -18,12 +18,6 @@
 (close-input-port file)
 
 
-;; scheme seems to lack this function
-(define string->char
- (lambda (s)
-  (car (string->list s))))
-
-
 ;;  recursive occurrence counter
 (define counter
  (lambda (ch s)
@@ -86,13 +80,27 @@
          
 
 ;; decryption ruleset
-(define decrypter
+(define caesar
+ (lambda (nrot)
+  (lambda (ch)
+   (let ( (loc (string-find-next-char alpha ch)) )
+    (if (> (+ loc nrot) (- (string-length alpha) 1))
+         (string-ref alpha (- (+ loc nrot) (string-length alpha)))
+         (string-ref alpha (+ loc nrot)))))))
+
+(define decrypted
  (lambda (s)
   (let ( (encrypted (substring s 0
                      (string-find-next-char-in-set s char-set:numeric)))
          (nrot (modulo (get-id s) (string-length alpha))))
-  (format #t " '~a' rotation for ~a is ~a~%" encrypted (get-id s) nrot)
- )))
+  (list->string
+   (map
+    (lambda (ch)
+     (if (char=? ch #\-)
+          #\Space
+          ((caesar nrot) ch)))
+     (string->list encrypted))
+  ))))
 
 
 ;;
@@ -100,10 +108,13 @@
 (let ((total 0))
 (for-each
  (lambda (s)
-  (format #t " ~a ~a" (get-id s) (sumcheck s)) (decrypter s)
-  (if (sumcheck s) (set! total (+ total (get-id s))))
+  (if (sumcheck s)
+   (begin
+    (set! total (+ total (get-id s)))
+    (format #t " ~a ~a~%" (get-id s) (decrypted s))
+   ))
  ) registry)
-(format #t "~% total of real sector ids: ~a~%~%" total))
+(format #t "~%  total of real sector ids: ~a~%~%" total))
 
 
 (exit)
