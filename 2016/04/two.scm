@@ -85,10 +85,22 @@
   )))
          
 
+;; decryption ruleset
+(define decrypter
+ (lambda (s)
+  (let ( (encrypted (substring s 0
+                     (string-find-next-char-in-set s char-set:numeric)))
+         (nrot (modulo (get-id s) (string-length alpha))))
+  (format #t " '~a' rotation for ~a is ~a~%" encrypted (get-id s) nrot)
+ )))
+
+
+;;
+;;  main program
 (let ((total 0))
 (for-each
  (lambda (s)
-  ;(display s)(newline)(format #t " ~a ~a" (get-id s) (sumcheck s))(newline)
+  (format #t " ~a ~a" (get-id s) (sumcheck s)) (decrypter s)
   (if (sumcheck s) (set! total (+ total (get-id s))))
  ) registry)
 (format #t "~% total of real sector ids: ~a~%~%" total))
