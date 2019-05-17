@@ -41,22 +41,37 @@ func reader () []string {
 }
 
 
+// sector id
+func get_id ( s string ) int {
+    id, _ := strconv.Atoi( s[ strings.IndexAny(s,NUMS):strings.LastIndexAny(s,NUMS)+1 ] )
+    return id
+}
+
 // checksum ruleset
 func sumcheck ( s string ) bool {
     var (
 	    checksum  string = s[ strings.Index(s,"[")+1:strings.Index(s,"]") ]
 	    encrypted string = s[ :strings.Index(s,"[") ]
-	    id, _ = strconv.Atoi( s[ strings.IndexAny(s,NUMS):strings.LastIndexAny(s,NUMS)+1 ] )
 	    done        bool = false
         )
-    fmt.Printf(" entry '%v' has id %d and checksum '%v'\n", s, id, checksum )
+
+    nlast := strings.Count( encrypted, checksum[len(checksum):] )
     for pos, char := range checksum {
-	if ( pos == len(checksum)-1 ) { break }
-	if ( !done && ( strings.Count( encrypted, checksum[len(checksum):] ) > 0 ) ) {
-	     fmt.Printf( " %v\n", ( strings.Count( encrypted, string(char) ) >= strings.Count( encrypted, string(checksum[pos+1])) ))
+	if ( !done && ( nlast > 0 ) && ( pos < len(checksum)-1 ) ) {
+	     nthis  := strings.Count( encrypted, string(char) )
+	     nnext  := strings.Count( encrypted, string(checksum[pos+1]) )
+	     iAthis := strings.Index( ALPHA, string(char) )
+	     iAnext := strings.Index( ALPHA, string(checksum[pos+1]) )
+	     if ( ( nthis > nnext ) || ( (nthis == nnext) && (iAthis < iAnext) ) ) {
+		     continue
+	     } else {
+		     done = true
+		     break
+		     //return !done
+	     }
         }
     }
-    return true
+    return !done
 }
 
 
@@ -65,13 +80,16 @@ func main () {
 
     r := reader()
 
+    total := 0
     for _, s := range r {
        if ( sumcheck(s) ) {
-	 //fmt.Println( "Yaaaassss." )
-	 continue
+	 id := get_id(s)
+	 total = total + id
+	 fmt.Printf(" %d %v checks out\n", id, s)
        }
     }
 
     fmt.Printf("\n read %d lines\n\n", len(r) )
+    fmt.Printf("\n sum of real sector id's is %d\n\n", total)
 
 }
