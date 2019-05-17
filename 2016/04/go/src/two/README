@@ -1,1 +1,3 @@
 don't forget to export the GOPATH to the go above the src
+cd ../..
+export GOPATH=`pwd`
