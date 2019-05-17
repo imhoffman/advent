@@ -10,7 +10,7 @@ import (
 )
 
 //  constants
-const max_lines int = 16384
+const MAX_LINES int = 16384
 const ALPHA  string = "abcdefghijklmnopqrstuvwxyz"
 const NUMS   string = "0123456789"
 
@@ -22,7 +22,7 @@ const NUMS   string = "0123456789"
 //   "Note that, unlike in C, it's perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns."
 func reader () []string {
     var i int = 0
-    temp := make( []string, max_lines )
+    temp := make( []string, MAX_LINES )
 
     f, err := os.Open("input.txt")
     if err != nil { log.Fatal(err) }
@@ -35,8 +35,8 @@ func reader () []string {
     if err := s.Err(); err != nil { log.Fatal(err) }
 
     //  https://blog.golang.org/go-slices-usage-and-internals
-    registry := make( []string, i )
-    copy( registry, temp )
+    registry := make( []string, i )   // allocate final array now that Nrooms is known
+    copy( registry, temp )            // GC should find temp soon enough
     return registry
 }
 
@@ -51,24 +51,20 @@ func get_id ( s string ) int {
 func sumcheck ( s string ) bool {
     var (
 	    checksum  string = s[ strings.Index(s,"[")+1:strings.Index(s,"]") ]
-	    encrypted string = s[ :strings.Index(s,"[") ]
+	    encrypted string = s[ :strings.IndexAny(s,NUMS)-1 ]
 	    done        bool = false
         )
 
-    nlast := strings.Count( encrypted, checksum[len(checksum):] )
     for pos, char := range checksum {
-	if ( !done && ( nlast > 0 ) && ( pos < len(checksum)-1 ) ) {
+	if ( !done && ( pos < len(checksum)-1 ) ) {
 	     nthis  := strings.Count( encrypted, string(char) )
 	     nnext  := strings.Count( encrypted, string(checksum[pos+1]) )
 	     iAthis := strings.Index( ALPHA, string(char) )
 	     iAnext := strings.Index( ALPHA, string(checksum[pos+1]) )
+             if ( ( nthis < 1 ) || (nnext < 1 ) ) { done = true; break }
 	     if ( ( nthis > nnext ) || ( (nthis == nnext) && (iAthis < iAnext) ) ) {
 		     continue
-	     } else {
-		     done = true
-		     break
-		     //return !done
-	     }
+	     } else { done = true; break }    // is 'return !done' from here idiomatic ?
         }
     }
     return !done
@@ -89,7 +85,7 @@ func main () {
        }
     }
 
-    fmt.Printf("\n read %d lines\n\n", len(r) )
+    fmt.Printf("\n read %d lines\n", len(r) )
     fmt.Printf("\n sum of real sector id's is %d\n\n", total)
 
 }
