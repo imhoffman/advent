@@ -40,7 +40,7 @@ func reader () []string {
 func main () {
 
     r := reader()
-    for i := range r { fmt.Println( r[i] ) }
+    for _, s := range r { fmt.Println( s ) }
 
     fmt.Printf("\n read %d lines\n\n", len(r) )
 
