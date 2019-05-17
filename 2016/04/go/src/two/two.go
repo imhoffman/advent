@@ -14,7 +14,7 @@ const max_lines int = 16384
 //   https://stackoverflow.com/questions/8757389/reading-file-line-by-line-in-go
 //  OMG!  from
 //   https://golang.org/doc/effective_go.html#data
-//   Note that, unlike in C, it's perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns.
+//   "Note that, unlike in C, it's perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns."
 func reader () []string {
     var i int = 0
     temp := make( []string, max_lines )
@@ -38,10 +38,9 @@ func reader () []string {
 
 //  main program
 func main () {
-    //var Nrooms int
 
     r := reader()
-    fmt.Printf(" %v\n", r )
+    for i := range r { fmt.Println( r[i] ) }
 
     fmt.Printf("\n read %d lines\n\n", len(r) )
 
