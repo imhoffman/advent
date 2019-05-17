@@ -5,9 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
+	"strconv"
 )
 
+//  constants
 const max_lines int = 16384
+const ALPHA  string = "abcdefghijklmnopqrstuvwxyz"
+const NUMS   string = "0123456789"
 
 //  file read
 //   https://golang.org/pkg/bufio/#Scanner
@@ -36,11 +41,36 @@ func reader () []string {
 }
 
 
+// checksum ruleset
+func sumcheck ( s string ) bool {
+    var (
+	    checksum  string = s[ strings.Index(s,"[")+1:strings.Index(s,"]") ]
+	    encrypted string = s[ :strings.Index(s,"[") ]
+	    id, _ = strconv.Atoi( s[ strings.IndexAny(s,NUMS):strings.LastIndexAny(s,NUMS)+1 ] )
+	    done        bool = false
+        )
+    fmt.Printf(" entry '%v' has id %d and checksum '%v'\n", s, id, checksum )
+    for pos, char := range checksum {
+	if ( pos == len(checksum)-1 ) { break }
+	if ( !done && ( strings.Count( encrypted, checksum[len(checksum):] ) > 0 ) ) {
+	     fmt.Printf( " %v\n", ( strings.Count( encrypted, string(char) ) >= strings.Count( encrypted, string(checksum[pos+1])) ))
+        }
+    }
+    return true
+}
+
+
 //  main program
 func main () {
 
     r := reader()
-    for _, s := range r { fmt.Println( s ) }
+
+    for _, s := range r {
+       if ( sumcheck(s) ) {
+	 //fmt.Println( "Yaaaassss." )
+	 continue
+       }
+    }
 
     fmt.Printf("\n read %d lines\n\n", len(r) )
 
