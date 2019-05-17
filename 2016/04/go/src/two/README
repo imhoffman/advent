@@ -1,3 +1,13 @@
+https://golang.org/doc/install
+https://golang.org/doc/code.html
 don't forget to export the GOPATH to the go above the src
-cd ../..
-export GOPATH=`pwd`
+$ cd ../..
+$ export GOPATH=`pwd`
+that way, the following will work
+$ go build
+$ ./two     <--- enormous static executable
+and maybe even
+$ go install
+rather than simply
+$ go run two.go
+and, I'm breaking the rules by symlinking the puzzle input file
