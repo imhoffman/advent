@@ -79,7 +79,7 @@ func checker ( s string, c chan int ) {
       c <- 0
     }
     // this is not working
-    if len(c) == cap(c) { close(c) }
+    //if len(c) == cap(c) { close(c) }
     // consult
     //   https://tour.golang.org/concurrency/4
     //   https://stackoverflow.com/questions/25657207/golang-how-to-know-a-buffered-channel-is-full
@@ -92,19 +92,15 @@ func checker ( s string, c chan int ) {
 func main () {
 
     r := reader("input.txt")
-    d := make( chan int, len(r) )
+    d := make( chan int )
+    //d := make( chan int, len(r) )
 
     total := 0
     for _, s := range r {
        go checker( s, d )
+       total = total + <-d
     }
-    for i := range d { total = total + i }
-//       if ( sumcheck(s) ) {
-//	 id := get_id(s)
-//	 total = total + id
-//	 fmt.Printf(" %d %v checks out\n", id, s)
-//      }
-//    }
+    //for len(d) != cap(d) { for i := range d { total = total + i } }
 
     fmt.Printf("\n read %d lines\n", len(r) )
     fmt.Printf("\n sum of real sector id's is %d\n\n", total)
