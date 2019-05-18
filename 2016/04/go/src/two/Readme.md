@@ -3,40 +3,25 @@ GO experiments
 
 ## environment and path
 
-https://golang.org/doc/install
-https://golang.org/doc/code.html
-don't forget to export the GOPATH to the go above the src
+Unless using simply `go run two.go` at the bash prompt, the directory structure above this Readme is mandated, as described [here](https://golang.org/doc/install) and [here](https://golang.org/doc/code.html).
+To do anything besides `run`, the `GOPATH` variable needs to be set.
+From here, it is
+```
 $ cd ../..
 $ export GOPATH=`pwd`
-that way, the following will work
+```
+Once set, the following will work
+```
 $ go build
-$ ./two     <--- enormous static executable
-and maybe even
-$ go install
-rather than simply
-$ go run two.go
-and, I'm breaking the rules by symlinking the puzzle input file
+$ ./two
+```
+where `two` is an enormous static executable.
+Also, I'm breaking the rules by symlinking the puzzle input file.
 
 ## Concurrent channels
 
-```
- Performance counter stats for '/usr/local/go/bin/go run vs.go' (10 runs):
-
-        167.802179      task-clock (msec)         #    1.436 CPUs utilized            ( +-  1.76% )
-             1,456      context-switches          #    0.009 M/sec                    ( +-  0.76% )
-               154      cpu-migrations            #    0.917 K/sec                    ( +-  3.80% )
-            21,490      page-faults               #    0.128 M/sec                    ( +-  0.92% )
-       655,224,471      cycles                    #    3.905 GHz                      ( +-  1.63% )  (34.37%)
-     1,132,353,082      instructions              #    1.73  insn per cycle           ( +-  3.45% )  (54.50%)
-       214,006,006      branches                  # 1275.347 M/sec                    ( +-  3.61% )  (64.32%)
-         2,296,197      branch-misses             #    1.07% of all branches          ( +-  1.89% )  (72.54%)
-       253,611,150      L1-dcache-loads           # 1511.370 M/sec                    ( +-  2.40% )  (79.78%)
-         8,575,072      L1-dcache-load-misses     #    3.38% of all L1-dcache hits    ( +-  1.86% )  (74.86%)
-         2,105,156      LLC-loads                 #   12.545 M/sec                    ( +-  8.43% )  (41.58%)
-           943,503      LLC-load-misses           #   44.82% of all LL-cache hits     ( +- 12.81% )  (32.55%)
-
-       0.116862908 seconds time elapsed                                          ( +-  0.78% )
-```
+The `chans.go` file is me messing with getting the operations on the input file to run asynchronously.
+Very much a work in progress...
 
 ```
  Performance counter stats for '/usr/local/go/bin/go run chans.go' (10 runs):

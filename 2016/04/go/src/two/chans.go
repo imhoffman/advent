@@ -78,21 +78,27 @@ func checker ( s string, c chan int ) {
     } else {
       c <- 0
     }
+    // this is not working
+    if len(c) == cap(c) { close(c) }
+    // consult
+    //   https://tour.golang.org/concurrency/4
+    //   https://stackoverflow.com/questions/25657207/golang-how-to-know-a-buffered-channel-is-full
+    //   --- or maybe an intemediary ring buffer or handler
+    return
 }
 
 
 //  main program
 func main () {
 
-    d := make( chan int )
-
     r := reader("input.txt")
+    d := make( chan int, len(r) )
 
     total := 0
     for _, s := range r {
        go checker( s, d )
-       total = total + <-d
     }
+    for i := range d { total = total + i }
 //       if ( sumcheck(s) ) {
 //	 id := get_id(s)
 //	 total = total + id
