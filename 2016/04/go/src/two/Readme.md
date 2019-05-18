@@ -20,24 +20,27 @@ Also, I'm breaking the rules by symlinking the puzzle input file.
 
 ## Concurrent channels
 
-The `chans.go` file is me messing with getting the operations on the input file to run asynchronously.
-Very much a work in progress...
+I am trying to learn concurrency.
+The experimental code is in `chans.go`.
+My goal is to get the many different operations (e.g., `sumcheck`) on the input list to run asynchronously by making use of something like `d := make( chan int, len(r) )`.
+For the synchronous case, it performs as follows:
 
 ```
- Performance counter stats for '/usr/local/go/bin/go run chans.go' (10 runs):
+ Performance counter stats for './two' (128 runs):
 
-        167.693575      task-clock (msec)         #    1.432 CPUs utilized            ( +-  1.72% )
-             1,496      context-switches          #    0.009 M/sec                    ( +-  0.69% )
-               155      cpu-migrations            #    0.923 K/sec                    ( +-  2.94% )
-            21,289      page-faults               #    0.127 M/sec                    ( +-  0.74% )
-       667,237,620      cycles                    #    3.979 GHz                      ( +-  1.82% )  (36.23%)
-     1,185,041,808      instructions              #    1.78  insn per cycle           ( +-  4.16% )  (57.70%)
-       214,941,006      branches                  # 1281.749 M/sec                    ( +-  4.18% )  (65.79%)
-         2,283,287      branch-misses             #    1.06% of all branches          ( +-  1.94% )  (70.54%)
-       258,412,812      L1-dcache-loads           # 1540.982 M/sec                    ( +-  2.48% )  (76.53%)
-         8,447,552      L1-dcache-load-misses     #    3.27% of all L1-dcache hits    ( +-  1.92% )  (73.51%)
-         2,026,598      LLC-loads                 #   12.085 M/sec                    ( +-  4.99% )  (41.90%)
-           767,073      LLC-load-misses           #   37.85% of all LL-cache hits     ( +- 10.96% )  (35.50%)
+          1.866827      task-clock (msec)         #    1.069 CPUs utilized            ( +-  0.45% )
+                47      context-switches          #    0.025 M/sec                    ( +-  1.20% )
+                 1      cpu-migrations            #    0.703 K/sec                    ( +-  8.85% )
+               207      page-faults               #    0.111 M/sec                    ( +-  0.26% )
+         4,505,656      cycles                    #    2.414 GHz                      ( +-  2.09% )  (82.49%)
+         6,989,662      instructions              #    1.55  insn per cycle           ( +-  0.11% )
+         1,425,913      branches                  #  763.816 M/sec                    ( +-  0.10% )
+            18,717      branch-misses             #    1.31% of all branches          ( +-  0.35% )
+         1,981,941      L1-dcache-loads           # 1061.663 M/sec                    ( +-  0.13% )
+            52,586      L1-dcache-load-misses     #    2.65% of all L1-dcache hits    ( +-  0.42% )
+     <not counted>      LLC-loads                                                     (0.00%)
+     <not counted>      LLC-load-misses                                               (0.00%)
 
-       0.117095262 seconds time elapsed                                          ( +-  0.85% )
+       0.001746484 seconds time elapsed                                          ( +-  0.35% )
 ```
+
