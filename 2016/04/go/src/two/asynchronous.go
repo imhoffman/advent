@@ -1,0 +1,101 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+	"strconv"
+	"sync"
+)
+
+//  constants
+const MAX_LINES int = 16384
+const ALPHA  string = "abcdefghijklmnopqrstuvwxyz"
+const NUMS   string = "0123456789"
+
+//  file read
+//   https://golang.org/pkg/bufio/#Scanner
+//   https://stackoverflow.com/questions/8757389/reading-file-line-by-line-in-go
+//  OMG!  from
+//   https://golang.org/doc/effective_go.html#data
+//   "Note that, unlike in C, it's perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns."
+func reader ( filename string ) []string {
+    var i int = 0
+    temp := make( []string, MAX_LINES )
+
+    f, err := os.Open(filename)
+    if err != nil { log.Fatal(err) }
+    defer f.Close()
+    s := bufio.NewScanner(f)
+    for s.Scan() {
+      temp[i] = s.Text()
+      i++
+    }
+    if err := s.Err(); err != nil { log.Fatal(err) }
+
+    //  https://blog.golang.org/go-slices-usage-and-internals
+    registry := make( []string, i )   // allocate final array now that Nrooms is known
+    copy( registry, temp )            // GC should find temp soon enough
+    return registry
+}
+
+
+// sector id
+func get_id ( s string ) int {
+    id, _ := strconv.Atoi( s[ strings.IndexAny(s,NUMS):strings.LastIndexAny(s,NUMS)+1 ] )
+    return id
+}
+
+// checksum ruleset
+func sumcheck ( s string ) bool {
+    var (
+	    checksum  string = s[ strings.Index(s,"[")+1:strings.Index(s,"]") ]
+	    encrypted string = s[ :strings.IndexAny(s,NUMS)-1 ]
+	    done        bool = false
+        )
+
+    for pos, char := range checksum {
+	if ( !done && ( pos < len(checksum)-1 ) ) {
+	     nthis  := strings.Count( encrypted, string(char) )
+	     nnext  := strings.Count( encrypted, string(checksum[pos+1]) )
+	     iAthis := strings.Index( ALPHA, string(char) )
+	     iAnext := strings.Index( ALPHA, string(checksum[pos+1]) )
+             if ( ( nthis < 1 ) || (nnext < 1 ) ) { done = true; break }
+	     if ( ( nthis > nnext ) || ( (nthis == nnext) && (iAthis < iAnext) ) ) {
+		     continue
+	     } else { done = true; break }    // is 'return !done' from here idiomatic ?
+        }
+    }
+    return !done
+}
+
+
+//  distributable function
+func checker ( s string, sum *int, group *sync.WaitGroup ) {
+    if ( sumcheck (s) ) {
+      *sum = *sum + get_id(s)
+    }
+    group.Done()
+    return     // this line doesn't seem to be needed, but it keeps me sane
+}
+
+
+//  main program
+func main () {
+    var wg sync.WaitGroup
+
+    r := reader("input.txt")
+
+    total := 0
+    for _, s := range r {
+       wg.Add(1)
+       go checker( s, &total, &wg )
+    }
+    wg.Wait()                                // block until all jobs complete
+
+    fmt.Printf("\n read %d lines\n", len(r) )
+    fmt.Printf("\n sum of real sector id's is %d\n\n", total)
+
+}

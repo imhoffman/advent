@@ -71,3 +71,18 @@ FWIW, here is the asynchronous performance of `chans.go` for the same number of 
        0.001266223 seconds time elapsed                                          ( +-  1.26% )
 ```
 
+### concurrency without a channel
+
+It turns out that I don't need to use a channel for communication at all.
+The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines wrote to it from within their functions.
+That is,
+```
+func checker ( s string, sum *int, group *sync.WaitGroup )
+```
+rather than
+```
+func checker ( s string, c chan int, group *sync.WaitGroup )
+```
+In this way, I skip both the need to return a zero on the channel in the `sumcheck` if and the need to sum over the channel from main.
+The codes for synchronous channel, asynchronous channel, and no channel are `synchronous.go`, `chans.go`, and `asynchronous.go`, respectively.
+
