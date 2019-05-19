@@ -16,7 +16,7 @@ $ go build
 $ ./two
 ```
 where `two` is an enormous static executable.
-This is the executable that I use in the benchmarking below.
+This is the executable that I describe below in the performance analysis.
 Usually, I simply use `run`.
 
 BTW, I'm breaking the rules by symlinking the puzzle input file.
@@ -49,7 +49,7 @@ For the synchronous case (that is, blocking each routine in a queue for a single
        0.001347552 seconds time elapsed                                          ( +-  0.27% )
 ```
 
-I figured out asynchronous channelling! WaitGroups!
+I figured out asynchronous channelling! WaitGroup!
 FWIW, here is the asynchronous performance of `chans.go` for the same number of context switches on the same linux box (Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz).
 
 ```
@@ -74,7 +74,7 @@ FWIW, here is the asynchronous performance of `chans.go` for the same number of 
 ### concurrency without a channel
 
 It turns out that I don't need to use a channel for communication at all.
-The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines wrote to it from within their functions.
+The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines write to it from within their functions (and then `main()` must still wait on the WaitGroup).
 That is,
 ```
 func checker ( s string, sum *int, group *sync.WaitGroup )
@@ -86,3 +86,23 @@ func checker ( s string, c chan int, group *sync.WaitGroup )
 In this way, I skip both the need to return a zero on the channel in the `sumcheck` if and the need to sum over the channel from main.
 The codes for synchronous channel, asynchronous channel, and no channel are `synchronous.go`, `chans.go`, and `asynchronous.go`, respectively.
 
+The perf stats for `asynchronous.go` are
+
+```
+ Performance counter stats for './two' (128 runs):
+
+          2.177258      task-clock (msec)         #    1.847 CPUs utilized            ( +-  0.91% )
+                38      context-switches          #    0.018 M/sec                    ( +-  1.34% )
+                 5      cpu-migrations            #    0.002 M/sec                    ( +-  5.41% )
+               443      page-faults               #    0.204 M/sec                    ( +-  1.37% )
+         8,038,551      cycles                    #    3.692 GHz                      ( +-  2.01% )  (86.42%)
+         8,321,258      instructions              #    1.04  insn per cycle           ( +-  0.47% )
+         1,687,349      branches                  #  774.988 M/sec                    ( +-  0.51% )
+            18,888      branch-misses             #    1.12% of all branches          ( +-  0.62% )
+         2,337,590      L1-dcache-loads           # 1073.640 M/sec                    ( +-  0.59% )
+           133,750      L1-dcache-load-misses     #    5.72% of all L1-dcache hits    ( +-  0.55% )
+     <not counted>      LLC-loads                                                     (0.00%)
+     <not counted>      LLC-load-misses                                               (0.00%)
+
+       0.001178824 seconds time elapsed                                          ( +-  0.80% )
+```
