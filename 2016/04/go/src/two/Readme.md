@@ -28,29 +28,29 @@ The code in `chans.go` uses concurrency.
 My goal is to get the many different operations (e.g., `sumcheck`) on the input list to run asynchronously on the channel `d := make( chan int, len(r) )`.
 However, my simple solution of waiting for `len(d) == cap(d)` does not work.
 (I eventually figured it out! Keep reading!)
-For the synchronous case (that is, blocking each routine in a queue for single channel, which is basically a really tricked-out for loop), it performs as follows:
+For the synchronous case (that is, blocking each routine in a queue for a single channel `d := make( chan int )`, which is basically a really tricked-out for loop), it performs as follows:
 
 ```
  Performance counter stats for './two' (128 runs):
 
-          1.866827      task-clock (msec)         #    1.069 CPUs utilized            ( +-  0.45% )
-                47      context-switches          #    0.025 M/sec                    ( +-  1.20% )
-                 1      cpu-migrations            #    0.703 K/sec                    ( +-  8.85% )
-               207      page-faults               #    0.111 M/sec                    ( +-  0.26% )
-         4,505,656      cycles                    #    2.414 GHz                      ( +-  2.09% )  (82.49%)
-         6,989,662      instructions              #    1.55  insn per cycle           ( +-  0.11% )
-         1,425,913      branches                  #  763.816 M/sec                    ( +-  0.10% )
-            18,717      branch-misses             #    1.31% of all branches          ( +-  0.35% )
-         1,981,941      L1-dcache-loads           # 1061.663 M/sec                    ( +-  0.13% )
-            52,586      L1-dcache-load-misses     #    2.65% of all L1-dcache hits    ( +-  0.42% )
+          1.408241      task-clock (msec)         #    1.045 CPUs utilized            ( +-  0.36% )
+                38      context-switches          #    0.027 M/sec                    ( +-  1.22% )
+                 2      cpu-migrations            #    0.001 M/sec                    ( +-  7.13% )
+               206      page-faults               #    0.147 M/sec                    ( +-  0.25% )
+         4,573,914      cycles                    #    3.248 GHz                      ( +-  1.21% )  (87.64%)
+         6,908,291      instructions              #    1.51  insn per cycle           ( +-  0.10% )
+         1,410,601      branches                  # 1001.676 M/sec                    ( +-  0.09% )
+            18,243      branch-misses             #    1.29% of all branches          ( +-  0.33% )
+         1,953,974      L1-dcache-loads           # 1387.528 M/sec                    ( +-  0.12% )
+            51,125      L1-dcache-load-misses     #    2.62% of all L1-dcache hits    ( +-  0.41% )
      <not counted>      LLC-loads                                                     (0.00%)
      <not counted>      LLC-load-misses                                               (0.00%)
 
-       0.001746484 seconds time elapsed                                          ( +-  0.35% )
+       0.001347552 seconds time elapsed                                          ( +-  0.27% )
 ```
 
 I figured out asynchronous channelling! WaitGroups!
-FWIW, here is the asynchronous performance of `chans.go` on the same linux Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz.
+FWIW, here is the asynchronous performance of `chans.go` for the same number of context switches on the same linux box (Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz).
 
 ```
  Performance counter stats for './two' (128 runs):
