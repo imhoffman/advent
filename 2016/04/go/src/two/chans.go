@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"strconv"
+	"sync"
 )
 
 //  constants
@@ -72,35 +73,31 @@ func sumcheck ( s string ) bool {
 
 
 //  channelized distributable function
-func checker ( s string, c chan int ) {
+func checker ( s string, c chan int, group *sync.WaitGroup ) {
     if ( sumcheck (s) ) {
       c <- get_id(s)
     } else {
       c <- 0
     }
-    // this is not working
-    //if len(c) == cap(c) { close(c) }
-    // consult
-    //   https://tour.golang.org/concurrency/4
-    //   https://stackoverflow.com/questions/25657207/golang-how-to-know-a-buffered-channel-is-full
-    //   --- or maybe an intemediary ring buffer or handler
-    return
+    group.Done()
+    //return
 }
 
 
 //  main program
 func main () {
+   var wg sync.WaitGroup
 
     r := reader("input.txt")
-    d := make( chan int )
-    //d := make( chan int, len(r) )
+    d := make( chan int, len(r) )
 
     total := 0
     for _, s := range r {
-       go checker( s, d )
-       total = total + <-d
+       wg.Add(1)
+       go checker( s, d, &wg )
     }
-    //for len(d) != cap(d) { for i := range d { total = total + i } }
+    wg.Wait()                                // block until all jobs complete
+    for len(d) != 0 { total = total + <-d }  // MPI_SUM  :)
 
     fmt.Printf("\n read %d lines\n", len(r) )
     fmt.Printf("\n sum of real sector id's is %d\n\n", total)
