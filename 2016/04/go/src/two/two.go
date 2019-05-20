@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"strconv"
+	"sync"
 )
 
 //  constants
@@ -20,11 +21,11 @@ const NUMS   string = "0123456789"
 //  OMG!  from
 //   https://golang.org/doc/effective_go.html#data
 //   "Note that, unlike in C, it's perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns."
-func reader () []string {
+func reader ( filename string ) []string {
     var i int = 0
     temp := make( []string, MAX_LINES )
 
-    f, err := os.Open("input.txt")
+    f, err := os.Open(filename)
     if err != nil { log.Fatal(err) }
     defer f.Close()
     s := bufio.NewScanner(f)
@@ -70,22 +71,58 @@ func sumcheck ( s string ) bool {
     return !done
 }
 
+//  decryption
+//   use func Map(mapping func(rune) rune, s string) string
+//   https://golang.org/pkg/strings/
+func key ( ch byte, rot int ) byte {
+	var newi int = -1
+	if ch == '-' { return ' ' }
+	if rot + strings.Index( ALPHA, string(ch) ) > len(ALPHA) - 1 {
+		newi = rot + strings.Index( ALPHA, string(ch) ) - len(ALPHA)
+	} else {
+		newi = rot + strings.Index( ALPHA, string(ch) )
+	}
+	return ALPHA[newi]
+}
+
+func decrypt ( s string ) string {
+    var (
+	    encrypted string = s[ :strings.IndexAny(s,NUMS)-1 ]
+	    rotate       int = get_id(s) % len(ALPHA)
+        )
+
+    decrypted := make ( []byte, len(encrypted) )
+
+    for pos, char := range encrypted {
+	    decrypted[pos] = encrypted[pos]
+    }
+    return string( decrypted )
+}
+
+
+//  distributable function
+func job ( s string, sum *int, group *sync.WaitGroup ) {
+    if ( sumcheck (s) ) {
+      *sum = *sum + get_id(s)
+    }
+    group.Done()
+    return     // this line doesn't seem to be needed, but it keeps me sane
+}
+
 
 //  main program
 func main () {
+    var wg sync.WaitGroup
 
-    r := reader()
+    r := reader("input.txt")
 
     total := 0
     for _, s := range r {
-       if ( sumcheck(s) ) {
-	 id := get_id(s)
-	 total = total + id
-	 fmt.Printf(" %d %v checks out\n", id, s)
-       }
+       wg.Add(1)
+       go job( s, &total, &wg )
     }
+    wg.Wait()                                // block until all jobs complete
 
-    fmt.Printf("\n read %d lines\n", len(r) )
     fmt.Printf("\n sum of real sector id's is %d\n\n", total)
 
 }
