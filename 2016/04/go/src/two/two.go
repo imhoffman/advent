@@ -72,17 +72,17 @@ func sumcheck ( s string ) bool {
 }
 
 //  decryption
-//   use func Map(mapping func(rune) rune, s string) string
-//   https://golang.org/pkg/strings/
-func key ( ch byte, rot int ) byte {
-	var newi int = -1
-	if ch == '-' { return ' ' }
-	if rot + strings.Index( ALPHA, string(ch) ) > len(ALPHA) - 1 {
-		newi = rot + strings.Index( ALPHA, string(ch) ) - len(ALPHA)
-	} else {
-		newi = rot + strings.Index( ALPHA, string(ch) )
-	}
-	return ALPHA[newi]
+//   instead use func Map(mapping func(rune) rune, s string) string  ??
+//   see https://golang.org/pkg/strings/
+func caesar ( ch rune, rot int ) byte {
+    var newi int = -1
+    if ch == '-' { return ' ' }
+    if rot + strings.Index( ALPHA, string(ch) ) > len(ALPHA) - 1 {
+        newi = rot + strings.Index( ALPHA, string(ch) ) - len(ALPHA)
+    } else {
+        newi = rot + strings.Index( ALPHA, string(ch) )
+    }
+    return ALPHA[newi]
 }
 
 func decrypt ( s string ) string {
@@ -90,11 +90,9 @@ func decrypt ( s string ) string {
 	    encrypted string = s[ :strings.IndexAny(s,NUMS)-1 ]
 	    rotate       int = get_id(s) % len(ALPHA)
         )
-
     decrypted := make ( []byte, len(encrypted) )
-
     for pos, char := range encrypted {
-	    decrypted[pos] = encrypted[pos]
+	    decrypted[pos] = caesar( char, rotate )
     }
     return string( decrypted )
 }
@@ -103,7 +101,9 @@ func decrypt ( s string ) string {
 //  distributable function
 func job ( s string, sum *int, group *sync.WaitGroup ) {
     if ( sumcheck (s) ) {
-      *sum = *sum + get_id(s)
+      id := get_id(s)
+      *sum = *sum + id
+      fmt.Printf("%4d %s\n", id, decrypt(s) )
     }
     group.Done()
     return     // this line doesn't seem to be needed, but it keeps me sane
