@@ -5,10 +5,9 @@ Go experiments
 
 I have a working solution in [`two.go`](two.go).
 
-Something is fishy about my "other" asynchronous solution in [`race.go`](race.go), that I am assuming is a race condition that I do not yet appreciate.
-The code always retruns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my linux desktop (go version go1.12.5 linux/amd64).
+My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described at the bottom of the Readme).
+The code always retruns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
 Even if I compile the binary on my chromebook and run that binary on my desktop, the problem persists.
-I'm not yet sure what's going on.
 
 ## environment and path
 
@@ -82,8 +81,12 @@ FWIW, here is the asynchronous performance of `chans.go` for the same number of 
 
 ### concurrency without a channel
 
-It turns out that I don't need to use a channel for communication at all.
-The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines write to it from within their functions (and then `main()` must still wait on the WaitGroup).
+~~It turns out that I don't need to use a channel for communication at all.
+The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines write to it from within their functions (and then `main()` must still wait on the WaitGroup).~~
+(False: All of the goroutines writing to the same pointer is indeed a race.
+A similar problem is described [at the golang site](https://blog.golang.org/race-detector).
+By using the `-race` flag, the problem is caught.
+My final solution uses the WaitGroup and a loop through the buffered channel; perhaps there is a better way, like pushing and popping the jobs out of a ring pool or something...)
 That is,
 ```
 func checker ( s string, sum *int, group *sync.WaitGroup )
