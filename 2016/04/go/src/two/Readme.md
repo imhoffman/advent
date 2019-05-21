@@ -6,7 +6,7 @@ Go experiments
 I have a working solution in [`two.go`](two.go).
 
 My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described later in this Readme under *concurrency without a channel*).
-The code always retruns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
+The bade race code always returns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
 Even if I compile the binary on my chromebook and run that binary on my desktop, the problem persists.
 
 ## environment and path
@@ -27,7 +27,7 @@ where `two` is an enormous static executable.
 This is the executable that I describe below in the performance analysis.
 Usually, I simply use `run`.
 
-BTW, I'm breaking the rules by symlinking the puzzle input file.
+BTW, [I'm breaking the rules](https://golang.org/doc/code.html#Workspaces) by symlinking the puzzle input file into my workspace.
 
 ## concurrent channels
 
@@ -88,19 +88,20 @@ A similar problem is described [in Example 1 at the golang site](https://blog.go
 By using the `-race` flag, the problem is empirically detected.
 My final solution uses a WaitGroup followed by a receiver loop through the buffered channel values until the channel is empty; perhaps there is a better way, like pushing and popping the jobs out of a ring pool or something...)
 
-That is,
+~~That is,~~ (this one is racy)
 ```go
 func checker ( s string, sum *int, group *sync.WaitGroup )
 ```
-rather than
+~~rather than~~ (this one is not)
 ```go
 func checker ( s string, c chan int, group *sync.WaitGroup )
 ```
 ~~In this way, I skip both the need to return a zero on the channel in the `sumcheck` if and the need to sum over the channel from main.~~
 (Again, false: goroutines cannot handle a race for a single address.
-I could add a separate, dedicated semafore channel [like on the Tour](https://tour.golang.org/concurrency/5) simply to report completion, but that introduces a thousand&mdash;one per job&mdash;seemingly unnecessary `select`s and comparisons.
+I could add a separate, dedicated semaphore channel [like on the Tour](https://tour.golang.org/concurrency/5) simply to report completion, but that introduces a thousand&mdash;one per job&mdash;seemingly unnecessary `select`s and comparisons.
 It seems like WaitGroup is better for this application...but I don't know how WaitGroup is signalling and testing...
-At any rate, this race bug in my code is "Nasty!" because the program runs without error or panic, yet returns an incorrect value.)
+At any rate, this race bug in my code is "Nasty!" because the program runs without error or panic, yet returns an incorrect value.
+The bad code even runs faster, which I guess is what you are supposed to do in a race.)
 
 The codes for synchronous channel, asynchronous channel, and no channel are `synchronous.go`, `chans.go`, and `asynchronous.go`, respectively.
 
