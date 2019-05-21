@@ -5,7 +5,7 @@ Go experiments
 
 I have a working solution in [`two.go`](two.go).
 
-My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described later on this Readme in ).
+My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described later in this Readme under *concurrency without a channel*).
 The code always retruns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
 Even if I compile the binary on my chromebook and run that binary on my desktop, the problem persists.
 
@@ -85,8 +85,8 @@ FWIW, here is the asynchronous performance of `chans.go` for the same number of 
 The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines write to it from within their functions (and then `main()` must still wait on the WaitGroup).~~
 (False: All of the goroutines writing to the same pointer is indeed a race.
 A similar problem is described [in Example 1 at the golang site](https://blog.golang.org/race-detector).
-By using the `-race` flag, the problem is caught.
-My final solution uses the WaitGroup and a loop through the buffered channel; perhaps there is a better way, like pushing and popping the jobs out of a ring pool or something...)
+By using the `-race` flag, the problem is empirically detected.
+My final solution uses a WaitGroup followed by a receiver loop through the buffered channel values until the channel is empty; perhaps there is a better way, like pushing and popping the jobs out of a ring pool or something...)
 
 That is,
 ```go
