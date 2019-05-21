@@ -5,7 +5,7 @@ Go experiments
 
 I have a working solution in [`two.go`](two.go).
 
-My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described at the bottom of the Readme).
+My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described later on this Readme in ).
 The code always retruns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
 Even if I compile the binary on my chromebook and run that binary on my desktop, the problem persists.
 
@@ -14,12 +14,12 @@ Even if I compile the binary on my chromebook and run that binary on my desktop,
 Unless using simply `go run two.go` at the bash prompt, the directory structure above this Readme is mandated, as described [here](https://golang.org/doc/install) and [here](https://golang.org/doc/code.html).
 The `GOPATH` variable needs to be set.
 From this directory, it is
-```
+```bash
 $ cd ../..
 $ export GOPATH=`pwd`
 ```
 Once set, the following will work
-```
+```bash
 $ go build
 $ ./two
 ```
@@ -79,23 +79,29 @@ FWIW, here is the asynchronous performance of `chans.go` for the same number of 
        0.001266223 seconds time elapsed                                          ( +-  1.26% )
 ```
 
-### concurrency without a channel
+### concurrency without a channel (update: nope)
 
 ~~It turns out that I don't need to use a channel for communication at all.
 The `go` routine handler is smart enough to manage multiple writes to the same variable, so I simply passed the address of the variable that would hold the sum and all of the routines write to it from within their functions (and then `main()` must still wait on the WaitGroup).~~
 (False: All of the goroutines writing to the same pointer is indeed a race.
-A similar problem is described [at the golang site](https://blog.golang.org/race-detector).
+A similar problem is described [in Example 1 at the golang site](https://blog.golang.org/race-detector).
 By using the `-race` flag, the problem is caught.
 My final solution uses the WaitGroup and a loop through the buffered channel; perhaps there is a better way, like pushing and popping the jobs out of a ring pool or something...)
+
 That is,
-```
+```go
 func checker ( s string, sum *int, group *sync.WaitGroup )
 ```
 rather than
-```
+```go
 func checker ( s string, c chan int, group *sync.WaitGroup )
 ```
-In this way, I skip both the need to return a zero on the channel in the `sumcheck` if and the need to sum over the channel from main.
+~~In this way, I skip both the need to return a zero on the channel in the `sumcheck` if and the need to sum over the channel from main.~~
+(Again, false: goroutines cannot handle a race for a single address.
+I could add a separate, dedicated semafore channel [like on the Tour](https://tour.golang.org/concurrency/5) simply to report completion, but that introduces a thousand&mdash;one per job&mdash;seemingly unnecessary `select`s and comparisons.
+It seems like WaitGroup is better for this application...but I don't know how WaitGroup is signalling and testing...
+At any rate, this race bug in my code is "Nasty!" because the program runs without error or panic, yet returns an incorrect value.)
+
 The codes for synchronous channel, asynchronous channel, and no channel are `synchronous.go`, `chans.go`, and `asynchronous.go`, respectively.
 
 The perf stats for `asynchronous.go` are
