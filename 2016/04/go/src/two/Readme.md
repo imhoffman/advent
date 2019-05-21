@@ -3,8 +3,10 @@ Go experiments
 
 ## puzzle solution
 
-Something is fishy about my "final" asynchronous solution in [`two.go`](two.go).
-The code always retruns the correct answer when run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sector sum when run on my linux desktop (go version go1.12.5 linux/amd64).
+I have a working solution in [`two.go`](two.go).
+
+Something is fishy about my "other" asynchronous solution in [`race.go`](race.go), that I am assuming is a race condition that I do not yet appreciate.
+The code always retruns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my linux desktop (go version go1.12.5 linux/amd64).
 Even if I compile the binary on my chromebook and run that binary on my desktop, the problem persists.
 I'm not yet sure what's going on.
 

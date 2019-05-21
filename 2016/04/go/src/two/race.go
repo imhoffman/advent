@@ -99,12 +99,12 @@ func decrypt ( s string ) string {
 
 
 //  distributable function
-func job ( s string, c chan int, group *sync.WaitGroup ) {
+func job ( s string, sum *int, group *sync.WaitGroup ) {
     if ( sumcheck (s) ) {
       id := get_id(s)
-      c <- id
+      *sum = *sum + id
       fmt.Printf("%4d %s\n", id, decrypt(s) )
-    } else { c <- 0 }
+    }
     group.Done()
     return     // this line doesn't seem to be needed, but it keeps me sane
 }
@@ -115,17 +115,14 @@ func main () {
     var wg sync.WaitGroup
 
     r := reader("input.txt")
-    d := make( chan int, len(r) )
 
+    total := 0
     for _, s := range r {
        wg.Add(1)
-       go job( s, d, &wg )
+       go job( s, &total, &wg )
     }
     wg.Wait()                                // block until all jobs complete
 
-    // anonymous function to return the sum :)
-    fmt.Printf(
-        "\n sum of real sector id's is %d\n\n",
-        func( c chan int ) int { var i int = 0; for len(c) != 0 { i = i + <-c }; return i; }(d) )
+    fmt.Printf("\n sum of real sector id's is %d\n\n", total)
 
 }
