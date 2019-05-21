@@ -6,7 +6,7 @@ Go experiments
 I have a working solution in [`two.go`](two.go).
 
 My first asynchronous solution is [`race.go`](race.go) which exhibited an interesting failure owing to a race condition that I eventually found (as described later in this Readme under *concurrency without a channel*).
-The bade race code always returns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
+The bad race code always returns the correct answer for the sum of the sector id's when it is run on my chromebook (chromebrew go version go1.12 linux/amd64) but almost always returns a value that is slightly too low for the sum when run on my much faster linux desktop (go version go1.12.5 linux/amd64).
 Even if I compile the binary on my chromebook and run that binary on my desktop, the problem persists.
 
 ## environment and path
