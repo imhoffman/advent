@@ -11,7 +11,7 @@ class C:
 #  typedefs
 #
 class listing:
-  Nrooms = 0
+  Nrooms = 0              # instance counter
 
   def __init__(self, s):
     self.s = s
