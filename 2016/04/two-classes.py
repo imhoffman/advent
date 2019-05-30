@@ -11,8 +11,11 @@ class C:
 #  typedefs
 #
 class listing:
+  Nrooms = 0
+
   def __init__(self, s):
     self.s = s
+    listing.Nrooms += 1
 
   def checksum ( self ) :
     x = self.s
@@ -82,4 +85,6 @@ with open("input.txt") as fo:
     for x in registry if x.sumcheck() ]
 
 print( f"\n total of real sector ids = {sum( [ x.sector_id() for x in registry if x.sumcheck() ] ):d}\n" )
+
+print( f" read {listing.Nrooms:d} lines from the input file\n" )
 
