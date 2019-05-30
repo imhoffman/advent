@@ -25,6 +25,7 @@ class listing:
     x = self.s
     return x[ :x.index('[')-3 ] 
 
+  # checksum ruleset
   def sumcheck ( self ):
       a = self.encrypted()
       b = self.checksum()
@@ -41,6 +42,7 @@ class listing:
           else: return False
       return True
 
+  # find and parse int id value
   def sector_id ( self ) :
     nums = [ ch.isdigit() for ch in self.s ]
     sub = ""
@@ -71,7 +73,6 @@ def caesar ( r ):     # accepts a two-item list
 registry = []
 
 # read file and populate registry with listing objects
-n = 0
 with open("input.txt") as fo:
  while True:
   line = fo.readline()
