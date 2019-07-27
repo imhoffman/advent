@@ -10,12 +10,16 @@
   (with-open [f (clojure.java.io/reader "input.txt")]
     (reduce conj () (line-seq f))))
 
-(println (count registry))
+;(println (count registry))
 
-(def total 0)
+;;  using `reduce` rather than a list comprehension allows the use of `reduced` to bail out
+;;  rather than testing a mutable in a `while` or using a CL-like `return-from`
+;;  and, `reduce` seems to send in two arguments, so I'm catching both `a` and `b` but only using `b`
+(defn first-digit [s]
+  (reduce (fn [a b] (if (> (or (str/index-of (constants :nums) b) -2) -1) (reduced (str/index-of s b)))) s))
 
-(doseq [s registry]
-  (doseq [a s]
-    (
+(defn last-digit [s]
+  (reduce (fn [a b] (if (> (or (str/index-of (constants :nums) b) -2) -1) (reduced (str/last-index-of s b (- (count s) 1))))) (reverse s)))
 
-(doseq [s strg] (if (> (or (str/index-of nums s) -2) -1) (do (def id (Integer/parseInt (str s))) (println id))))
+(defn get-id [s] (Integer/parseInt (subs s (first-digit s) (+ 1 (last-digit s)))))
+
