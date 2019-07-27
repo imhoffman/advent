@@ -34,7 +34,7 @@
 (defn get-id [s] (Integer/parseInt (subs s (first-digit s) (+ 1 (last-digit s)))))
 
 ;;
-;; substring retrievals utilities
+;; substring retrieval utilities
 ;;
 (defn get-checksum [s]
   (subs s
@@ -48,20 +48,33 @@
 ;; checksum verification
 ;;
 ;;  the ruleset
-(defn ruleset [checksum freqs strng]
-  true)
+(defn ruleset [checksum freqs]
+  (reduce
+    (fn [a b]
+      (if (or
+            (< (get freqs a) (get freqs b))
+            (and (= (get freqs a) (get freqs b))
+                 (> (str/index-of (constants :alpha) a)
+                    (str/index-of (constants :alpha) b))))
+       (reduced false)
+       (reduced true)))   ;; this is a placeholder---too many successes
+    (seq checksum)))
 
 ;; parser and impossibility filter
 ;;  https://clojuredocs.org/clojure.core/frequencies
 (defn sumcheck [s]
   (let [checksum (get-checksum s)
-        strng    (encrypted s)
-        freqs    (frequencies strng)]
+        freqs    (frequencies (encrypted s))]
   (if
    (and
     (reduce (fn [a b] (and a b)) (for [c (seq checksum)] (contains? freqs c)))
-    (ruleset checksum freqs strng))
+    (ruleset checksum freqs))  ;; proceed since all letters are present
    true false)))
 
 
+;;
+;;  main program
+;;
+(println " Total = "
+ (reduce + (for [s registry] (if (sumcheck s) (get-id s) 0))))
 
