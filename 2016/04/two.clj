@@ -49,16 +49,27 @@
 ;;
 ;;  the ruleset
 (defn ruleset [checksum freqs]
-  (reduce
-    (fn [a b]
-      (if (or
-            (< (get freqs a) (get freqs b))
+  (let [ra (seq (subs checksum 0 (- (count checksum) 1)))
+        rb (seq (subs checksum 1))]
+  (every? true?
+    (for [a ra b rb]
+       (if (or
+            (> (get freqs a) (get freqs b))
             (and (= (get freqs a) (get freqs b))
-                 (> (str/index-of (constants :alpha) a)
+                 (< (str/index-of (constants :alpha) a)
                     (str/index-of (constants :alpha) b))))
-       (reduced false)
-       (reduced true)))   ;; this is a placeholder---too many successes
-    (seq checksum)))
+        true false)))))
+
+;  (reduce
+;    (fn [a b]
+;      (if (or
+;            (< (get freqs a) (get freqs b))
+;            (and (= (get freqs a) (get freqs b))
+;                 (> (str/index-of (constants :alpha) a)
+;                    (str/index-of (constants :alpha) b))))
+;       (reduced false)
+;       (reduced true)))
+;    (seq checksum)))
 
 ;; parser and impossibility filter
 ;;  https://clojuredocs.org/clojure.core/frequencies
@@ -75,6 +86,7 @@
 ;;
 ;;  main program
 ;;
+(doseq [s registry] (println (sumcheck s) s))
 (println " Total = "
  (reduce + (for [s registry] (if (sumcheck s) (get-id s) 0))))
 
