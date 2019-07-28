@@ -10,7 +10,6 @@
 (def registry
   (with-open [f (clojure.java.io/reader "input.txt")]
     (reduce conj () (line-seq f))))
-
 ;(println (count registry))
 
 ;;  using `reduce` rather than a list comprehension allows the use of `reduced` to bail out
@@ -48,28 +47,20 @@
 ;; checksum verification
 ;;
 ;;  the ruleset
+;;   zipping up the comparison pairs is `map vector` ... as per
+;;   https://stackoverflow.com/questions/2588227/is-there-an-equivalent-for-the-zip-function-in-clojure-core-or-contrib
 (defn ruleset [checksum freqs]
   (let [ra (seq (subs checksum 0 (- (count checksum) 1)))
-        rb (seq (subs checksum 1))]
+        rb (seq (subs checksum 1))
+        rp (map vector ra rb)]
   (every? true?
-    (for [a ra b rb]
+    (for [p rp] (let [a (first p) b (last p) fa (get freqs a) fb (get freqs b)]
        (if (or
-            (> (get freqs a) (get freqs b))
-            (and (= (get freqs a) (get freqs b))
+            (> fa fb)
+            (and (= fa fb)
                  (< (str/index-of (constants :alpha) a)
                     (str/index-of (constants :alpha) b))))
-        true false)))))
-
-;  (reduce
-;    (fn [a b]
-;      (if (or
-;            (< (get freqs a) (get freqs b))
-;            (and (= (get freqs a) (get freqs b))
-;                 (> (str/index-of (constants :alpha) a)
-;                    (str/index-of (constants :alpha) b))))
-;       (reduced false)
-;       (reduced true)))
-;    (seq checksum)))
+        true false))))))
 
 ;; parser and impossibility filter
 ;;  https://clojuredocs.org/clojure.core/frequencies
@@ -86,7 +77,7 @@
 ;;
 ;;  main program
 ;;
-(doseq [s registry] (println (sumcheck s) s))
+;(doseq [s registry] (println (sumcheck s) s))
 (println " Total = "
  (reduce + (for [s registry] (if (sumcheck s) (get-id s) 0))))
 
