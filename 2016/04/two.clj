@@ -6,12 +6,6 @@
    :nums "0123456789",
    } )
 
-;;  https://clojuredocs.org/clojure.core/line-seq
-(def registry
-  (with-open [f (clojure.java.io/reader "input.txt")]
-    (reduce conj () (line-seq f))))
-;(println (count registry))
-
 ;;  using `reduce` rather than a list comprehension allows the use of `reduced` to bail out
 ;;  rather than testing a mutable in a `while` or using a CL-like `return-from`
 ;;  and, `reduce` seems to send in two arguments, so I'm catching both `a` and `b` but only using `b`
@@ -77,7 +71,16 @@
 ;;
 ;;  main program
 ;;
+
+;;  https://clojuredocs.org/clojure.core/line-seq
+(def registry
+  (with-open [f (clojure.java.io/reader "input.txt")]
+    (reduce conj () (line-seq f))))
+
+;(println (count registry))
+
 ;(doseq [s registry] (println (sumcheck s) s))
+
 (println " Total = "
  (reduce + (for [s registry] (if (sumcheck s) (get-id s) 0))))
 
