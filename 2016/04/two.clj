@@ -27,7 +27,7 @@
 (defn get-id [s] (Integer/parseInt (subs s (first-digit s) (+ 1 (last-digit s)))))
 
 ;;
-;; substring retrieval utilities
+;; checksum verification
 ;;
 (defn get-checksum [s]
   (subs s
@@ -37,9 +37,6 @@
 (defn encrypted [s]
   (subs s 0 (- (first-digit s) 1)))
 
-;;
-;; checksum verification
-;;
 ;;  the ruleset
 ;;   zipping up the comparison pairs is `map vector` ... as per
 ;;   https://stackoverflow.com/questions/2588227/is-there-an-equivalent-for-the-zip-function-in-clojure-core-or-contrib
@@ -66,6 +63,24 @@
     (ruleset checksum freqs))  ; proceed since all letters are present
    true false)))
 
+;;
+;;  decryption
+;;
+(defn caesar [c id]
+  (let [nlet (count (constants :alpha))
+        rot  (mod id nlet)]
+  (if (= c \-)
+    \space
+    (let [i    (str/index-of (constants :alpha) c)
+          tot  (+ i rot)]
+    (if (> tot (- nlet 1))
+      (subs (constants :alpha) (- tot nlet) (+ 1 (- tot nlet )))
+      (subs (constants :alpha) tot (+ 1 tot)))))))
+
+(defn decrypt [s]
+  (let [id (get-id s)]
+  (str/join (for [a (seq (encrypted s))] (caesar a id)))))
+
 
 ;;
 ;;  main program
@@ -78,9 +93,10 @@
     (reduce conj () (line-seq f))))
 ;(println (count registry))
 
-;(doseq [s registry] (println (sumcheck s) s))
+;;  print all decrypted names ... add a sumcheck to filter decoys
+(doseq [s registry] (println (get-id s) (decrypt s)))
 
-;; part one sum
+;;  part one sum
 (println " Total = "
  (reduce + (for [s registry] (if (sumcheck s) (get-id s) 0))))
 
