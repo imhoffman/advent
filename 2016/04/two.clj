@@ -41,6 +41,7 @@
 ;;   zipping up the comparison pairs is `map vector` ... as per
 ;;   https://stackoverflow.com/questions/2588227/is-there-an-equivalent-for-the-zip-function-in-clojure-core-or-contrib
 ;;   the `every` test here and in `sumcheck` could be short-circuited with a `reduce`--`reduced` pair
+;;   `and` is lazy, but why doesn't this compile ?  `(apply and true '(true false))`
 (defn ruleset [checksum freqs]
   (let [ra (seq (subs checksum 0 (- (count checksum) 1)))
         rb (seq (subs checksum 1))
@@ -80,6 +81,7 @@
 
 (defn decrypt [s]
   (let [id (get-id s)]
+  ;(apply str (for [a (seq (encrypted s))] (caesar a id)))))    ; this works too
   (str/join (for [a (seq (encrypted s))] (caesar a id)))))
 
 ;;
