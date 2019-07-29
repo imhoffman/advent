@@ -37,7 +37,7 @@
 (defn encrypted [s]
   (subs s 0 (- (first-digit s) 1)))
 
-;;  the ruleset
+;;  checksum ruleset
 ;;   zipping up the comparison pairs is `map vector` ... as per
 ;;   https://stackoverflow.com/questions/2588227/is-there-an-equivalent-for-the-zip-function-in-clojure-core-or-contrib
 ;;   the `every` test here and in `sumcheck` could be short-circuited with a `reduce`--`reduced` pair
@@ -66,6 +66,7 @@
 ;;
 ;;  decryption
 ;;
+;;   ruleset
 (defn caesar [c id]
   (let [nlet (count (constants :alpha))
         rot  (mod id nlet)]
@@ -81,20 +82,20 @@
   (let [id (get-id s)]
   (str/join (for [a (seq (encrypted s))] (caesar a id)))))
 
-
 ;;
 ;;  main program
 ;;
-
-;;  file I/O
-;;  https://clojuredocs.org/clojure.core/line-seq
+;;   file I/O
+;;   https://clojuredocs.org/clojure.core/line-seq
 (def registry
   (with-open [f (clojure.java.io/reader "input.txt")]
     (reduce conj () (line-seq f))))
 ;(println (count registry))
 
-;;  print all decrypted names ... add a sumcheck to filter decoys
-(doseq [s registry] (println (get-id s) (decrypt s)))
+;;  part two: print all decrypted names ... or filter with sumcheck
+;(doseq [s registry] (println (get-id s) (decrypt s)))
+;(doseq [s registry] (if (not (sumcheck s)) (println (get-id s) (decrypt s))))
+(doseq [s registry] (if (sumcheck s) (println (get-id s) (decrypt s))))
 
 ;;  part one sum
 (println " Total = "
