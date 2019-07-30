@@ -22,27 +22,27 @@
 (defn numb [s] (Integer/parseInt (apply str (rest s))))
 
 ;;  part two ruleset
+;;   for zipping up ordered pairs
+(defn zipper [d]
+  (let [xr (sort (list (get d 0) (get d 2)))   ; `sort` the endpoitns for zip `range`
+        yr (sort (list (get d 1) (get d 3)))]
+  (if (= (first xr) (last xr))    ; an x move or a y move ?
+    (map vector
+         (for [a (range (+ 1 (- (last yr) (first yr))))] (conj () (first xr)))
+         (for [a (range (first yr) (+ 1 (last yr)))] (conj () a)))
+    (map vector                   ; must be an x move; hold y constant
+         (for [a (range (first xr) (+ 1 (last xr)))] (conj () a))
+         (for [a (range (+ 1 (- (last xr) (first xr))))] (conj () (first yr)))))))
+
 ;;   not necessarily a stop ... can be merely retreading
-(defn revisited? [loc pv]
-  (let [x (get loc 2)   ; redo for four vec ... zip up all of the traversed points and compare
-        y (get loc 3)]
-    (println "called with x,y:" x y)
-    (doseq [p pv]
-      (let [xi (get p 0)
-            xf (get p 2)
-            yi (get p 1)
-            yf (get p 3)]
-      (println " checking"xi"--"x"--"xf" and "yi"--"y"--"yf)))
-  (some true?
+(defn get-revisit [loc pv]
+  ; determine the points touched on the current leg ...
+  (let [xyzip (zipper loc)]
+  ; ... and compare them to the points touched on previous legs
+  ((fn [a] (print a) (if a (println "yes") (println "no")))
     (for [p pv]
-      (let [xi (get p 0)
-            xf (get p 2)
-            yi (get p 1)
-            yf (get p 3)]
-      (if (and (if (> xf xi) (and (>= x xi) (<= x xf)) (and (<= x xi) (>= x xf)))
-               (if (> yf yi) (and (>= y yi) (<= y yf)) (and (<= y yi) (>= y yf))))
-        true
-        false))))))
+    (let [pxyzip (zipper p)]
+      ((fn [n] (if n n)) (for [b xyzip c pxyzip] ((fn [m] (if m m)) (if (= b c) b false)))))))))
 
 (defn two [v]
   (loop [i  0    ; vector element
@@ -51,8 +51,9 @@
          b  0    ; North 0, West 1, South 2, East 3
          pv [[0 0 0 0]] ] ; history of traversals [oldx oldy newx newy]
     (if (= i (count v)) (println "got to end of directions vector :("))
-    (if (revisited? (last pv) (drop-last pv))
-      (+ x y)
+    (let [ans (get-revisit (last pv) (drop-last pv))]
+    (if ans
+      ans    ; will need to add the two components once the return starts working
       (let [d (get v i)]
        (if (= (first d) \L)
          (if (= b 0) (let [x2 (- x (numb d)) y2 y] (recur (inc i) x2 y2 1 (conj pv [x y x2 y2])))
@@ -63,7 +64,7 @@
          (if (= b 0) (let [x2 (+ x (numb d)) y2 y] (recur (inc i) x2 y2 3 (conj pv [x y x2 y2])))
          (if (= b 1) (let [x2 x y2 (+ y (numb d))] (recur (inc i) x2 y2 0 (conj pv [x y x2 y2])))
          (if (= b 2) (let [x2 (- x (numb d)) y2 y] (recur (inc i) x2 y2 1 (conj pv [x y x2 y2])))
-         (if (= b 3) (let [x2 x y2 (- y (numb d))] (recur (inc i) x2 y2 2 (conj pv [x y x2 y2]))))))))))))
+         (if (= b 3) (let [x2 x y2 (- y (numb d))] (recur (inc i) x2 y2 2 (conj pv [x y x2 y2])))))))))))))
 
 (println "distance to location is" (two dirvec))
 
