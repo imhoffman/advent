@@ -34,15 +34,20 @@
          (for [a (range (first xr) (+ 1 (last xr)))] (conj () a))
          (for [a (range (+ 1 (- (last xr) (first xr))))] (conj () (first yr)))))))
 
-;;   not necessarily a stop ... can be merely retreading
+;;   not necessarily an intersection with a turn ... can be merely retreading
 (defn get-revisit [loc pv]
   ; determine the points touched on the current leg ...
   (let [xyzip (zipper loc)]
   ; ... and compare them to the points touched on previous legs
-  ((fn [a] (print a) (if a (println "yes") (println "no")))
+  ;(reduce (fn [g h] (if h (reduced h) false))
+  (some true?
     (for [p pv]
     (let [pxyzip (zipper p)]
-      ((fn [n] (if n n)) (for [b xyzip c pxyzip] ((fn [m] (if m m)) (if (= b c) b false)))))))))
+      (some true?
+      ;(reduce (fn [gg hh] (if hh (reduced hh) false))
+        (for [b xyzip c pxyzip] (if (= b c) b false))))))))
+        ;(doseq [b xyzip c pxyzip] (if (= b c) (def get-revisit-return b))))))
+  ;get-revisit-return)
 
 (defn two [v]
   (loop [i  0    ; vector element
@@ -51,9 +56,8 @@
          b  0    ; North 0, West 1, South 2, East 3
          pv [[0 0 0 0]] ] ; history of traversals [oldx oldy newx newy]
     (if (= i (count v)) (println "got to end of directions vector :("))
-    (let [ans (get-revisit (last pv) (drop-last pv))]
-    (if ans
-      ans    ; will need to add the two components once the return starts working
+    (if (and (> 1 (count pv)) (get-revisit (last pv) (drop-last pv)))
+      (get-revisit (last pv) (drop-last pv))
       (let [d (get v i)]
        (if (= (first d) \L)
          (if (= b 0) (let [x2 (- x (numb d)) y2 y] (recur (inc i) x2 y2 1 (conj pv [x y x2 y2])))
@@ -64,7 +68,7 @@
          (if (= b 0) (let [x2 (+ x (numb d)) y2 y] (recur (inc i) x2 y2 3 (conj pv [x y x2 y2])))
          (if (= b 1) (let [x2 x y2 (+ y (numb d))] (recur (inc i) x2 y2 0 (conj pv [x y x2 y2])))
          (if (= b 2) (let [x2 (- x (numb d)) y2 y] (recur (inc i) x2 y2 1 (conj pv [x y x2 y2])))
-         (if (= b 3) (let [x2 x y2 (- y (numb d))] (recur (inc i) x2 y2 2 (conj pv [x y x2 y2])))))))))))))
+         (if (= b 3) (let [x2 x y2 (- y (numb d))] (recur (inc i) x2 y2 2 (conj pv [x y x2 y2]))))))))))))
 
 (println "distance to location is" (two dirvec))
 
