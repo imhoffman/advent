@@ -38,16 +38,13 @@
 (defn get-revisit [loc pv]
   ; determine the points touched on the current leg ...
   (let [xyzip (zipper loc)]
+    (reduce (fn [f g] (if g (reduced g) false))
+            (for [p pv]
   ; ... and compare them to the points touched on previous legs
-  ;(reduce (fn [g h] (if h (reduced h) false))
-  (some true?
-    (for [p pv]
-    (let [pxyzip (zipper p)]
-      (some true?
-      ;(reduce (fn [gg hh] (if hh (reduced hh) false))
-        (for [b xyzip c pxyzip] (if (= b c) b false))))))))
-        ;(doseq [b xyzip c pxyzip] (if (= b c) (def get-revisit-return b))))))
-  ;get-revisit-return)
+        (let [pxyzip (zipper p)]
+          (reduce (fn [d h] (if h (reduced h) false))
+                  (for [b xyzip c pxyzip]
+            (if (= b c) b false))))))))
 
 (defn two [v]
   (loop [i  0    ; vector element
@@ -56,8 +53,9 @@
          b  0    ; North 0, West 1, South 2, East 3
          pv [[0 0 0 0]] ] ; history of traversals [oldx oldy newx newy]
     (if (= i (count v)) (println "got to end of directions vector :("))
-    (if (and (> 1 (count pv)) (get-revisit (last pv) (drop-last pv)))
-      (get-revisit (last pv) (drop-last pv))
+    (if (and (> 1 (count pv)) (get-revisit (last pv) (drop-last pv)))   ; this order mattered
+      ;(get-revisit (last pv) (drop-last pv))
+      8192
       (let [d (get v i)]
        (if (= (first d) \L)
          (if (= b 0) (let [x2 (- x (numb d)) y2 y] (recur (inc i) x2 y2 1 (conj pv [x y x2 y2])))
