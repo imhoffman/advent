@@ -9,52 +9,48 @@
 
 ;;  predicate for valid triples
 (defn valid? [t]
-  (println "in valid")
   (assert (= 3 (count t)))
   (let [a (first t)
         b (first (rest t))
         c (last t)]
-    (println " valid? is considering:" a b c)
+    ;(println " valid? is considering:" a b c)
     (and (> (+ b c) a)
          (> (+ a c) b)
          (> (+ b a) c))))
 
 ;;  part two column-bundler
-;user=> (for [i (range 0 16 3)] ((fn [j] (list (+ j 1) (+ j 2) (+ j 3))) i))
-;((1 2 3) (4 5 6) (7 8 9) (10 11 12) (13 14 15) (16 17 18))
-;user=> (for [a (for [i (range 0 16 3)] ((fn [j] (list (+ j 1) (+ j 2) (+ j 3))) i))] (first a))
-;(1 4 7 10 13 16)
-;(user=> (for [a (for [i (range 0 16 3)] ((fn [j] (vector (+ j 1) (+ j 2) (+ j 3))) i))] (first a))
-;(1 4 7 10 13 16)
+;;   b/c `bundler` makes a list of lists every three rows
+(defn unpacker [r accum]
+  (if (empty? (rest r))
+    (conj accum (first r))
+    (unpacker (rest r) (conj accum (first r)))))
+
+
+;;  repackage triangle triples from column chunks
+;;   using `get` from a `get` but could also `let` a 2d array and `aget` from it
 (defn bundler [v]
   (assert (= 0 (mod (count v) 3)))
-  ;(println " passed to bundler:" v)
-  ;(println " a sample output list:"
-  ;         (let [i 3]
-  ;         (list (get (get v i) 0) (get (get v (+ i 1)) 0) (get (get v (+ i 2)) 0))))
-  (for [i (range 0 (mod (count v) 3) 3)]
-    (reduce conj ()    ; HERE --- need to unpack this list of lists ... perhaps `map`
-           (list (get (get v i) 0) (get (get v (+ i 1)) 0) (get (get v (+ i 2)) 0)))))
+  (let [w
+    (for [i (range 0 (count v) 3) j (range 0 3)]
+      (list
+        (get (get v i) j) (get (get v (+ i 1)) j) (get (get v (+ i 2)) j)))]
+  (for [x w] (unpacker x ()))))
+
 
 ;;
 ;;  main program
 ;;
 ;;   file I/O
 ;;   https://clojuredocs.org/clojure.core/line-seq
-(def input (reverse             ; conj appends to front of list
+;;    `reverse` b/c `conj` appends to front of list
+;;    although order doesn't matter in this puzzle
+(def input (reverse
   (with-open [f (clojure.java.io/reader "input.txt")]
     (reduce conj () (line-seq f)))))
 (println " number of lines read from input file:" (count input))
 
-;(println " number of valid listings:" (get (frequencies (for [u (parser input)] (valid? u))) true))
 (println " number of valid listings:"
          (get (frequencies
                 (for [u (bundler (parser input))]
                   (valid? u))) true))
-
-(println " output from parser:")
-(println (parser input))
-
-(println " output from bundler:")
-(println (bundler (parser input)))
 
