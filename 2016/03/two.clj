@@ -1,8 +1,10 @@
 (require '[clojure.string :as str])
 
 ;;  retrieve integers from input strings
+;;   must parse into a vector of vectors for column-specific addressing by `bundler`
+;;   NB `vec` is not the same as `vector`
 (defn parser [s]
-  (vec (for [r s] (vec           ; parse into vectors for column-specific addressing by `bundler`
+  (vec (for [r s] (vec
     (for [a (str/split (str/trim r) #"\s+" 3)] (Integer/parseInt a))))))
 
 ;;  predicate for valid triples
@@ -26,21 +28,13 @@
 ;(1 4 7 10 13 16)
 (defn bundler [v]
   (assert (= 0 (mod (count v) 3)))
-  (println " passed to bundler:" v)
-  (println " a sample output list:"
-           (let [i 3]
-           (list (get v i 0) (get v (+ i 1) 0) (get v (+ i 2) 0)))) ; HERE! need to pull out vector, then address it b/c each line is already a vector...it is not a 2d array...perhaps `let` a 2d array ?
+  ;(println " passed to bundler:" v)
+  ;(println " a sample output list:"
+  ;         (let [i 3]
+  ;         (list (get (get v i) 0) (get (get v (+ i 1)) 0) (get (get v (+ i 2)) 0))))
   (for [i (range 0 (mod (count v) 3) 3)]
-    (reduce conj ()
-  ;(doseq [i (range 0 (- (mod (count v) 3) 3) 3)]
-    ;(let [t1 (list (get v i 0) (get v (+ i 1) 0) (get v (+ i 2) 0))
-    ;      t2 (list (get v i 1) (get v (+ i 1) 1) (get v (+ i 2) 1))
-    ;      t3 (list (get v i 2) (get v (+ i 1) 2) (get v (+ i 2) 2))]
-    ;  t1 t2 t3
-      (list (get v i 0) (get v (+ i 1) 0) (get v (+ i 2) 0))
-      (list (get v i 1) (get v (+ i 1) 1) (get v (+ i 2) 1))
-      (list (get v i 2) (get v (+ i 1) 2) (get v (+ i 2) 2)))))
-      ;(if (< (+ i 3) (count v)) (recur (+ i 3))))))
+    (reduce conj ()    ; HERE --- need to unpack this list of lists ... perhaps `map`
+           (list (get (get v i) 0) (get (get v (+ i 1)) 0) (get (get v (+ i 2)) 0)))))
 
 ;;
 ;;  main program
