@@ -1,7 +1,10 @@
 (require '[clojure.string :as str])
 
-(defn get-outsides [s p]     ;; initially, call with p as []
-  (let [r (vec (char-array s))
+;;  return the strings outside of the \[ \] as a vector of vectors
+;;   initiate the recursion by calling with p as an empty vector []
+;;   if vector indexing is not needed, then returing a subs or join'ed coll is better
+(defn get-outsides [s p]
+  (let [r (vec (char-array s))    ;; this is not necessary; str has indexing funcs
         n (if (str/index-of s \])
             (min (count r) (or (str/index-of s \[) 8192))
             (count r))]
@@ -11,6 +14,15 @@
              (conj p (reduce conj [] (for [i (range n)] (get r i)))))
       )))
 
+;;  same as above, but for the strings between the \[ \]
+(defn get-insides [s p]
+  (let [n (+ 1 (str/index-of s \[))
+        m (str/index-of s \])]
+    (if (not (str/index-of (subs s m) \[))
+      (conj p (vec (char-array (subs s n m))))
+      (recur (subs s (+ 1 m))
+             (conj p (vec (char-array (subs s n m)))))
+      )))
 
 ;; parse substrings from \[ and \] before calling this
 (defn has-palindrome? [s]
@@ -29,8 +41,10 @@
 (println "Input file has" (count input) "lines.")
 
 (println (first input))
-(println (get-outsides (first input) []))
+(println " outsides:" (get-outsides (first input) []))
+(println "  insides:" (get-insides (first input) []))
 
 (println (second input))
-(println (get-outsides (second input) []))
+(println " outsides:" (get-outsides (second input) []))
+(println "  insides:" (get-insides (second input) []))
 
