@@ -1,5 +1,15 @@
 (require '[clojure.string :as str])
 
+(defn get-outsides [s p]     ;; initially, call with p as []
+  (let [r (vec (char-array s))]
+    (let [n (str/index-of s \[)  ;; this is not catching the last one
+          m (str/index-of s \])]
+      (if (not (str/blank? (subs ...
+        (recur (subs s (+ 1 m))
+               (conj p (reduce conj [] (for [i (range n)] (get r i)))))
+        p))))
+
+
 ;; parse substrings from \[ and \] before calling this
 (defn has-palindrome? [s]
   (let [L 4]
@@ -16,6 +26,7 @@
     (reduce conj () (line-seq f))))
 (println "Input file has" (count input) "lines.")
 
-(let [s (str/split (first input) #"")]
-  (println (first input) (first s) (last s)))
+(println (first input))
+(println (get-outsides (first input) []))
+
 
