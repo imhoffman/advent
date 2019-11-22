@@ -1,13 +1,14 @@
 (require '[clojure.string :as str])
 
 (defn get-outsides [s p]     ;; initially, call with p as []
-  (let [r (vec (char-array s))]
-    (let [n (str/index-of s \[)  ;; this is not catching the last one
-          m (str/index-of s \])]
-      (if (not (str/blank? (subs ...
-        (recur (subs s (+ 1 m))
-               (conj p (reduce conj [] (for [i (range n)] (get r i)))))
-        p))))
+  (let [r (vec (char-array s))
+        n (if (< (count r) (or (str/index-of s \[) 8192)) (count r) (str/index-of s \[)) ]
+    (println " n:" n ", (count r):" (count r) (subs s n))
+    (if (str/blank? (subs s n))
+      p
+      (recur (subs s (+ 1 (str/index-of s \])))
+             (conj p (reduce conj [] (for [i (range n)] (get r i)))))
+      )))
 
 
 ;; parse substrings from \[ and \] before calling this
