@@ -1,17 +1,15 @@
 (require '[clojure.string :as str])
 
-;;  return the strings outside of the \[ \] as a vector of vectors
+;;  return the strings outside of the \[ \] as a vector of strings
 ;;   initiate the recursion by calling with p as an empty vector []
-;;   if vector indexing is not needed, then returing a subs or join'ed coll is better
 (defn get-outsides [s p]
-  (let [r (vec (char-array s))    ;; this is not necessary; str has indexing funcs
-        n (if (str/index-of s \])
-            (min (count r) (or (str/index-of s \[) 8192))
-            (count r))]
-    (if (= n (count r))
-      (conj p (reduce conj [] (for [i (range n)] (get r i))))
+  (let [n (if (str/index-of s \])
+            (min (count s) (or (str/index-of s \[) 8192))
+            (count s))]
+    (if (= n (count s))
+      (conj p (subs s 0 n))
       (recur (subs s (+ 1 (str/index-of s \])))
-             (conj p (reduce conj [] (for [i (range n)] (get r i)))))
+             (conj p (subs s 0 n)))
       )))
 
 ;;  same as above, but for the strings between the \[ \]
@@ -19,9 +17,9 @@
   (let [n (+ 1 (str/index-of s \[))
         m (str/index-of s \])]
     (if (not (str/index-of (subs s m) \[))
-      (conj p (vec (char-array (subs s n m))))
+      (conj p (subs s n m))
       (recur (subs s (+ 1 m))
-             (conj p (vec (char-array (subs s n m)))))
+             (conj p (subs s n m)))
       )))
 
 ;; parse substrings from \[ and \] before calling this
