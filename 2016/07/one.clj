@@ -2,10 +2,11 @@
 
 (defn get-outsides [s p]     ;; initially, call with p as []
   (let [r (vec (char-array s))
-        n (if (< (count r) (or (str/index-of s \[) 8192)) (count r) (str/index-of s \[)) ]
-    (println " n:" n ", (count r):" (count r) (subs s n))
-    (if (str/blank? (subs s n))
-      p
+        n (if (str/index-of s \])
+            (min (count r) (or (str/index-of s \[) 8192))
+            (count r))]
+    (if (= n (count r))
+      (conj p (reduce conj [] (for [i (range n)] (get r i))))
       (recur (subs s (+ 1 (str/index-of s \])))
              (conj p (reduce conj [] (for [i (range n)] (get r i)))))
       )))
@@ -30,4 +31,6 @@
 (println (first input))
 (println (get-outsides (first input) []))
 
+(println (second input))
+(println (get-outsides (second input) []))
 
