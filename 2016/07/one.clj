@@ -27,7 +27,7 @@
   (let [Ls (count s)
         Lp 4
         r  (vec (char-array s))]
-    (if (< Ls 4)
+    (if (> (+ i 4) Ls)
       false
       (if (and
             (= (get r i)       (get r (+ i 3)))
@@ -48,13 +48,13 @@
     (reduce conj () (line-seq f))))
 (println "Input file has" (count input) "lines.")
 
-(println (first input))
-(println " outsides:" (get-outsides (first input) []))
-(println "  insides:" (get-insides (first input) []))
+(println
+  " number of TLS entries:"
+  (reduce +
+    (doseq [s input]
+      (if (and
+              (some true? (map (fn [a] (has-palindrome? a 0)) (get-outsides s [])))
+              (not (some true? (map (fn [a] (has-palindrome? a 0)) (get-insides s [])))))
+        1 0))))
 
-(println (second input))
-(println " outsides:" (get-outsides (second input) []))
-(println "  insides:" (get-insides (second input) []))
-
-(println (map (fn [a] (has-palindrome? a 0)) (get-outsides (second input) [])))
 
