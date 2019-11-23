@@ -23,9 +23,19 @@
       )))
 
 ;; parse substrings from \[ and \] before calling this
-(defn has-palindrome? [s]
-  (let [L 4]
-    (if (subs s 0 L) true false)))
+(defn has-palindrome? [s i]
+  (let [Ls (count s)
+        Lp 4
+        r  (vec (char-array s))]
+    (if (< Ls 4)
+      false
+      (if (and
+            (= (get r i)       (get r (+ i 3)))
+            (= (get r (+ i 1)) (get r (+ i 2)))
+            (not (= (get r i) (get r (+ i 1)))))
+        true
+        (recur s (+ i 1)))
+      )))
 
 ;;
 ;;  main program
@@ -45,4 +55,6 @@
 (println (second input))
 (println " outsides:" (get-outsides (second input) []))
 (println "  insides:" (get-insides (second input) []))
+
+(println (map (fn [a] (has-palindrome? a 0)) (get-outsides (second input) [])))
 
