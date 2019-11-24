@@ -25,19 +25,26 @@
 
 
 ;;  pass in `outsides` and `insides` as coll's
-(defn ssl [out in i j]
+(defn ssl [outsides insides]
   (some true?
-    (for [a out]
+    (for [a outsides]
       (let [va (vec (char-array a))]
-        (if (> (+ i 3) (count va))
-          false
-          (if (and
-                (= (get va i) (get va (+ i 2)))
-                (not (= (get va (+ i 1)) (get va i))))
-            (let [bab (join (get va i) (get va (+ 1 i)) (get va (+ i 2)))]
-              ;;loop through insides looking for bab ...
-
-
+        (loop [i 0]
+          (if (> (+ i 3) (count va))
+            false
+            (if (and
+                  (= (get va i) (get va (+ i 2)))
+                  (not (= (get va (+ i 1)) (get va i))))
+              (let [bab (list (get va i) (get va (+ 1 i)) (get va (+ 2 i)))]
+                (for [b insides]
+                  (let [vb (vec (char-array b))]
+                    (loop [j 0]
+                      (if (> (+ j 3)) (count vb))
+                        false
+                        (if (= bab (list (get vb j) (get vb (+ 1 j)) (get vb (+ 2 j))))
+                          true)
+                        (recur (+ 1 j))))))
+              (recur (+ 1 i)))))))))
 
 
 ;; parse substrings from \[ and \] before calling this
