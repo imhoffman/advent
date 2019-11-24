@@ -18,20 +18,26 @@
   (let [n (+ 1 (str/index-of s \[))
         m (str/index-of s \])]
     (if (not (str/index-of (subs s m) \[))
-      (conj p (subs s n m))
+      (conj p (subs s n m))       ;; duplicating this line in the recur is JV!
       (recur (subs s (+ 1 m))
              (conj p (subs s n m)))
       )))
 
 
-;;  pass in `s` and let the out's and in's ?
-(defn ssl [s]
-  (let [out (get-outsides s [])
-        in  (get-insides  s [])]
+;;  pass in `outsides` and `insides` as coll's
+(defn ssl [out in i j]
+  (some true?
+    (for [a out]
+      (let [va (vec (char-array a))]
+        (if (> (+ i 3) (count va))
+          false
+          (if (and
+                (= (get va i) (get va (+ i 2)))
+                (not (= (get va (+ i 1)) (get va i))))
+            (let [bab (join (get va i) (get va (+ 1 i)) (get va (+ i 2)))]
+              ;;loop through insides looking for bab ...
 
-;;  or, pass in `outsides` and `insides` the \[ and \] as coll's ?
-(defn ssl [out in]
-  ;; do it this way, so that it can recur further into `s`
+
 
 
 ;; parse substrings from \[ and \] before calling this
