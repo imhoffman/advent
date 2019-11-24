@@ -36,14 +36,15 @@
                   (= (get va i) (get va (+ i 2)))
                   (not (= (get va (+ i 1)) (get va i))))
               (let [bab (list (get va i) (get va (+ 1 i)) (get va (+ 2 i)))]
-                (for [b insides]
-                  (let [vb (vec (char-array b))]
-                    (loop [j 0]
-                      (if (> (+ j 3)) (count vb))
-                        false
-                        (if (= bab (list (get vb j) (get vb (+ 1 j)) (get vb (+ 2 j))))
-                          true)
-                        (recur (+ 1 j))))))
+                (some true?      ;; this runs the whole loop; a reduced lambda is better
+                  (for [b insides]
+                    (let [vb (vec (char-array b))]
+                      (loop [j 0]
+                        (if (> (+ j 3)) (count vb))
+                          false
+                          (if (= bab (list (get vb j) (get vb (+ 1 j)) (get vb (+ 2 j))))
+                            true)
+                          (recur (+ 1 j)))))))
               (recur (+ 1 i)))))))))
 
 
@@ -82,4 +83,12 @@
               (not (some true? (map (fn [a] (has-palindrome? a 0)) (get-insides s [])))))
         1 0))))
 
+;;  add a 1 for each entry that satisfies the ruleset
+(println
+  " number of SSL entries:"
+  (reduce +
+    (for [s input]
+      (if (ssl (get-outsides s []) (get-insides s [])) 1 0))))
+
+(println " list of SSL's:" (for [s input] (ssl (get-outsides s []) (get-insides s []))))
 
