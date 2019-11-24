@@ -1,5 +1,6 @@
 (require '[clojure.string :as str])
 
+
 ;;  return the strings outside of the \[ \] as a vector of strings
 ;;   initiate the recursion by calling with p as an empty vector []
 (defn get-outsides [s p]
@@ -22,10 +23,10 @@
              (conj p (subs s n m)))
       )))
 
+
 ;; parse substrings from \[ and \] before calling this
 (defn has-palindrome? [s i]
   (let [Ls (count s)
-        Lp 4
         r  (vec (char-array s))]
     (if (> (+ i 4) Ls)
       false
@@ -48,10 +49,11 @@
     (reduce conj () (line-seq f))))
 (println "Input file has" (count input) "lines.")
 
+;;  add a 1 for each entry that satisfies the ruleset
 (println
   " number of TLS entries:"
   (reduce +
-    (doseq [s input]
+    (for [s input]
       (if (and
               (some true? (map (fn [a] (has-palindrome? a 0)) (get-outsides s [])))
               (not (some true? (map (fn [a] (has-palindrome? a 0)) (get-insides s [])))))
