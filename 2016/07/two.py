@@ -20,10 +20,22 @@ def parse_insides ( s, p ):
         m = s.find(']')
         p.append( s[ n+1:m ] )
         parse_insides( s[ m+1: ], p )
-    else:
-        p.append( s )
     return p
 
+
+def ssl ( q ):
+    outs = parse_outsides( q, [] )
+    ins  = parse_insides( q, [] )
+    for s in outs:
+        for i in range( len(s) ):
+            if i + 2 < len(s) and s[i] == s[i+2] and s[i+1] != s[i]:
+                bab = s[i+1] + s[i] + s[i+1]
+                for r in ins:
+                    for j in range( len(r) ):
+                        if j + 2 < len(r) and r.find( bab, j ) != -1:
+                            #print( " outs:", s, " ins:", r, " bab:", bab )
+                            return True
+    return False
 
 ##
 ##  main program
@@ -40,6 +52,11 @@ with open("puzzle.txt") as fo:
 
 print( " read %d lines from input file\n" % (n) )
 
-[ print( s, "outsides:", parse_outsides( s, [] ), " insides:", parse_insides( s, [] ) ) for s in listing ] 
+print( " number of SSL listings: %d\n" %
+        sum( [ 1 if ssl( s ) else 0 for s in listing ] ) )
 
+#[ print( s, "\n", parse_insides( s, []), "\n", parse_outsides( s, [] ), "\n" ) for s in listing ]
+#print( [ s for s in listing if ssl( parse_outsides( s, [] ), parse_insides( s, [] ) ) ] )
 
+# 338 is too high
+# 247 is too low
