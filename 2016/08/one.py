@@ -20,19 +20,19 @@ class screen:
         if r.split(sep=' ')[1] == 'row':
             y = int( r[ e:r.find(' ',e) ] )
             n = int( r[ r.find('by')+2: ] )
-            #print( " rotate row command encountered: row %d by %d\n" % (y, n) )
+            print( " rotate row command encountered: row %d by %d\n" % (y, n) )
             temp = d[y][-n:]
             for i in range( len(d[0])-n-1 ):
                 d[y][i+1] = d[y][i]
-            # something like d[y][0] = temp
+            d[y][0:n] = temp
         elif r.split(sep=' ')[1] == 'column':
             x = int( r[ e:r.find(' ',e) ] )
             m = int( r[ r.find('by')+2: ] )
-            #print( " rotate column command encountered: column %d by %d\n" % (x, m) )
+            print( " rotate column command encountered: column %d by %d\n" % (x, m) )
             temp = d[-m:][x]
             for j in range( len(d)-m-1 ):
                 d[j+m][x] = d[j][x]
-            #something like d[0][x] = temp
+            d[0:m][x] = temp
         else:
             print( " problem reading rotate command\n" )
     else:
