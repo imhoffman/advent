@@ -2,25 +2,30 @@
 
 
 class screen:
-  def __init__(self, state):
-    self.state = state
-
-    # the instantiation should accept 50,6 and
-    # the object should keep track of its own state thereafter...
+  def __init__(self, width, length):
+    self.width = width
+    self.length = length
+    self.state = [ [ 0 for i in range(self.width) ] for j in range(self.length) ]
 
   def command ( self, r ):
-    x = self.state
+    d = self.state
     print( r.split(sep=' ')[0] )
-    x[2][9] = 1
-    return x
+    return
+
+  def test_point ( self, x0, y0 ):
+    d = self.state
+    d[y0][x0] = '#'
+    return
 
   def render ( self ):
-    x = self.state
+    length = self.length
+    width = self.width
+    state = self.state
     print()
-    for i in range( len(x) ):
-      [ print( '.', end='', flush=True ) if x[i][j] == 0 else
+    for i in range( length ):
+      [ print( '.', end='', flush=True ) if state[i][j] == 0 else
         print( '#', end='', flush=True )
-        for j in range( len(x[0])) ]
+        for j in range( width ) ]
       print()
     print()
 
@@ -41,12 +46,11 @@ with open("puzzle.txt") as fo:
 
 print( " read %d lines from input file\n" % (n) )
 
-state = [ [ 0 for i in range(50) ] for j in range(6) ]
+# instantiate a screen object with an internally-tracked state
+display = screen( 50, 6 )
 
-state = screen(state).command( listing[3] )
 
-screen(state).render()
-
-#print( screen(state).command( listing[3] ) )
-#[ screen(state).command(s) for s in listing ]
+display.render()
+display.test_point( 26, 4 )
+display.render()
 
