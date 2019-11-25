@@ -1,0 +1,6 @@
+rect 1x1
+rect 4x4
+rect 2x2
+rect 5x5
+rect 18x1
+rect 15x2

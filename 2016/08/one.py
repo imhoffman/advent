@@ -9,7 +9,15 @@ class screen:
 
   def command ( self, r ):
     d = self.state
-    print( r.split(sep=' ')[0] )
+    if r.split(sep=' ')[0] == 'rect':
+        x,y = [ int(n) for n in r.split(sep=' ')[1].split(sep='x') ]
+        for i in range(x):
+            for j in range(y):
+                d[j][i] = '#'
+    elif r.split(sep=' ')[0] == 'rotate':
+        print( " rotate command encountered\n" )
+    else:
+        print( " command unknown\n" )
     return
 
   def test_point ( self, x0, y0 ):
@@ -30,7 +38,6 @@ class screen:
     print()
 
 
-
 ##
 ##  main program
 ##
@@ -49,8 +56,7 @@ print( " read %d lines from input file\n" % (n) )
 # instantiate a screen object with an internally-tracked state
 display = screen( 50, 6 )
 
-
-display.render()
-display.test_point( 26, 4 )
-display.render()
+for s in listing:
+    display.command( s )
+    display.render()
 
