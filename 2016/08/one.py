@@ -48,13 +48,17 @@ class screen:
     length = self.length
     width = self.width
     state = self.state
+    total = 0
     print()
     for i in range( length ):
-      [ print( '.', end='', flush=True ) if state[i][j] == 0 else
-        print( '#', end='', flush=True )
-        for j in range( width ) ]
-      print()
-    print()
+        for j in range( width ):
+            if state[i][j] == 0 :
+                print( '.', end='', flush=True )
+            else:
+                print( '#', end='', flush=True )
+                total = total + 1
+        print()
+    print( "   %d" % total )
 
 
 ##
@@ -73,8 +77,8 @@ with open("puzzle.txt") as fo:
 print( " read %d lines from input file\n" % (n) )
 
 # instantiate a screen object with an internally-tracked state
-display = screen( 7, 3 )
-#display = screen( 50, 6 )
+#display = screen( 7, 3 )     # for the example
+display = screen( 50, 6 )
 
 for s in listing:
     display.command( s )
