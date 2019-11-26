@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+def rotater ( v, n ):
+    temp = v[:]             # cannot do temp = v  OMG
+    for i in range( len(v) ):
+        m = i + n
+        m = m % len(v)
+        v[m] = temp[i]
+    return v
+
 
 class screen:
   def __init__(self, width, length):
@@ -9,7 +17,7 @@ class screen:
 
   def command ( self, r ):
     d = self.state
-    print( r )
+    #print( r )
     if r.split(sep=' ')[0] == 'rect':
         x,y = [ int(n) for n in r.split(sep=' ')[1].split(sep='x') ]
         for i in range(x):
@@ -19,16 +27,16 @@ class screen:
         e = r.find('=')+1
         if r.split(sep=' ')[1] == 'row':
             y = int( r[ e:r.find(' ',e) ] )
-            n = int( r[ r.find('by')+2: ] )      # modulus here ?
-            print( " rotate row command encountered: row %d by %d\n" % (y, n) )
+            n = int( r[ r.find('by')+2: ] )
             row = d[:][y]
-            print( " the row in question:", row )
+            d[:][y] = rotater( row, n )
         elif r.split(sep=' ')[1] == 'column':
             x = int( r[ e:r.find(' ',e) ] )
             m = int( r[ r.find('by')+2: ] )
-            print( " rotate column command encountered: column %d by %d\n" % (x, m) )
             col = [ d[k][x] for k in range( len(d) ) ]
-            print( " the column in question:", col )
+            newcol = rotater( col, m )[:]
+            for k in range( len(col) ):
+                d[k][x] = newcol[k]
         else:
             print( " problem reading rotate command\n" )
     else:
