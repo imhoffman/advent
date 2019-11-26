@@ -19,12 +19,16 @@ class screen:
         e = r.find('=')+1
         if r.split(sep=' ')[1] == 'row':
             y = int( r[ e:r.find(' ',e) ] )
-            n = int( r[ r.find('by')+2: ] )
+            n = int( r[ r.find('by')+2: ] )      # modulus here ?
             print( " rotate row command encountered: row %d by %d\n" % (y, n) )
+            row = d[:][y]
+            print( " the row in question:", row )
         elif r.split(sep=' ')[1] == 'column':
             x = int( r[ e:r.find(' ',e) ] )
             m = int( r[ r.find('by')+2: ] )
             print( " rotate column command encountered: column %d by %d\n" % (x, m) )
+            col = [ d[k][x] for k in range( len(d) ) ]
+            print( " the column in question:", col )
         else:
             print( " problem reading rotate command\n" )
     else:
