@@ -1,5 +1,3 @@
-(require '[clojure.string :as str])
-
 ;;
 ;;  main program
 ;;
@@ -10,7 +8,7 @@
     (first (reduce conj () (line-seq f)))))      ; for a single-line input
 
 ((fn [directions index floor]
-   (if (= floor -1) (println "\n basement encountered at floor" (dec index)))
+   (if (= floor -1) (println "\n basement encountered at index" (dec index)))
    (if (= (first directions) \()
      (recur (rest directions) (inc index) (inc floor))
      (recur (rest directions) (inc index) (dec floor)))
