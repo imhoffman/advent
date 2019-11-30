@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 #include<stdbool.h>
 
 #define MAXMOVES 16384
@@ -11,7 +12,7 @@ void mover ( const char current_move, int *x, int *y ) {
     case '^': *y = *y + 1; break;
     case '<': *x = *x - 1; break;
     case 'v': *y = *y - 1; break;
-    default: printf( "\n :(\n" );   // error checker...should not happen
+    default: printf( "\n switch :(\n" );   // error checker...should not happen
   }
   return;
 }
@@ -20,7 +21,7 @@ void mover ( const char current_move, int *x, int *y ) {
 //  main program
 //
 int main ( void ) {
-  char buffer[MAXMOVES];    // fgets will terminate with a null
+  char *buffer =(char *) malloc( MAXMOVES * sizeof( char ) );
   FILE *fp;
   char *address_of_null;
   size_t difference_of_memory_locations;
@@ -37,10 +38,14 @@ int main ( void ) {
     difference_of_memory_locations = address_of_null - &buffer[0];
     number_of_moves =(int) difference_of_memory_locations;
   } else {
-    printf( " :(\n " );    // error checking
+    printf( " file :(\n " );    // error checking
     return 1;
   }
   fclose(fp);
+
+  char input[number_of_moves+1];
+  strncpy( input, buffer, number_of_moves );
+  free( buffer );
 
   //  puzzle solution
   //   start by delivering two presents to the first house
@@ -52,7 +57,7 @@ int main ( void ) {
   for ( int i = 1; i < number_of_moves; i++ ) {
 	//  loop with i += 2 with a second mover on i-1+1 ?
 	//  or a duplicate round of the j search for the other i's
-    mover( buffer[i-1], &x, &y );     // update location
+    mover( input[i-1], &x, &y );     // update location
 
     //  look for a match to a previous visit
     match = false;
