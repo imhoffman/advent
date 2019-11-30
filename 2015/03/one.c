@@ -4,6 +4,17 @@
 
 #define MAXMOVES 1048576
 
+void mover ( const char current_move, int *x, int *y ) {
+  switch ( current_move ) {
+	  case '>': *x = *x + 1; break;
+	  case '^': *y = *y + 1; break;
+	  case '<': *x = *x - 1; break;
+	  case 'v': *y = *y - 1; break;
+	  default: printf( "\n :(\n" );
+  }
+  return;
+}
+
 
 int main ( void ) {
   char buffer[MAXMOVES] = { '\0' };
@@ -23,7 +34,17 @@ int main ( void ) {
   }
   fclose(fp);
 
-  printf( "\n number of moves read from file: %d\n\n", number_of_moves );
+  //char moves[8193] = { '\0' };
+  //char moves[number_of_moves+1] = { '\0' };
+  //strncpy( moves, buffer, number_of_moves );
+
+  int x=0, y=0;    // maybe an ordered-pair struct ?
+  for ( int i = 0; i < number_of_moves; i++ ) {
+    mover( buffer[i], &x, &y );
+    printf( " move: %c, x: %d, y: %d\n", buffer[i], x, y );
+  }
+
+  //printf( "\n number of moves read from file: %d\n\n", number_of_moves );
 
   return 0;
 }
