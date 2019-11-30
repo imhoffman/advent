@@ -27,12 +27,25 @@ void reader ( FILE* f, int* n, int* maxlen, char lines[][MAX_LINE_LENGTH] ) {
 }
 
 
+//  subroutine to parse box dimensions and needed paper from input strings
+int box_dimension_parser ( const char input[] ) {
+  int smallest_side_area, x, y, z;
+
+  sscanf( input, "%dx%dx%d", &x, &y, &z );
+
+  if ( x*y <= x*z  &&  x*y <= y*z ) { smallest_side_area = x*y; }
+  if ( x*z <= x*y  &&  x*z <= y*z ) { smallest_side_area = x*z; }
+  if ( z*y <= x*z  &&  z*y <= y*x ) { smallest_side_area = z*y; }
+
+  return x*y + x*z + y*z + smallest_side_area;
+}
+
 //
 // main program
 //
 int main( int argc, char *argv[] ) {
  FILE* fp;
- int number_of_lines, longest_line;
+ int number_of_lines, longest_line, total;
  char (*temp)[MAX_LINE_LENGTH]
 	 = malloc( MAX_LINES_IN_FILE * sizeof( char ) * MAX_LINE_LENGTH );
          //  do we need to cast from (void *) to (char *) ?
@@ -43,7 +56,7 @@ int main( int argc, char *argv[] ) {
  fclose(fp);        // done with file...only read the file once
 
  printf( "\n read %d lines from the input file\n", number_of_lines );
- printf( "\n the longest line is %d chars long\n", longest_line );
+ printf( "\n the longest line is %d chars long\n\n", longest_line );
 
  char input[number_of_lines][longest_line+1];   // declare an array of appropriate length and width
 
@@ -53,6 +66,13 @@ int main( int argc, char *argv[] ) {
  }
  free( temp );  // keeper now has the data...free the big temp array from the file read
  //  end of file I/O
+
+ total = 0; 
+ for ( int i=0; i < number_of_lines; i++ ) {
+   total += box_dimension_parser( input[i] );
+ }
+ printf( "\n total paper needed: %d square feet\n\n", total );
+ //  867823 too low
 
  return 0;
 }
