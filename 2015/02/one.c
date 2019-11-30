@@ -37,7 +37,7 @@ int box_dimension_parser ( const char input[] ) {
   if ( x*z <= x*y  &&  x*z <= y*z ) { smallest_side_area = x*z; }
   if ( z*y <= x*z  &&  z*y <= y*x ) { smallest_side_area = z*y; }
 
-  return x*y + x*z + y*z + smallest_side_area;
+  return 2*x*y + 2*x*z + 2*y*z + smallest_side_area;
 }
 
 //
@@ -72,7 +72,6 @@ int main( int argc, char *argv[] ) {
    total += box_dimension_parser( input[i] );
  }
  printf( "\n total paper needed: %d square feet\n\n", total );
- //  867823 too low
 
  return 0;
 }
