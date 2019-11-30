@@ -17,34 +17,53 @@ void mover ( const char current_move, int *x, int *y ) {
   return;
 }
 
-void house_deliveries( const char moves[], int *houses[][3], const int number_of_moves ) {
-  int x, y;
+// subroutine for delivering presents and recording deliveries in `houses`
+//  the house-match loop code is completely duplicated for Robo-Santa,
+//  which is the antithesis of modularize programming  :(
+void house_deliveries( const char moves[], int houses[][3], const int number_of_moves ) {
+  int x, y, x_robo, y_robo;
   bool match;
 
   //   start by delivering two presents to the first house
   x = 0;  y = 0;
-  *houses[0][2] = 2;
-  *houses[0][0] = x;
-  *houses[0][1] = y;
+  x_robo = 0; y_robo = 0;
+  houses[0][2] = 2;
+  houses[0][0] = x;
+  houses[0][1] = y;
   //   loop over moves
-  for ( int i = 1; i < number_of_moves; i++ ) {
-	//  loop with i += 2 with a second mover on i-1+1 ?
-	//  or a duplicate round of the j search for the other i's
+  for ( int i = 1; i < number_of_moves; i += 2 ) {
+    // Santa
     mover( moves[i-1], &x, &y );     // update location
-
     //  look for a match to a previous visit
     match = false;
     for ( int j = 0; j < i; j++ ) { //  NB: j does not map to i
-      if ( *houses[j][0] == x  &&  *houses[j][1] == y ) {
-        *houses[j][2] += 1;          // give them one more present
+      if ( houses[j][0] == x  &&  houses[j][1] == y ) {
+        houses[j][2] += 1;          // give them one more present
 	match = true;
         break;
       }
     }
     if ( !match ) {           // must be the first visit
-      *houses[i][2] = 1;      // give them their first present
-      *houses[i][0] = x;
-      *houses[i][1] = y;
+      houses[i][2] = 1;       // give them their first present
+      houses[i][0] = x;
+      houses[i][1] = y;
+    }
+
+    // Robo-Santa
+    mover( moves[i-1+1], &x_robo, &y_robo );     // update location
+    //  look for a match to a previous visit
+    match = false;
+    for ( int j = 0; j < i+1; j++ ) { //  NB: j does not map to i
+      if ( houses[j][0] == x_robo  &&  houses[j][1] == y_robo ) {
+        houses[j][2] += 1;          // give them one more present
+	match = true;
+        break;
+      }
+    }
+    if ( !match ) {           // must be the first visit
+      houses[i+1][2] = 1;     // give them their first present
+      houses[i+1][0] = x_robo;
+      houses[i+1][1] = y_robo;
     }
   }
 }
@@ -58,8 +77,7 @@ int main ( void ) {
   FILE *fp;
   char *address_of_null;
   size_t difference_of_memory_locations;
-  int x, y, number_of_moves, number_of_houses_visited;
-  bool match;
+  int number_of_moves, number_of_houses_visited;
   int houses[MAXMOVES][3] = { -9000 };
     //  2D array: x, y, number_of_presents
     //  initialize with negative presents
@@ -82,28 +100,10 @@ int main ( void ) {
   free( buffer );
 
   //  puzzle solution
-  //   loop over moves
-  for ( int i = 1; i < number_of_moves; i++ ) {
-	//  loop with i += 2 with a second mover on i-1+1 ?
-	//  or a duplicate round of the j search for the other i's
-    mover( input[i-1], &x, &y );     // update location
-
-    //  look for a match to a previous visit
-    match = false;
-    for ( int j = 0; j < i; j++ ) { //  NB: j does not map to i
-      if ( houses[j][0] == x  &&  houses[j][1] == y ) {
-        houses[j][2] += 1;          // give them one more present
-	match = true;
-        break;
-      }
-    }
-    if ( !match ) {           // must be the first visit
-       houses[i][2] = 1;      // give them their first present
-       houses[i][0] = x; houses[i][1] = y;
-    }
-  }
-
-  //  loop over houses and count the ones without the negative initializer
+  //   delivery subroutine populates `houses`
+  house_deliveries( input, houses, number_of_moves );
+  
+  //   loop over houses and count the ones without the negative initializer
   number_of_houses_visited = 0;
   for ( int i = 0; i < number_of_moves; i++ ) {
     if ( houses[i][2] > 0 ) { number_of_houses_visited += 1; }
