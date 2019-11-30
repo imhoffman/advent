@@ -17,6 +17,39 @@ void mover ( const char current_move, int *x, int *y ) {
   return;
 }
 
+void house_deliveries( const char moves[], int *houses[][3], const int number_of_moves ) {
+  int x, y;
+  bool match;
+
+  //   start by delivering two presents to the first house
+  x = 0;  y = 0;
+  *houses[0][2] = 2;
+  *houses[0][0] = x;
+  *houses[0][1] = y;
+  //   loop over moves
+  for ( int i = 1; i < number_of_moves; i++ ) {
+	//  loop with i += 2 with a second mover on i-1+1 ?
+	//  or a duplicate round of the j search for the other i's
+    mover( moves[i-1], &x, &y );     // update location
+
+    //  look for a match to a previous visit
+    match = false;
+    for ( int j = 0; j < i; j++ ) { //  NB: j does not map to i
+      if ( *houses[j][0] == x  &&  *houses[j][1] == y ) {
+        *houses[j][2] += 1;          // give them one more present
+	match = true;
+        break;
+      }
+    }
+    if ( !match ) {           // must be the first visit
+      *houses[i][2] = 1;      // give them their first present
+      *houses[i][0] = x;
+      *houses[i][1] = y;
+    }
+  }
+}
+
+
 //
 //  main program
 //
@@ -27,9 +60,10 @@ int main ( void ) {
   size_t difference_of_memory_locations;
   int x, y, number_of_moves, number_of_houses_visited;
   bool match;
-  int houses[MAXMOVES][3] = { -9000 };  //  2D array: x, y, number_of_presents
-                                        //  initialize with negative presents
-					//  for identification later
+  int houses[MAXMOVES][3] = { -9000 };
+    //  2D array: x, y, number_of_presents
+    //  initialize with negative presents
+    //  for identification later
 
   //  file I/O
   fp = fopen( "input.txt", "r" );
@@ -48,11 +82,6 @@ int main ( void ) {
   free( buffer );
 
   //  puzzle solution
-  //   start by delivering two presents to the first house
-  x = 0;  y = 0;
-  houses[0][2] = 2;
-  houses[0][0] = x;
-  houses[0][1] = y;
   //   loop over moves
   for ( int i = 1; i < number_of_moves; i++ ) {
 	//  loop with i += 2 with a second mover on i-1+1 ?
