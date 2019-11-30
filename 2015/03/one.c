@@ -24,8 +24,7 @@ int main ( void ) {
   FILE *fp;
   char *address_of_null;
   size_t difference_of_memory_locations;
-  int number_of_moves, number_of_houses_visited;
-  int x=0, y=0;                         // maybe an ordered-pair struct ?
+  int x, y, number_of_moves, number_of_houses_visited;
   bool match;
   int houses[MAXMOVES][3] = { -9000 };  //  2D array: x, y, number_of_presents
                                         //  initialize with negative presents
@@ -44,9 +43,14 @@ int main ( void ) {
   fclose(fp);
 
   //  puzzle solution
+  //   start by delivering one present to the first house
+  x = 0;  y = 0;
+  houses[0][2] = 1;
+  houses[0][0] = x;
+  houses[0][1] = y;
   //   loop over moves
-  for ( int i = 0; i < number_of_moves; i++ ) {
-    mover( buffer[i], &x, &y );     // update location
+  for ( int i = 1; i < number_of_moves; i++ ) {
+    mover( buffer[i-1], &x, &y );     // update location
 
     //  look for a match to a previous visit
     match = false;
