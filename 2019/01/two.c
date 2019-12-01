@@ -28,21 +28,27 @@ void reader ( FILE* f, int* n, int* maxlen, char lines[][MAX_LINE_LENGTH] ) {
 }
 
 
-//  subroutine to parse mass into fuel from input strings
+//  recursive function to parse mass into fuel from input strings
 int fuel_parser ( const char input[], int accum ) {
   int mass, fuel;
   char next[80];
 
+  // parse integer from input string
   sscanf( input, "%d", &mass );
 
   fuel =(int) floor( (double)mass / 3.0 );
   fuel = fuel - 2;
 
+  // base case
   if ( fuel <= 0 ) { return accum; }
+
+  // recursive case
   accum = accum + fuel;
 
+  // write integer to a string for recursive pass
   sprintf( next, "%d", fuel );
 
+  // tail call
   return fuel_parser( next, accum );
 }
 

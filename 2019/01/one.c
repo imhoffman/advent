@@ -28,7 +28,7 @@ void reader ( FILE* f, int* n, int* maxlen, char lines[][MAX_LINE_LENGTH] ) {
 }
 
 
-//  subroutine to parse box dimensions and needed ribbon from input strings
+//  function to parse mass into fuel from input string
 int fuel_parser ( const char input[] ) {
   int mass, fuel;
 
@@ -58,15 +58,18 @@ int main( int argc, char *argv[] ) {
  printf( "\n read %d lines from the input file\n", number_of_lines );
  printf( "\n the longest line is %d chars long\n\n", longest_line );
 
- char input[number_of_lines][longest_line+1];   // declare an array of appropriate length and width
+ // declare an array of appropriate length and width
+ char input[number_of_lines][longest_line+1];
 
  //  populate `input` with puzzle data for use going forward
  for( int i=0; i < number_of_lines; i++ ) {
   strncpy( input[i], temp[i], longest_line+1 );
  }
- free( temp );  // keeper now has the data...free the big temp array from the file read
+ // `input` now has the data...free the big temp array from the file read
+ free( temp );
  //  end of file I/O
 
+ //  puzzle solution
  total = 0; 
  for ( int i=0; i < number_of_lines; i++ ) {
    total += fuel_parser( input[i] );
