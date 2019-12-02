@@ -31,16 +31,18 @@ orig[:] = commands[:]
 print( "\n read %d commands from input file\n" % ( len(commands) ) )
 
 ip = 0
-for noun in range(100):
-    for verb in range(100):
+for noun in range(0,99):
+    for verb in range(0,99):
         commands[1] = noun
         commands[2] = verb
         while ip != -1:
             commands, ip = operator( commands, ip)
         if commands[0] == 19690720:
-            print( "\n noun: %d, verb: %d\n\n" % ( noun, verb ) )
+            print( "\n output: %d, noun: %d, verb: %d\n\n" %
+                    ( commands[0], noun, verb ) )
             break;
         else:
             commands[:] = orig[:]   # reload program
+            ip = 0
 
 
