@@ -6,13 +6,15 @@
 
 def operator ( program, ip ):
     if program[ip] == 1:
-        program[program[ip+3]] = program[program[ip+1]] + program[program[ip+2]]
+        program[ program[ip+3] ] = \
+                program[ program[ip+1] ] + program[ program[ip+2] ]
         return program, ip+4
     elif program[ip] == 2:
-        program[program[ip+3]] = program[program[ip+1]] * program[program[ip+2]]
+        program[ program[ip+3] ] = \
+                program[ program[ip+1] ] * program[ program[ip+2] ]
         return program, ip+4
     elif program[ip] == 99:
-        return program, -1   # catch -1 in main and halt
+        return program, -1          # catch -1 in main and halt
 
 
 ##
@@ -21,19 +23,18 @@ def operator ( program, ip ):
 with open("puzzle.txt") as fo:
   line = fo.readline()
 
-commands = line.rstrip().split(sep=",")
-commands = [ int( s ) for s in commands ]
-
-#  copy initial program
-orig = []
-orig[:] = commands[:]
+commands = [ int( s ) for s in line.rstrip().split(sep=",") ]
 
 print( "\n read %d commands from input file\n" % ( len(commands) ) )
 
-ip = 0
+#  copy initial program
+orig = []
+orig[:] = commands[:]               # without [:], this is a pointer
+
+ip = 0                              # aka program counter
 done = False
-for noun in range(0,99):
-    for verb in range(0,99):
+for noun in range(0,100):           # 0--99 inclusize, as per rules
+    for verb in range(0,100):
         commands[1] = noun
         commands[2] = verb
         while ip != -1:
