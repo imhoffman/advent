@@ -6,10 +6,10 @@
 
 def operator ( program, ip ):
     if program[ip] == 1:
-        program[program[ip+3]] = program[ip+1] + program[ip+2]
+        program[program[ip+3]] = program[program[ip+1]] + program[program[ip+2]]
         return program, ip+4
     elif program[ip] == 2:
-        program[program[ip+3]] = program[ip+1] * program[ip+2]
+        program[program[ip+3]] = program[program[ip+1]] * program[program[ip+2]]
         return program, ip+4
     elif program[ip] == 99:
         return program, -1   # catch -1 in main and halt
