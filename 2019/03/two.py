@@ -46,7 +46,8 @@ def intersector ( wire1, wire2 ):
                         xmax, xmin = xmin, xmax
                     if wire2[j][1] >= ymin and wire2[j][1] <= ymax \
                             and wire1[i][0] >= xmin and wire1[i][0] <= xmax:
-                                intersections.append( [ wire1[i][0], wire2[j][1], wire1[i][2]+wire2[j][2] ] )
+                                intersections.append( [ wire1[i][0], wire2[j][1], \
+                                    wire1[i][2]+wire2[j][2]+(wire2[j][1]-ymin)+(wire1[i][0]-xmin) ] )
         if ( wire1[i][1] == wire1[i+1][1] ):    # the y coords are the same
             xmin = wire1[i][0]
             xmax = wire1[i+1][0]
@@ -60,7 +61,8 @@ def intersector ( wire1, wire2 ):
                         ymax, ymin = ymin, ymax
                     if wire2[j][0] >= xmin and wire2[j][0] <= xmax \
                             and wire1[i][1] >= ymin and wire1[i][1] <= ymax:
-                                intersections.append( [ wire2[j][0], wire1[i][1], wire1[i][2]+wire2[j][2] ] )
+                                intersections.append( [ wire2[j][0], wire1[i][1], \
+                                        wire1[i][2]+wire2[j][2]+(wire2[j][0]-xmin)+(wire1[i][1]-ymin) ] )
     return intersections
 
 
