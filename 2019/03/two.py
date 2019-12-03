@@ -23,6 +23,7 @@ def parser ( wire_routing ):
 
 
 #  routine for finding intersections among trajectories
+#  and the combined number of steps (i+j) to the intersection
 def intersector ( wire1, wire2 ):
     intersections = []
     for i in range( len( wire1 )-1 ):
@@ -39,7 +40,7 @@ def intersector ( wire1, wire2 ):
                         xmax, xmin = xmin, xmax
                     if wire2[j][1] >= ymin and wire2[j][1] <= ymax \
                             and wire1[i][0] >= xmin and wire1[i][0] <= xmax:
-                                intersections.append( [ wire1[i][0], wire2[j][1] ] )
+                                intersections.append( [ wire1[i][0], wire2[j][1], i+j ] )
         if ( wire1[i][1] == wire1[i+1][1] ):    # the y coords are the same
             xmin = wire1[i][0]
             xmax = wire1[i+1][0]
@@ -53,7 +54,7 @@ def intersector ( wire1, wire2 ):
                         ymax, ymin = ymin, ymax
                     if wire2[j][0] >= xmin and wire2[j][0] <= xmax \
                             and wire1[i][1] >= ymin and wire1[i][1] <= ymax:
-                                intersections.append( [ wire2[j][0], wire1[i][1] ] )
+                                intersections.append( [ wire2[j][0], wire1[i][1], i+j ] )
     return intersections
 
 
@@ -71,6 +72,8 @@ wire1_path = parser( wire1 )
 wire2_path = parser( wire2 )
 
 intersections = intersector( wire1_path, wire2_path )
+
+#  part one
 temp_min = 100000000
 for pair in intersections:
     manhattan_distance = abs(pair[0]) + abs(pair[1])
@@ -78,6 +81,14 @@ for pair in intersections:
         temp_min = manhattan_distance
 
 print( "\n distance to closest intersection: %d\n\n" % (temp_min) )
+
+#  path two
+temp_min = 100000000
+for entry in intersections:
+    if entry[2] < temp_min:
+        temp_min = entry[2]
+
+print( "\n shortest delay to an intersection: %d\n\n" % (temp_min) )
 
 
 
