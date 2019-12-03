@@ -6,24 +6,30 @@
 
 #  parse directions into ordered pairs of trajectory points
 def parser ( wire_routing ):
-    x, y = 0, 0
+    x, y, total_path = 0, 0, 0
     points = []
-    points.append( [x,y] )
+    points.append( [x,y,total_path] )
     for directive in wire_routing:
+        delta = int( directive[1:] ) 
         if directive[0] == 'D':
-            y = y - int( directive[1:] )
+            y = y - delta
+            total_path = total_path + delta
         elif directive[0] == 'U':
-            y = y + int( directive[1:] )
+            y = y + delta
+            total_path = total_path + delta
         elif directive[0] == 'L':
-            x = x - int( directive[1:] )
+            x = x - delta
+            total_path = total_path + delta
         elif directive[0] == 'R':
-            x = x + int( directive[1:] )
-        points.append( [x,y] )
+            x = x + delta
+            total_path = total_path + delta
+        points.append( [x,y,total_path] )
     return points
 
 
+
 #  routine for finding intersections among trajectories
-#  and the combined number of steps (i+j) to the intersection
+#  and the combined number of coords traversed to the intersection
 def intersector ( wire1, wire2 ):
     intersections = []
     for i in range( len( wire1 )-1 ):
@@ -40,7 +46,7 @@ def intersector ( wire1, wire2 ):
                         xmax, xmin = xmin, xmax
                     if wire2[j][1] >= ymin and wire2[j][1] <= ymax \
                             and wire1[i][0] >= xmin and wire1[i][0] <= xmax:
-                                intersections.append( [ wire1[i][0], wire2[j][1], i+j ] )
+                                intersections.append( [ wire1[i][0], wire2[j][1], wire1[i][2]+wire2[j][2] ] )
         if ( wire1[i][1] == wire1[i+1][1] ):    # the y coords are the same
             xmin = wire1[i][0]
             xmax = wire1[i+1][0]
@@ -54,7 +60,7 @@ def intersector ( wire1, wire2 ):
                         ymax, ymin = ymin, ymax
                     if wire2[j][0] >= xmin and wire2[j][0] <= xmax \
                             and wire1[i][1] >= ymin and wire1[i][1] <= ymax:
-                                intersections.append( [ wire2[j][0], wire1[i][1], i+j ] )
+                                intersections.append( [ wire2[j][0], wire1[i][1], wire1[i][2]+wire2[j][2] ] )
     return intersections
 
 
