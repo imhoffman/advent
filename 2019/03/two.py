@@ -70,6 +70,16 @@ wire2 = [ s for s in wire2.rstrip().split(sep=",") ]
 wire1_path = parser( wire1 )
 wire2_path = parser( wire2 )
 
-print( intersector( wire1_path, wire2_path ) )
+intersections = intersector( wire1_path, wire2_path )
+temp_min = 100000000
+for pair in intersections:
+    manhattan_distance = abs(pair[0]) + abs(pair[1])
+    if manhattan_distance < temp_min:
+        temp_min = manhattan_distance
+
+print( "\n distance to closest intersection: %d\n\n" % (temp_min) )
+
+
+
 
 
