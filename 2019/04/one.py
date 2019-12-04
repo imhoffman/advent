@@ -4,23 +4,22 @@
 ##  subprograms
 ##
 
-def combo_maker ( lower_bound, upper_bound ):
-    length_of_input = len( puzzle_input )
-    for i in range( length_of_input )
+def is_increasing ( string_of_digits ):
+    if len( string_of_digits ) == 1:
+        return True
+    for i in range( len( string_of_digits ) ):
+        for j in range( i+1, len( string_of_digits )-i ):
+            if int(string_of_digits[i]) > int(string_of_digits[j]):
+                return False
+            else:
+                return is_increasing( string_of_digits[1:] )
 
 
-
-def rules ( puzzle_input, init_index, list_of_possibilities ):
-    s = puzzle_input[:]
-    if len(s) - init_index < 6:
-        return list_of_possibilities
-    possibility = []
-    for i in range( init_index, len(s) ):
-        possibility.append( s[i] )
-        for j in range( i, len(s)-i ):
-            if s[i] <= s[j]:
-                possibility.append( s[j] )
-
+def rules ( lower_bound, upper_bound ):
+    list_of_possibilities = []
+    for i in range( lower_bound, upper_bound ):
+        candidate_digits = str( i )
+        cd = candidate_digits[:]
 
 
 
@@ -39,5 +38,7 @@ print( " read %d characters from input file\n" % ( len(puzzle) ) )
 
 lower_bound = int( puzzle[:5] )
 upper_bound = int( puzzle[7:] )
+
+print( is_increasing( '123334' ) )
 
 
