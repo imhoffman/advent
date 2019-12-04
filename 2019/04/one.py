@@ -25,21 +25,16 @@ def has_repeats ( string_of_digits ):
             return has_repeats ( string_of_digits[1:] )
 
 
-
-
-
 def rules ( lower_bound, upper_bound ):
     list_of_possibilities = []
     for i in range( lower_bound, upper_bound ):
         candidate_digits = str( i )
-        cd = candidate_digits[:]
         if not is_increasing( candidate_digits ):
             continue
-        
-
-
-
-
+        if not has_repeats( candidate_digits ):
+            continue
+        list_of_possibilities.append( i )
+    return list_of_possibilities
 
 
 ##
@@ -50,14 +45,13 @@ with open("puzzle.txt") as fo:
   puzzle = fo.readline().strip()
 #fo.close()
 
-print( " read %d characters from input file\n" % ( len(puzzle) ) )
+print( "\n read %d characters from input file\n" % ( len(puzzle) ) )
 
 lower_bound = int( puzzle[:5] )
 upper_bound = int( puzzle[7:] )
 
-i = 123789
-candidate_digits = str( i )
-print( is_increasing( candidate_digits ) )
-print( has_repeats( candidate_digits ) )
+possibilities = rules( lower_bound, upper_bound )
+
+print( "\n number of possible passwords: %d\n\n" % len( possibilities ) )
 
 
