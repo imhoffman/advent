@@ -15,6 +15,16 @@ def is_increasing ( string_of_digits ):
                 return is_increasing( string_of_digits[1:] )
 
 
+def has_repeats ( string_of_digits ):
+    if len( string_of_digits ) == 1:
+        return False
+    for i in range( len( string_of_digits )-1 ):
+        if int( string_of_digits[i] ) == int( string_of_digits[i+1] ):
+            return True
+        else:
+            return has_repeats ( string_of_digits[1:] )
+
+
 def has_one_repeated_value ( string_of_digits, have_one_match, existing_match ):
     if len( string_of_digits ) == 1:
         return have_one_match
@@ -36,7 +46,8 @@ def rules ( lower_bound, upper_bound ):
         candidate_digits = str( i )
         if not is_increasing( candidate_digits ):
             continue
-        if not has_one_repeated_value( candidate_digits, False, None ):
+        if not has_repeats( candidate_digits ):
+        #if not has_one_repeated_value( candidate_digits, False, None ):
             continue
         list_of_possibilities.append( i )
     return list_of_possibilities
@@ -52,7 +63,7 @@ with open("puzzle.txt") as fo:
 
 print( "\n read %d characters from input file\n" % ( len(puzzle) ) )
 
-lower_bound = int( puzzle[:5] )
+lower_bound = int( puzzle[:6] )
 upper_bound = int( puzzle[7:] )
 
 possibilities = rules( lower_bound, upper_bound )
@@ -61,4 +72,5 @@ print( possibilities )
 print( "\n number of possible passwords: %d\n\n" % len( possibilities ) )
 
 ## 1820 too high
+## 490 too low
 
