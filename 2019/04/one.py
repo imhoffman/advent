@@ -15,11 +15,27 @@ def is_increasing ( string_of_digits ):
                 return is_increasing( string_of_digits[1:] )
 
 
+def has_repeats ( string_of_digits ):
+    if len( string_of_digits ) == 1:
+        return False
+    for i in range( len( string_of_digits )-1 ):
+        if int( string_of_digits[i] ) == int( string_of_digits[i+1] ):
+            return True
+        else:
+            return has_repeats ( string_of_digits[1:] )
+
+
+
+
+
 def rules ( lower_bound, upper_bound ):
     list_of_possibilities = []
     for i in range( lower_bound, upper_bound ):
         candidate_digits = str( i )
         cd = candidate_digits[:]
+        if not is_increasing( candidate_digits ):
+            continue
+        
 
 
 
@@ -39,6 +55,9 @@ print( " read %d characters from input file\n" % ( len(puzzle) ) )
 lower_bound = int( puzzle[:5] )
 upper_bound = int( puzzle[7:] )
 
-print( is_increasing( '123334' ) )
+i = 123789
+candidate_digits = str( i )
+print( is_increasing( candidate_digits ) )
+print( has_repeats( candidate_digits ) )
 
 
