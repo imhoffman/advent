@@ -34,10 +34,33 @@
 
   !!  test for increasing digit values
   recursive function is_increasing ( n ) result ( predicate )
-    integer, intent(in) :: n
-    logical             :: predicate
+    integer, intent(in)        :: n
+    logical                    :: predicate
+    character(:), allocatable  :: chars
+    integer                    :: i, j, num_chars, a, b
 
-    predicate = .false.
+    chars = as_char_array( n )
+    num_chars = len( chars )
+
+    if ( num_chars .eq. 1 ) then
+      predicate = .true.
+    else
+      do i = 1, num_chars
+        write(6,*) chars(i:i)
+        read( chars(i:i), '(I1)' ) a
+        !write(6,*) " a: ", a
+        do j = i+1, num_chars-i
+          read( chars(j:j), '(I1)' ) b
+          !write(6,*) " b: ", b
+          if ( a .gt. b ) then
+            predicate = .false.
+          else
+            predicate = is_increasing( mod( n, int( 10**i ) ) )
+          endif
+        enddo
+      enddo
+    endif
+
     return
   end function is_increasing
 
@@ -68,6 +91,8 @@
   write(6,'(/,A,I0,A,I0,A,/)') ' Using ', lower_bound, ' and ', upper_bound, ' as bounds.'
 
   write(6,'(/,A,/)') ' as_char_array: '//as_char_array( lower_bound )
+
+  write(6,*) is_increasing( lower_bound )
 
   stop
  end program main
