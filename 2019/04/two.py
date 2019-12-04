@@ -16,17 +16,19 @@ def is_increasing ( string_of_digits ):
 
 
 def has_repeats ( string_of_digits, number_found ):
-    if len( string_of_digits ) == 1 or max(number_found) > 2:
+    if max( number_found ) > 2:
         return False
+    if len( string_of_digits ) == 1:
+        if max(number_found) > 1:
+            return True
+        else:
+            return False
     for i in range( len( string_of_digits )-1 ):
         if int( string_of_digits[i] ) == int( string_of_digits[i+1] ):
             j = int( string_of_digits[i] )
             number_found[j] += 1
             return has_repeats( string_of_digits[1:], number_found )
-    if max(number_found) > 1:
-        return True
-    else:
-        return False
+    #return False      # should never get here
 
 
 def rules ( lower_bound, upper_bound ):
