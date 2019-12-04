@@ -4,6 +4,8 @@
 ##  subprograms
 ##
 
+#  recursive predicate for checking for sequential increase
+#   is there a more obvious arithmetic test ??
 def is_increasing ( string_of_digits ):
     if len( string_of_digits ) == 1:
         return True
@@ -14,25 +16,24 @@ def is_increasing ( string_of_digits ):
             else:
                 return is_increasing( string_of_digits[1:] )
 
-
-def has_repeats ( string_of_digits, number_found ):
-    if len( string_of_digits ) == 1:
-        if any( [ x == 1 for x in number_found ] ):
-            return True
+#  recursive predicate for the "repeated" rule
+#   repeated_digits_found is an array of each digit's repeat count
+def has_repeats ( string_of_digits, repeated_digits_found ):
+    if len( string_of_digits ) == 1:              # base case
+        if any( [ x == 1 for x in repeated_digits_found ] ):
+            return True                           # at least one single-repeat
         else:
             return False
-    elif len( string_of_digits ) == 2:
-        #if int( string_of_digits[0] ) == int( string_of_digits[1] ):
-        #    j = int( string_of_digits[0] )
-        #    number_found[j] += 1
-            return has_repeats( "Q", number_found )
+    elif len( string_of_digits ) == 2:            # work around range(0) have a len of 2
+            return has_repeats( "Q", repeated_digits_found )
     else:
         for i in range( len( string_of_digits )-1 ):
             if int( string_of_digits[i] ) == int( string_of_digits[i+1] ):
-                j = int( string_of_digits[i] )
-                number_found[j] += 1
-                return has_repeats( string_of_digits[1:], number_found )
-    #return False      # should never get here
+                j = int( string_of_digits[i] )    # use its value for indexing
+                repeated_digits_found[j] += 1
+                # recur with remainder of string
+                return has_repeats( string_of_digits[1:], repeated_digits_found )
+    #return False                                 # should never get here
 
 
 def rules ( lower_bound, upper_bound ):
@@ -58,10 +59,6 @@ print( "\n read %d characters from input file\n" % ( len(puzzle) ) )
 
 lower_bound = int( puzzle[:6] )
 upper_bound = int( puzzle[7:] )
-
-#i = 444466
-#chars = str(i)
-#print( has_repeats( chars , [0]*10 ) )
 
 possibilities = rules( lower_bound, upper_bound )
 
