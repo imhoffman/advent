@@ -16,10 +16,8 @@ def is_increasing ( string_of_digits ):
 
 
 def has_repeats ( string_of_digits, number_found ):
-    if max( number_found ) > 2:
-        return False
     if len( string_of_digits ) == 1:
-        if max(number_found) > 1:
+        if any( [ x == 2 for x in number_found ] ):
             return True
         else:
             return False
