@@ -33,34 +33,26 @@
 
 
   !!  test for increasing digit values
-  recursive function is_increasing ( n ) result ( predicate )
-    integer, intent(in)        :: n
+  recursive function is_increasing ( as_integer ) result ( predicate )
+    integer, intent(in)        :: as_integer
     logical                    :: predicate
-    character(:), allocatable  :: chars
-    integer                    :: i, j, num_chars, a, b
+    integer                    :: i, a, b, current_modulus, n
 
-    chars = as_char_array( n )
-    num_chars = len( chars )
+    n = as_integer
+    do i = 5, 1, -1
+      current_modulus = mod( n, int( 10**i ) )
+      a = ( n - current_modulus )/10**i
+      n = current_modulus
+      current_modulus = mod( n, int( 10**(i-1) ) )
+      b = ( n - current_modulus )/10**(i-1)
+      if ( a .gt. b ) then
+        predicate = .false.
+        goto 100
+      endif
+    end do
 
-    if ( num_chars .eq. 1 ) then
-      predicate = .true.
-    else
-      do i = 1, num_chars
-        write(6,*) chars(i:i)
-        read( chars(i:i), '(I1)' ) a
-        !write(6,*) " a: ", a
-        do j = i+1, num_chars-i
-          read( chars(j:j), '(I1)' ) b
-          !write(6,*) " b: ", b
-          if ( a .gt. b ) then
-            predicate = .false.
-          else
-            predicate = is_increasing( mod( n, int( 10**i ) ) )
-          endif
-        enddo
-      enddo
-    endif
-
+    predicate = .true.
+    100 continue
     return
   end function is_increasing
 
@@ -82,6 +74,7 @@
   use subs
   implicit none
   integer :: upper_bound, lower_bound
+  integer :: test
 
   ! read puzzle input --- always six-digit integers
   open( 10, file="puzzle.txt")
@@ -92,7 +85,9 @@
 
   write(6,'(/,A,/)') ' as_char_array: '//as_char_array( lower_bound )
 
-  write(6,*) is_increasing( lower_bound )
+  !test = lower_bound
+  test = 123456
+  write(6,*) is_increasing( test )
 
   stop
  end program main
