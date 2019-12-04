@@ -4,16 +4,22 @@
 ##  subprograms
 ##
 
+def combo_maker ( lower_bound, upper_bound ):
+    length_of_input = len( puzzle_input )
+    for i in range( length_of_input )
+
+
+
 def rules ( puzzle_input, init_index, list_of_possibilities ):
     s = puzzle_input[:]
     if len(s) - init_index < 6:
         return list_of_possibilities
     possibility = []
     for i in range( init_index, len(s) ):
-        possibility.append( int(s[i]) )
+        possibility.append( s[i] )
         for j in range( i, len(s)-i ):
-            if int(s[i]) <= int(s[j]):
-                possibility.append( int(s[j]) )
+            if s[i] <= s[j]:
+                possibility.append( s[j] )
 
 
 
@@ -31,7 +37,7 @@ with open("puzzle.txt") as fo:
 
 print( " read %d characters from input file\n" % ( len(puzzle) ) )
 
-numerical_input = [ int( c ) for c in puzzle if c != '-' ]
+lower_bound = int( puzzle[:5] )
+upper_bound = int( puzzle[7:] )
 
-answer = rules( numerical_input, 0, [] )
 
