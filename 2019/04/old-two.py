@@ -5,15 +5,13 @@
 ##
 
 #  recursive predicate for checking for sequential increase
-#   is there a more obvious arithmetic test? yes ... see two.f90
+#   is there a more obvious arithmetic test ??
 def is_increasing ( string_of_digits ):
     if len( string_of_digits ) == 1:
         return True
-    i = 0
-    for a in string_of_digits:
-        i += 1
-        for b in string_of_digits[i:]:
-            if int(a) > int(b):
+    for i in range( len( string_of_digits ) ):
+        for j in range( i+1, len( string_of_digits )-i ):
+            if int(string_of_digits[i]) > int(string_of_digits[j]):
                 return False
             else:
                 return is_increasing( string_of_digits[1:] )
@@ -26,13 +24,15 @@ def has_repeats ( string_of_digits, repeated_digits_found ):
             return True                           # at least one single-repeat
         else:
             return False
+    elif len( string_of_digits ) == 2:            # work around range(0) have a len of 2
+            return has_repeats( "Q", repeated_digits_found )
     else:
-        a, b = [ d[i][0] for d in [ string_of_digits[:-1], string_of_digits[1:] ] for i in (0,1) ]
-        if int( a ) == int( b ):
-            j = int( a )                      # use its value for indexing
-            repeated_digits_found[j] += 1
-            # recur with remainder of string
-            return has_repeats( string_of_digits[1:], repeated_digits_found )
+        for i in range( len( string_of_digits )-1 ):
+            if int( string_of_digits[i] ) == int( string_of_digits[i+1] ):
+                j = int( string_of_digits[i] )    # use its value for indexing
+                repeated_digits_found[j] += 1
+                # recur with remainder of string
+                return has_repeats( string_of_digits[1:], repeated_digits_found )
     #return False                                 # should never get here
 
 
