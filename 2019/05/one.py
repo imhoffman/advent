@@ -61,7 +61,7 @@ def processor ( ram, ip ):
         ram[ ram[ip+1] ] = id_input
         return ram, ip+2
     elif opcode == 4:
-        print( "\n The program has outputted: %d\n\n" % ram[ ip+1 ] )
+        print( "\n The program has outputted: %d\n\n" % ram[ ram[ip+1] ] )
         return ram, ip+2
     elif opcode == 99:
         return ram, -1         # catch -1 in main and halt
@@ -85,4 +85,6 @@ while ip != -1:
     program, ip = processor( program, ip)
 
 print( "\n the value at position 0 after halting is %d\n\n" % program[0] )
+
+# 224 is too low
 
