@@ -58,44 +58,53 @@
 
 
   !!  test for repetitions as per rules
-  recursive function has_repeat ( as_integer ) result ( predicate )
+  recursive function has_repeat ( as_integer, repeat_counting_array ) result ( predicate )
     integer, intent(in)        :: as_integer
+    integer, intent(inout)     :: repeat_counting_array(10)
     logical                    :: predicate
     character(:), allocatable  :: chars
     integer, allocatable       :: as_integer_array(:)
-    integer                    :: repeat_counting_array(10)
-    integer                    :: i, j, num_chars, a, b
+    integer                    :: i, j, num_chars, integer_for_recur
 
     chars = as_char_array( as_integer )
     num_chars = len( chars )
     allocate( as_integer_array(num_chars) )
+    integer_for_recur = 0
 
     !!  terminal case: we have recurred down to one digit
     if ( num_chars .eq. 1 ) then
       do i = 1, 10
         if ( repeat_counting_array(i) .eq. 1 ) then
           predicate = .true.
-          goto 200
+        else
+          predicate = .false.
         endif
       enddo
     else
+    !!  recursive case
       do i = 1, num_chars-1
         if ( as_integer_array(i) .eq. as_integer_array(i+1) ) then
           j = as_integer_array(i)
           repeat_counting_array(j) = repeat_counting_array(j) + 1
-          do j = num_chars
-          current_modulus = mod( as_integer, int( 10**num_chars ) )
-          integer_for_recur = ( as_integer - current_modulus )/10**num_chars
-          predicate = has_repeat
+          do j = num_chars, 1, -1
+            integer_for_recur = integer_for_recur + as_integer_array(j)*10**(j-1)
+          enddo
+        endif
       enddo
+      predicate = has_repeat( integer_for_recur, repeat_counting_array )
     endif
 
-
     deallocate( as_integer_array )
-    predicate = .false.
-    200 continue
     return
   end function has_repeat
+
+  function apply_rules ( lower_bound, upper_bound ) result ( possible )
+    integer, intent(in)  :: lower_bound, upper_bound
+    logical              :: possible( upper_bound - lower_bound )
+
+    possible(1) = .true.
+    return
+  end function apply_rules
  end module subs
 
 !!
@@ -105,6 +114,7 @@
   use subs
   implicit none
   integer :: upper_bound, lower_bound
+  integer :: repeat_counting_array(10)
   integer :: test
 
   ! read puzzle input --- always six-digit integers
@@ -114,11 +124,11 @@
 
   write(6,'(/,A,I0,A,I0,A,/)') ' Using ', lower_bound, ' and ', upper_bound, ' as bounds.'
 
-  write(6,'(/,A,/)') ' as_char_array: '//as_char_array( lower_bound )
-
+  repeat_counting_array(:) = 0
   !test = lower_bound
   test = 123456
   write(6,*) test, " is increasing? ", is_increasing( test )
+  write(6,*) test, "   is repeat-y? ", has_repeat( test, repeat_counting_array )
 
   stop
  end program main
