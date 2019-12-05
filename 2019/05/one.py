@@ -7,7 +7,7 @@
 def parse_opcode ( ABCDE ):
     as_char_array = str( ABCDE )
     opcode = int( as_char_array[-1:] )
-    if opcode == 9 and int( as_char_array[-2:-1] ) == 99:
+    if opcode == 9:
         opcode = 99
     if as_char_array[-3:-2]:
         C = int( as_char_array[-3:-2] )
