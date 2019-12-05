@@ -73,7 +73,7 @@ def processor ( ram, ip ):
         else:
             arg2 = ram[ ram[ip+2] ]
         if arg1:
-            return ram, ram[ arg2 ]
+            return ram, arg2
         else:
             return ram, ip+3
     elif opcode == 6:
@@ -86,7 +86,7 @@ def processor ( ram, ip ):
         else:
             arg2 = ram[ ram[ip+2] ]
         if not arg1:
-            return ram, ram[ arg2 ]
+            return ram, arg2
         else:
             return ram, ip+3
     elif opcode == 7:
