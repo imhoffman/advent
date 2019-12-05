@@ -13,12 +13,12 @@ def parse_opcode ( ABCDE ):
         C = int( as_char_array[-3:-2] )
     else:
         C = 0
-    if as_char_array[:-4]:
-        B = int( as_char_array[:-4] )
+    if as_char_array[-4:-3]:
+        B = int( as_char_array[-4:-3] )
     else:
         B = 0
-    if as_char_array[:-5]:
-        A = int( as_char_array[:-5] )
+    if as_char_array[-5:-4]:
+        A = int( as_char_array[-5:-4] )
     else:
         A = 0
     return opcode, C, B, A
@@ -26,7 +26,7 @@ def parse_opcode ( ABCDE ):
 
 def processor ( ram, ip ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    print( " opcode:", ram[ip], "  parsed opcode:", opcode )
+    print( " ip:", ip, " opcode:", ram[ip], "  parsed opcode:", opcode, " modes:", mode1,mode2,mode3 )
     if   opcode == 1:
         if mode1:
             arg1 = ram[ip+1]
@@ -58,7 +58,7 @@ def processor ( ram, ip ):
         return ram, ip+4
     elif opcode == 3:
         id_input = int( input( "\n Please enter the ID of the system to test: " ) )
-        ram[ ip+1 ] = id_input
+        ram[ ram[ip+1] ] = id_input
         return ram, ip+2
     elif opcode == 4:
         print( "\n The program has outputted: %d\n\n" % ram[ ip+1 ] )
