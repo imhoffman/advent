@@ -42,54 +42,53 @@ def modal_parameters ( ram, ip, modes ):
         return arg1, arg2, arg3
 
 
-def processor ( ram, ip, amp_config ):
+def processor ( ram, ip, input_value ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
+    output_value = 0
     if opcode in ( 1, 2, 5, 6, 7, 8 ):
         arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
     if   opcode == 1:
         ram[ arg3 ] = arg1 + arg2
-        return ram, ip+4
+        return ram, ip+4, output_value
     elif opcode == 2:
         ram[ arg3 ] = arg1 * arg2
-        return ram, ip+4
+        return ram, ip+4, output_value
     elif opcode == 3:
-        #user_input = int( input( "\n Please provide input: " ) )
-        user_input = amp_config.provide_input()
-        ram[ ram[ip+1] ] = user_input
-        return ram, ip+2
+        ram[ ram[ip+1] ] = input_value
+        return ram, ip+2, output_value
     elif opcode == 4:
-        #print( "\n The program has outputted: %d\n\n" % ram[ ram[ip+1] ] )
-        amp_config.receive_output( ram[ ram[ip+1] ] )
-        return ram, ip+2
+        output_value = ( ram[ ram[ip+1] ] )
+        return ram, ip+2, output_value
     elif opcode == 5:
         if arg1:
-            return ram, arg2
+            return ram, arg2, output_value
         else:
-            return ram, ip+3
+            return ram, ip+3, output_value
     elif opcode == 6:
         if not arg1:
-            return ram, arg2
+            return ram, arg2, output_value
         else:
-            return ram, ip+3
+            return ram, ip+3, output_value
     elif opcode == 7:
         if arg1 < arg2:
             ram[ arg3 ] = 1
         else:
             ram[ arg3 ] = 0
-        return ram, ip+4
+        return ram, ip+4, output_value
     elif opcode == 8:
         if arg1 == arg2:
             ram[ arg3 ] = 1
         else:
             ram[ arg3 ] = 0
-        return ram, ip+4
+        return ram, ip+4, output_value
     elif opcode == 99:
-        return ram, -1         # catch -1 in main and halt
+        return ram, -1, output_value         # catch -1 in main and halt
     else:
         print("unknown opcode")
 
 
-class amplifiers:
+#  for passing inputs and outputs along the chain of amps
+class IO_handler:
   def __init__(self, phase_settings):
     self.settings = phase_settings
     self.number_of_calls = 0
@@ -114,13 +113,35 @@ class amplifiers:
 
   def thruster_output ( self ):
     return self.latest_output
+# end of IO_handler class
+
+
+#  the state of any one amplifier, including its ram
+def class amplifier:
+    def __init__( self, original_program, phase_setting ):
+        self.program = original_program
+        self.phase = phase_setting
+        self.input_value = 0
+        self.output_value = 0
+
+    def obtain_input( self, new_input ):
+        self.input_value = new_input
+        return
+
+    def generate_output( self ):
+        ip = 0
+        while ip != -1:
+            self.program, ip, output_val = processor( self.program, ip, self.input_value )
+        return
+
+
 
 
 def thrusters( program, phase_settings ):
     original_program = []
     original_program[:] = program[:]
 
-    amp_object = amplifiers( phase_settings )
+    amp_chain = IO_handler( phase_settings )
 
     ip = 0
     for _ in range(5):   # this needs to change
@@ -128,9 +149,9 @@ def thrusters( program, phase_settings ):
             ip = 0
             program[:] = original_program[:]
         while ip != -1:
-            program, ip = processor( program, ip, amp_object )
+            program, ip = processor( program, ip, amp_chain )
 
-    return amp_object.thruster_output()
+    return amp_chain.thruster_output()
 
 
 #  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
