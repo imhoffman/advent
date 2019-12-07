@@ -44,7 +44,7 @@ def modal_parameters ( ram, ip, modes ):
 
 def processor ( ram, ip, input_value ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    output_value = 0
+    output_value = -1   # default non-opcode-4 return value ... is this safe?
     if opcode in ( 1, 2, 5, 6, 7, 8 ):
         arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
     if   opcode == 1:
@@ -87,61 +87,41 @@ def processor ( ram, ip, input_value ):
         print("unknown opcode")
 
 
-#  for passing inputs and outputs along the chain of amps
-class IO_handler:
-  def __init__(self, phase_settings):
-    self.settings = phase_settings
-    self.number_of_calls = 0
-    self.latest_output = 0
-
-  def provide_input ( self ):
-    self.number_of_calls += 1
-    d = self.number_of_calls
-    if d < 11:
-        if d % 2 == 0:
-            f = self.latest_output
-        else:
-            f = self.settings[ int( (d-1)/2 ) ]
-    else:
-        f = self.latest_output
-    #print( " providing %d for the %dth input\n" % ( f, d ) )
-    return f
-
-  def receive_output ( self, n ):
-    self.latest_output = n
-    return
-
-  def thruster_output ( self ):
-    return self.latest_output
-# end of IO_handler class
-
 
 #  the state of any one amplifier, including its ram
 def class amplifier:
-    def __init__( self, original_program, phase_setting ):
-        self.program = original_program
+    def __init__( self, program, phase_setting ):
+        self.program = program
         self.phase = phase_setting
         self.input_value = 0
-        self.output_value = 0
+        self.original_program = []
+        self.original_program[:] = program[:]
 
     def obtain_input( self, new_input ):
         self.input_value = new_input
         return
 
     def generate_output( self ):
+        # "Don't restart the Amplifier Controller Software on any amplifier during this process" ... but that can't mean don't reset the program counter
         ip = 0
-        while ip != -1:
-            self.program, ip, output_val = processor( self.program, ip, self.input_value )
-        return
+        # "memory is not shared or reused between copies of the program" ... but maybe I shouldn't reload the program into ram (?)
+        #self.program[:] = self.original_program[:]
+        output_value = -1            # processor returns -1 when not opcode 4
+        while output_value == -1:
+            self.program, ip, output_value = processor( self.program, ip, self.input_value )
+        return output_value
 
 
 
 
 def thrusters( program, phase_settings ):
-    original_program = []
-    original_program[:] = program[:]
 
-    amp_chain = IO_handler( phase_settings )
+    # "memory is not shared or reused between copies of the program"
+    Amp_A = amplifier( program, phase_settings[0] )
+    Amp_B = amplifier( program, phase_settings[1] )
+    Amp_C = amplifier( program, phase_settings[2] )
+    Amp_D = amplifier( program, phase_settings[3] )
+    Amp_E = amplifier( program, phase_settings[4] )
 
     ip = 0
     for _ in range(5):   # this needs to change
