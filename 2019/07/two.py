@@ -44,7 +44,7 @@ def modal_parameters ( ram, ip, modes ):
 
 def processor ( ram, ip, input_value ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    output_value = -1   # default non-opcode-4 return value ... is this safe?
+    output_value = -42   # default non-opcode-4 return value ... is this safe?
     if opcode in ( 1, 2, 5, 6, 7, 8 ):
         arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
     if   opcode == 1:
@@ -54,6 +54,8 @@ def processor ( ram, ip, input_value ):
         ram[ arg3 ] = arg1 * arg2
         return ram, ip+4, output_value
     elif opcode == 3:
+        if input_value == -1:
+            output_value = -3   # this means `still running, waiting for input`
         ram[ ram[ip+1] ] = input_value
         return ram, ip+2, output_value
     elif opcode == 4:
@@ -82,20 +84,22 @@ def processor ( ram, ip, input_value ):
             ram[ arg3 ] = 0
         return ram, ip+4, output_value
     elif opcode == 99:
-        return ram, -1, output_value         # catch -1 in main and halt
+        output_value = -1
+        return ram, -1, output_value
     else:
         print("unknown opcode")
 
 
 
 #  the state of any one amplifier, including its ram
-def class amplifier:
+class amplifier:
     def __init__( self, program, phase_setting ):
         self.program = program
         self.phase = phase_setting
         self.input_value = 0
         self.original_program = []
         self.original_program[:] = program[:]
+        self.ip = 0
 
     def obtain_input( self, new_input ):
         self.input_value = new_input
@@ -103,14 +107,16 @@ def class amplifier:
 
     def generate_output( self ):
         # "Don't restart the Amplifier Controller Software on any amplifier during this process" ... but that can't mean don't reset the program counter
-        ip = 0
-        # "memory is not shared or reused between copies of the program" ... but maybe I shouldn't reload the program into ram (?)
+        #self.ip = 0
+        # "memory is not shared or reused between copies of the program" ... so maybe I shouldn't reload the program into ram on any one amp (?)
         #self.program[:] = self.original_program[:]
-        output_value = -1            # processor returns -1 when not opcode 4
-        while output_value == -1:
-            self.program, ip, output_value = processor( self.program, ip, self.input_value )
-        return output_value
-
+        output_value = 0            # `processor` returns -1 when not opcode 4
+        while output_value != -1 or output_value != -3:  # halted or waiting on input
+            self.program, self.ip, output_value = \
+                    processor( self.program, self.ip, self.input_value )
+            if output_value >= 0:   # keep any good output, then run more
+                good_output_value = output_value
+        return good_output_value, output_value
 
 
 
@@ -122,16 +128,23 @@ def thrusters( program, phase_settings ):
     Amp_C = amplifier( program, phase_settings[2] )
     Amp_D = amplifier( program, phase_settings[3] )
     Amp_E = amplifier( program, phase_settings[4] )
+    #amps = [ Amp_A, Amp_B, Amp_C, Amp_D, Amp_E ]
 
-    ip = 0
-    for _ in range(5):   # this needs to change
-        if ip == -1:
-            ip = 0
-            program[:] = original_program[:]
-        while ip != -1:
-            program, ip = processor( program, ip, amp_chain )
+    Amp_A.obtain_input(0)
+    final_output = False     # no way to catch this yet
+    while True:
+        #for amp1, amp2 in [ amps[:-1], amps[1:] ]:
+        #    amp2.obtain_input( amp1.generate_output() )
+        Amp_B.obtain_input( Amp_A.generate_output()[0] )
+        Amp_C.obtain_input( Amp_B.generate_output()[0] )
+        Amp_D.obtain_input( Amp_C.generate_output()[0] )
+        Amp_E.obtain_input( Amp_D.generate_output()[0] )
+        inp_A, exit_code = Amp_E.generate_output()
+        if exit_code == -1:    # if E halts (rather than -3), we're done
+            break
+        Amp_A.obtain_input( inp_A )
 
-    return amp_chain.thruster_output()
+    return inp_A
 
 
 #  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
