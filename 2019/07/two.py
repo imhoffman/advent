@@ -114,6 +114,7 @@ class amplifier:
         while output_value != -1 and output_value != -3:  # halted or waiting on input
             self.program, self.ip, output_value = \
                     processor( self.program, self.ip, self.input_value )
+            print( " looping through program in generate_output\n" )
             if output_value >= 0:   # keep any good output, then run more
                 good_output_value = output_value
         return good_output_value, output_value
