@@ -111,7 +111,7 @@ class amplifier:
         # "memory is not shared or reused between copies of the program" ... so maybe I shouldn't reload the program into ram on any one amp (?)
         #self.program[:] = self.original_program[:]
         output_value = 0            # `processor` returns -1 when not opcode 4
-        while output_value != -1 or output_value != -3:  # halted or waiting on input
+        while output_value != -1 and output_value != -3:  # halted or waiting on input
             self.program, self.ip, output_value = \
                     processor( self.program, self.ip, self.input_value )
             if output_value >= 0:   # keep any good output, then run more
@@ -131,7 +131,6 @@ def thrusters( program, phase_settings ):
     #amps = [ Amp_A, Amp_B, Amp_C, Amp_D, Amp_E ]
 
     Amp_A.obtain_input(0)
-    final_output = False     # no way to catch this yet
     while True:
         #for amp1, amp2 in [ amps[:-1], amps[1:] ]:
         #    amp2.obtain_input( amp1.generate_output() )
@@ -140,6 +139,7 @@ def thrusters( program, phase_settings ):
         Amp_D.obtain_input( Amp_C.generate_output()[0] )
         Amp_E.obtain_input( Amp_D.generate_output()[0] )
         inp_A, exit_code = Amp_E.generate_output()
+        print( " A just received %d from E\n" % inp_A )
         if exit_code == -1:    # if E halts (rather than -3), we're done
             break
         Amp_A.obtain_input( inp_A )
