@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from math import factorial
+from itertools import permutations
 
 ##
 ##  subprograms
@@ -106,7 +107,7 @@ class amplifiers:
         f = self.latest_output
     else:
         f = self.settings[ int( (d-1)/2 ) ]
-    print( " providing %d for the %dth input\n" % ( f, d ) )
+    #print( " providing %d for the %dth input\n" % ( f, d ) )
     return f
 
   def receive_output ( self, n ):
@@ -134,6 +135,17 @@ def thrusters( program, phase_settings ):
     return amp_object.thruster_output()
 
 
+#  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
+def search_phase_settings( program ):
+    temp_max = 0
+    for p in permutations( (4,3,2,1,0) ):
+        trial = thrusters( program, p )
+        if trial > temp_max:
+            temp_max = trial
+            best_config = p
+    return temp_max, best_config
+
+
 
 ##
 ##  main program
@@ -145,6 +157,6 @@ program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 
 print( "\n read %d commands from input file\n" % ( len(program) ) )
 
-phase_settings = ( 1, 0, 4, 3, 2 )
-print( "\n Thruster output: %d\n\n" % thrusters( program, phase_settings) )
+answer, config = search_phase_settings( program ) 
+print( "\n For phases", config, "maximal thruster output", answer, "is obtained.\n\n" )
 
