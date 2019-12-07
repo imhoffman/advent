@@ -44,13 +44,12 @@ def modal_parameters ( ram, ip, modes ):
 
 def processor ( ram, ip, amp_config ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    #print( " ip:", ip, " opcode:", ram[ip], "  parsed opcode:", opcode, " modes:", mode1,mode2,mode3 )
-    if   opcode == 1:
+    if opcode in ( 1, 2, 5, 6, 7, 8 ):
         arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
+    if   opcode == 1:
         ram[ arg3 ] = arg1 + arg2
         return ram, ip+4
     elif opcode == 2:
-        arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
         ram[ arg3 ] = arg1 * arg2
         return ram, ip+4
     elif opcode == 3:
@@ -63,26 +62,22 @@ def processor ( ram, ip, amp_config ):
         amp_config.receive_output( ram[ ram[ip+1] ] )
         return ram, ip+2
     elif opcode == 5:
-        arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
         if arg1:
             return ram, arg2
         else:
             return ram, ip+3
     elif opcode == 6:
-        arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
         if not arg1:
             return ram, arg2
         else:
             return ram, ip+3
     elif opcode == 7:
-        arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
         if arg1 < arg2:
             ram[ arg3 ] = 1
         else:
             ram[ arg3 ] = 0
         return ram, ip+4
     elif opcode == 8:
-        arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
         if arg1 == arg2:
             ram[ arg3 ] = 1
         else:
@@ -103,10 +98,13 @@ class amplifiers:
   def provide_input ( self ):
     self.number_of_calls += 1
     d = self.number_of_calls
-    if d % 2 == 0:
-        f = self.latest_output
+    if d < 11:
+        if d % 2 == 0:
+            f = self.latest_output
+        else:
+            f = self.settings[ int( (d-1)/2 ) ]
     else:
-        f = self.settings[ int( (d-1)/2 ) ]
+        f = self.latest_output
     #print( " providing %d for the %dth input\n" % ( f, d ) )
     return f
 
@@ -125,7 +123,7 @@ def thrusters( program, phase_settings ):
     amp_object = amplifiers( phase_settings )
 
     ip = 0
-    for _ in range(5):
+    for _ in range(5):   # this needs to change
         if ip == -1:
             ip = 0
             program[:] = original_program[:]
