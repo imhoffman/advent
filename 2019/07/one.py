@@ -41,7 +41,7 @@ def modal_parameters ( ram, ip, modes ):
         return arg1, arg2, arg3
 
 
-def processor ( ram, ip ):
+def processor ( ram, ip, amp_config ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
     #print( " ip:", ip, " opcode:", ram[ip], "  parsed opcode:", opcode, " modes:", mode1,mode2,mode3 )
     if   opcode == 1:
@@ -117,6 +117,24 @@ class amplifiers:
     return self.latest_output
 
 
+def thrusters( program, phase_settings ):
+    original_program = []
+    original_program[:] = program[:]
+
+    amp_object = amplifiers( phase_settings )
+
+    ip = 0
+    for _ in range(5):
+        if ip == -1:
+            ip = 0
+            program[:] = original_program[:]
+        while ip != -1:
+            program, ip = processor( program, ip, amp_object )
+
+    return amp_object.thruster_output()
+
+
+
 ##
 ##  main program
 ##
@@ -127,19 +145,6 @@ program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 
 print( "\n read %d commands from input file\n" % ( len(program) ) )
 
-original_program = []
-original_program[:] = program[:]
-
 phase_settings = ( 1, 0, 4, 3, 2 )
-amp_config = amplifiers( phase_settings )
-
-ip = 0                              # aka program counter
-for _ in range(5):
-    if ip == -1:
-        ip = 0
-        program[:] = original_program[:]
-    while ip != -1:
-        program, ip = processor( program, ip)
-
-print( "\n Thruster output: %d\n\n" % amp_config.thruster_output() )
+print( "\n Thruster output: %d\n\n" % thrusters( program, phase_settings) )
 
