@@ -21,7 +21,7 @@
   ((fn [s accum]
     (if (str/blank? s)
       accum
-      (let [r (subs s 0 (dec pixels_per_layer))]
+      (let [r (subs s 0 pixels_per_layer)]
         (recur (subs s pixels_per_layer) (conj accum r)))))
   input []))
 
