@@ -38,7 +38,11 @@
 (doseq [digit-count digit-counts]
   (println
     ;(.indexOf digit-counts digit-count)
-    (get digit-count \0)
-    (* (get digit-count \1) (get digit-count \2))))
+    " zeroes:" (format "%3d" (get digit-count \0))
+    ", ones:" (format "%3d" (get digit-count \1))
+    ", twos:" (format "%3d" (get digit-count \2))
+    ", answer product:" (* (get digit-count \1) (get digit-count \2))
+    ;(get layers (.indexOf digit-counts digit-count))
+  ))
 
 
