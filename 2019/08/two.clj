@@ -7,6 +7,13 @@
 (defn get-pixel [layers x y z]
   (get (get (get layers z) y) x))
 
+;; call with z=0
+(defn display-pixel [cube x y z]
+  (let [current-layer-value (get-pixel cube x y z)]
+    (if (and (= current-layer-value \2) (< z height))
+      (recur cube x y (inc z))
+      current-layer-value)))
+
 ;;
 ;;  main program
 ;;
@@ -30,14 +37,24 @@
 ;;  2D array for display
 (def layers-2d 
   (vec
-          (for [layer layers]
-            ((fn [s accum]
-               (if (str/blank? s)
-                 accum
-                 (recur (subs s width) (conj accum (subs s 0 width)))))
-             layer []))))
+    (for [layer layers]
+      ((fn [s accum]
+         (if (str/blank? s)
+           accum
+           (recur (subs s width) (conj accum (subs s 0 width)))))
+       layer []))))
 
 
-(println (get-pixel layers-2d 16 5 3))
+;;  # and . as per 2016 day 8
+(def display
+  (vec
+    (for [y (range height)] (conj []
+      (for [x (range width)]
+        (if (= (display-pixel layers-2d x y 0) \1) \# \.))))))
+
+(doseq [line display]
+  (println line))
+
+
 
 
