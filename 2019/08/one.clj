@@ -25,11 +25,14 @@
         (recur (subs s pixels_per_layer) (conj accum r)))))
   input []))
 
-(println (get layers 2))
 
 ;;  part one ruleset
-;(def part-one
-;  (for [layer layers]
-;    (min (frequencies
+(def digit-counts
+  (for [layer layers]
+    (frequencies layer)))
+
+;;(let [zeromin (min (for [digit-count digit-counts]
+(doseq [digit-count digit-counts]
+  (println (get digit-count \0) (* (get digit-count \1) (get digit-count \2))))
 
 
