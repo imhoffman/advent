@@ -59,7 +59,7 @@ def processor ( ram, ip, input_value ):
             return ram, ip, output_value    # hold on input ip
         else:
             ram[ ram[ip+1] ] = input_value
-            output_value = -3   # a neg value other than -3 ??
+            output_value = -4   # a neg value other than -3 ??
             return ram, ip+2, output_value
     elif opcode == 4:
         output_value = ( ram[ ram[ip+1] ] )
