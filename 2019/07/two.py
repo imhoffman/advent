@@ -44,7 +44,7 @@ def modal_parameters ( ram, ip, modes ):
 
 def processor ( ram, ip, input_value ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    output_value = -42   # default non-opcode-4 return value ... is this safe?
+    output_value = -42   # default 4 or 3 return value ... is this safe?
     if opcode in ( 1, 2, 5, 6, 7, 8 ):
         arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3) )
     if   opcode == 1:
@@ -54,10 +54,13 @@ def processor ( ram, ip, input_value ):
         ram[ arg3 ] = arg1 * arg2
         return ram, ip+4, output_value
     elif opcode == 3:
-        if input_value == -1:
+        if input_value < 0:
             output_value = -3   # this means `still running, waiting for input`
-        ram[ ram[ip+1] ] = input_value
-        return ram, ip+2, output_value
+            return ram, ip, output_value    # hold on input ip
+        else:
+            ram[ ram[ip+1] ] = input_value
+            output_value = -3   # a neg value other than -3 ??
+            return ram, ip+2, output_value
     elif opcode == 4:
         output_value = ( ram[ ram[ip+1] ] )
         return ram, ip+2, output_value
@@ -95,14 +98,17 @@ def processor ( ram, ip, input_value ):
 class amplifier:
     def __init__( self, program, phase_setting ):
         self.program = program
-        self.phase = phase_setting
-        self.input_value = 0
+        self.input_value = phase_setting
+        self.phase_not_yet_set = True
         self.original_program = []
         self.original_program[:] = program[:]
         self.ip = 0
 
     def obtain_input( self, new_input ):
-        self.input_value = new_input
+        if self.phase_not_yet_set:
+            self.phase_not_yet_set = False
+        else:
+            self.input_value = new_input
         return
 
     def generate_output( self ):
@@ -110,13 +116,26 @@ class amplifier:
         #self.ip = 0
         # "memory is not shared or reused between copies of the program" ... so maybe I shouldn't reload the program into ram on any one amp (?)
         #self.program[:] = self.original_program[:]
-        output_value = 0            # `processor` returns -1 when not opcode 4
-        while output_value != -1 and output_value != -3:  # halted or waiting on input
+        ##
+        ##   I am interpreting the puzzle to be that each amp runs an output
+        ##   procedure, we record that output, then let the program continues
+        ##   to run until it requires an input. At that point, we pass our output
+        ##   value to the next amp and remember the ip of the input command
+        ##   that is waiting. When this amp is called upon again, it will be
+        ##   called with a legit input value and we jump in at the ip of the
+        ##   input procedure that is hungry for it.
+        ##
+        output_value = 0            # `processor` returns -42 when not opcode 4
+        good_output_value = -888
+        while output_value not in (-1,-3):  # halted or needs to wait for input
             self.program, self.ip, output_value = \
                     processor( self.program, self.ip, self.input_value )
-            print( " looping through program in generate_output\n" )
-            if output_value >= 0:   # keep any good output, then run more
+            if output_value >= 0:   # keep any good output, then continue program
                 good_output_value = output_value
+            if output_value == -1:
+                good_output_value = -999     # some irrelevant value
+            if good_output_value == -888 and output_value == -3:
+                print( "\n attemping to enter wait mode without having outputed!" )
         return good_output_value, output_value
 
 
@@ -129,20 +148,20 @@ def thrusters( program, phase_settings ):
     Amp_C = amplifier( program, phase_settings[2] )
     Amp_D = amplifier( program, phase_settings[3] )
     Amp_E = amplifier( program, phase_settings[4] )
-    #amps = [ Amp_A, Amp_B, Amp_C, Amp_D, Amp_E ]
+    amps = [ Amp_A, Amp_B, Amp_C, Amp_D, Amp_E ]
 
+    for amp in amps:
+        amp.obtain_input(0)      # initialize phase setting
     Amp_A.obtain_input(0)
     while True:
-        #for amp1, amp2 in [ amps[:-1], amps[1:] ]:
-        #    amp2.obtain_input( amp1.generate_output() )
         Amp_B.obtain_input( Amp_A.generate_output()[0] )
         Amp_C.obtain_input( Amp_B.generate_output()[0] )
         Amp_D.obtain_input( Amp_C.generate_output()[0] )
         Amp_E.obtain_input( Amp_D.generate_output()[0] )
         inp_A, exit_code = Amp_E.generate_output()
-        print( " A just received %d from E\n" % inp_A )
-        if exit_code == -1:    # if E halts (rather than -3), we're done
+        if exit_code == -1:    # if E halts (-1 rather than -3), we're done
             break
+        print( " Amp A just received %d from Amp E\n" % inp_A )
         Amp_A.obtain_input( inp_A )
 
     return inp_A
@@ -151,7 +170,8 @@ def thrusters( program, phase_settings ):
 #  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
 def search_phase_settings( program ):
     temp_max = 0
-    for p in permutations( (9,8,7,6,5) ):
+    for p in ( (9,7,8,5,6), (5,6,7,8,9) ):
+    #for p in permutations( (9,8,7,6,5) ):
         trial = thrusters( program, p )
         if trial > temp_max:
             temp_max = trial
