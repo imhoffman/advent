@@ -4,10 +4,11 @@
 (def height 6)
 (def pixels_per_layer (* width height))
 
+;;  rather than `aget` within the other functions
 (defn get-pixel [layers x y z]
   (get (get (get layers z) y) x))
 
-;; call with z=0
+;;  initially call with z=0, i.e. looking down from the top
 (defn display-pixel [cube x y z]
   (let [current-layer-value (get-pixel cube x y z)]
     (if (= current-layer-value \2)
@@ -45,16 +46,16 @@
        layer []))))
 
 
-;;  # and . as per 2016 day 8
+;; colours and #/. as per 2016 day 8
 (def display
   (vec
     (for [y (range height)] (conj []
       (for [x (range width)]
-        (if (= (display-pixel layers-2d x y 0) \1) \# \.))))))
+        (if (= (display-pixel layers-2d x y 0) \1)
+          "\033[31m\033[1m\033[43m#\033[0m" \.))))))
 
+;; pretty print
 (doseq [line display]
-  (println line))
-
-
+    (println (map str/join line)))
 
 
