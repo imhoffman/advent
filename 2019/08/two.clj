@@ -10,7 +10,7 @@
 ;; call with z=0
 (defn display-pixel [cube x y z]
   (let [current-layer-value (get-pixel cube x y z)]
-    (if (and (= current-layer-value \2) (< z height))
+    (if (= current-layer-value \2)
       (recur cube x y (inc z))
       current-layer-value)))
 
