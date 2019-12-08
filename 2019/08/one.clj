@@ -31,8 +31,14 @@
   (for [layer layers]
     (frequencies layer)))
 
-;;(let [zeromin (min (for [digit-count digit-counts]
+(println "The fewest zeros on any layer is"
+         (apply min (for [digit-count digit-counts] (get digit-count \0)))
+         "\n Find its entry on the list below.")
+
 (doseq [digit-count digit-counts]
-  (println (get digit-count \0) (* (get digit-count \1) (get digit-count \2))))
+  (println
+    ;(.indexOf digit-counts digit-count)
+    (get digit-count \0)
+    (* (get digit-count \1) (get digit-count \2))))
 
 
