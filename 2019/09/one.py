@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import numpy as np
+
 ##
 ##  subprograms
 ##
@@ -7,7 +9,7 @@
 def parse_opcode ( ABCDE ):
     as_char_array = str( ABCDE )
     opcode = int( as_char_array[-1:] )
-    if opcode == 9 and int( as_char_array[-2:-1] ) == 9:
+    if opcode == 9 and len(as_char_array) > 1 and int( as_char_array[-2:-1] ) == 9:
         opcode = 99
     if as_char_array[-3:-2]:
         C = int( as_char_array[-3:-2] )
@@ -24,22 +26,32 @@ def parse_opcode ( ABCDE ):
     return opcode, C, B, A
 
 #  for fetching the appropriate value as per the instruction modalities
-def modal_parameters ( ram, ip, modes, base ):
-    # first param
-    if modes[0] == 1:
-        arg1 = ram[ip+1]
-    elif modes[0] == 2:
-        arg1 = ram[ ram[ip+1] ] + base
+#   "Parameters that an instruction writes to will never be in immediate mode."
+#   see writing location switches below
+def modal_parameters ( opcode, ram, ip, modes, base ):
+    if opcode == 99:
+        return 0, 0, 0
+    # first param; arg1 is the writing location of opcode 3
+    if opcode == 3:
+        if modes[0] == 2:
+            arg1 = ram[ip+1] + base
+        else:
+            arg1 = ram[ip+1]
     else:
-        arg1 = ram[ ram[ip+1] ]
+        if modes[0] == 1:
+            arg1 = ram[ip+1]
+        elif modes[0] == 2:
+            arg1 = ram[ ram[ip+1] + base ]
+        else:
+            arg1 = ram[ ram[ip+1] ]
     # second param
     if modes[1] == 1:
         arg2 = ram[ip+2]
     elif modes[1] == 2:
-        arg2 = ram[ ram[ip+2] ] + base
+        arg2 = ram[ ram[ip+2] + base ]
     else:
         arg2 = ram[ ram[ip+2] ]
-    # "Parameters that an instruction writes to will never be in immediate mode."
+    # third param; arg3 is the writing location of opcodes 1,2,7,8
     if modes[2] == 2:
         arg3 = ram[ip+3] + base
     else:
@@ -49,8 +61,8 @@ def modal_parameters ( ram, ip, modes, base ):
 
 def processor ( ram, ip, base ):
     opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    if opcode in ( 1, 2, 5, 6, 7, 8, 9 ):
-        arg1, arg2, arg3 = modal_parameters( ram, ip, (mode1, mode2, mode3), base )
+    arg1, arg2, arg3 = \
+            modal_parameters( opcode, ram, ip, (mode1, mode2, mode3), base )
     if   opcode == 1:
         ram[ arg3 ] = arg1 + arg2
         return ram, ip+4, base
@@ -59,10 +71,10 @@ def processor ( ram, ip, base ):
         return ram, ip+4, base
     elif opcode == 3:
         id_input = int( input( "\n Please provide a program input: " ) )
-        ram[ ram[ip+1] ] = id_input
+        ram[ arg1 ] = id_input
         return ram, ip+2, base
     elif opcode == 4:
-        print( "\n The program has outputted: %d\n\n" % ram[ ram[ip+1] ] )
+        print( "\n The program has outputted: %d\n\n" % arg1 )
         return ram, ip+2, base
     elif opcode == 5:
         if arg1:
@@ -87,7 +99,7 @@ def processor ( ram, ip, base ):
             ram[ arg3 ] = 0
         return ram, ip+4, base
     elif opcode == 9:
-        return ram, ip+3, base+arg1
+        return ram, ip+2, base+arg1
     elif opcode == 99:
         return ram, -1, base
     else:
@@ -106,11 +118,13 @@ program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 print( "\n read %d commands from input file\n" % ( len(program) ) )
 
 # "The computer's available memory should be much larger than the initial program."
-for _ in range(8192):
-    program.append(0)
+#   numpy arrays are _way_ faster
+ram_array = np.asarray( program )
+padding = np.zeros( 900000000, dtype=int )
+ram_array = np.append( ram_array, padding )
 
 ip = 0
 base = 0
 while ip != -1:
-    program, ip, base = processor( program, ip, base )
+    ram_array, ip, base = processor( ram_array, ip, base )
 
