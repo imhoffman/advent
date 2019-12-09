@@ -14,8 +14,6 @@
 
 ;;  for determining direct orbits
 ;;   call initially with dict as an empty hash map (i.e., dictionary)
-;;
-;;   do I need to pass the empty dict?  or can I return a `let`ed dict?
 (defn direct-orbit-dict [pairs dict]
   (let [a (bary (first pairs))]
     (if (empty? a)
@@ -25,7 +23,8 @@
       )))
 
 
-;;  find the intersection of the barycenter set and the satellite set ...
+;;  find the intersection of the keys of the barycenter set and the satellite set ...
+;;   then add up the values of those keys ?
 
 
 
@@ -45,4 +44,6 @@
 
 
 (println " Number of direct orbits in map:" (apply + (vals (direct-orbit-dict pairs {}))))
+
+(println (direct-orbit-dict pairs {}))
 
