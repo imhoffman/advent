@@ -13,7 +13,9 @@
 (defn satl [pair] (last pair))
 
 ;;  for determining direct orbits
-;;   call initially with dict as an empty hash map
+;;   call initially with dict as an empty hash map (i.e., dictionary)
+;;
+;;   do I need to pass the empty dict?  or can I return a `let`ed dict?
 (defn direct-orbit-dict [pairs dict]
   (let [a (bary (first pairs))]
     (if (empty? a)
@@ -21,6 +23,10 @@
       (recur (rest pairs)
              (assoc dict a (if (contains? dict a) (inc (get dict a)) 1)))
       )))
+
+
+;;  find the intersection of the barycenter set and the satellite set ...
+
 
 
 
