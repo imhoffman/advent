@@ -6,28 +6,23 @@ import numpy as np
 ##  subprograms
 ##
 
+#  unpack individual integers from compound Intcode
 def parse_opcode ( ABCDE ):
+    A, B, C = 0, 0, 0
     as_char_array = str( ABCDE )
     opcode = int( as_char_array[-1:] )
     if opcode == 9 and len(as_char_array) > 1 and int( as_char_array[-2:-1] ) == 9:
         opcode = 99
     if as_char_array[-3:-2]:
         C = int( as_char_array[-3:-2] )
-    else:
-        C = 0
     if as_char_array[-4:-3]:
         B = int( as_char_array[-4:-3] )
-    else:
-        B = 0
     if as_char_array[-5:-4]:
         A = int( as_char_array[-5:-4] )
-    else:
-        A = 0
-    return opcode, C, B, A
+    return opcode, (C, B, A)
 
 #  for fetching the appropriate value as per the instruction modalities
 #   "Parameters that an instruction writes to will never be in immediate mode."
-#   see writing location switches below
 def modal_parameters ( opcode, ram, ip, modes, base ):
     if opcode == 99:
         return 0, 0, 0
@@ -59,49 +54,48 @@ def modal_parameters ( opcode, ram, ip, modes, base ):
     return arg1, arg2, arg3
 
 
-def processor ( ram, ip, base ):
-    opcode, mode1, mode2, mode3 = parse_opcode( ram[ip] )
-    arg1, arg2, arg3 = \
-            modal_parameters( opcode, ram, ip, (mode1, mode2, mode3), base )
+def processor ( ram, ip, base_addr ):
+    opcode, modes = parse_opcode( ram[ip] )
+    arg1, arg2, arg3 = modal_parameters( opcode, ram, ip, modes, base_addr )
     if   opcode == 1:
         ram[ arg3 ] = arg1 + arg2
-        return ram, ip+4, base
+        return ram, ip+4, base_addr
     elif opcode == 2:
         ram[ arg3 ] = arg1 * arg2
-        return ram, ip+4, base
+        return ram, ip+4, base_addr
     elif opcode == 3:
         id_input = int( input( "\n Please provide a program input: " ) )
         ram[ arg1 ] = id_input
-        return ram, ip+2, base
+        return ram, ip+2, base_addr
     elif opcode == 4:
         print( "\n The program has outputted: %d\n\n" % arg1 )
-        return ram, ip+2, base
+        return ram, ip+2, base_addr
     elif opcode == 5:
         if arg1:
-            return ram, arg2, base
+            return ram, arg2, base_addr
         else:
-            return ram, ip+3, base
+            return ram, ip+3, base_addr
     elif opcode == 6:
         if not arg1:
-            return ram, arg2, base
+            return ram, arg2, base_addr
         else:
-            return ram, ip+3, base
+            return ram, ip+3, base_addr
     elif opcode == 7:
         if arg1 < arg2:
             ram[ arg3 ] = 1
         else:
             ram[ arg3 ] = 0
-        return ram, ip+4, base
+        return ram, ip+4, base_addr
     elif opcode == 8:
         if arg1 == arg2:
             ram[ arg3 ] = 1
         else:
             ram[ arg3 ] = 0
-        return ram, ip+4, base
+        return ram, ip+4, base_addr
     elif opcode == 9:
-        return ram, ip+2, base+arg1
+        return ram, ip+2, base_addr + arg1
     elif opcode == 99:
-        return ram, -1, base
+        return ram, -1, base_addr
     else:
         print("unknown opcode")
 
@@ -115,16 +109,16 @@ with open("puzzle.txt") as fo:
 
 program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 
-print( "\n read %d commands from input file\n" % ( len(program) ) )
+print( "\n read %d Intcodes from input file\n" % ( len(program) ) )
 
 # "The computer's available memory should be much larger than the initial program."
-#   numpy arrays are _way_ faster
+#   numpy arrays are faster that linked lists
 ram_array = np.asarray( program )
 padding = np.zeros( 900000000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
 ip = 0
-base = 0
+base_addr = 0
 while ip != -1:
-    ram_array, ip, base = processor( ram_array, ip, base )
+    ram_array, ip, base_addr = processor( ram_array, ip, base_addr )
 
