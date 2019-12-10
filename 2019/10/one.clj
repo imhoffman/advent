@@ -8,8 +8,7 @@
 (def input
   (with-open [f (clojure.java.io/reader "puzzle.txt")]
     (reduce conj [] (vec (line-seq f)))))
-    ;(reduce conj [] (line-seq f))))
-(println "Read" (count input) "lines.")
+;(println "Read" (count input) "lines.")
 
 (def width (count (get input 0)))
 (def height (count input))
