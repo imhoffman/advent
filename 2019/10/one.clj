@@ -24,11 +24,9 @@
 (defn los-search [input x y slope nearest-found]
   (let [width (count (get input 0))
         height (count input)]
-    (if (= y height)
+    (if (= y height)     ;; this condition is meaningless---simply testing
       nearest-found
       (recur input x (inc y) slope (conj nearest-found (list x y))))))
-
-
 
 
 
@@ -45,4 +43,6 @@
 
 ;(show-map input)
 (show-map input 11 13)
+
+(println (los-search input 11 13 0 #{}))
 
