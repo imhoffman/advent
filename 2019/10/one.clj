@@ -1,5 +1,24 @@
 (require '[clojure.string :as str])
 
+;;  "array" fetcher
+(defn get-map-val [input x y] (get (get input y) x))
+
+;;  visualize data, optionally with solution
+(defn show-map [input & ordered-pair]
+  (let [x (first ordered-pair)
+        y (second ordered-pair)
+        height (count input)]
+    (doseq [i (range height)]
+      (if (= i y)
+        (println (str (subs (get input i) 0 x)
+                      "\033[31m\033[1m\033[43m"
+                      (get-map-val input x y)
+                      "\033[0m"
+                      (subs (get input i) (inc x))))
+        (println (get input i))))))
+
+
+
 
 ;;
 ;;  main program
@@ -13,6 +32,6 @@
 (def width (count (get input 0)))
 (def height (count input))
 
-(doseq [i (range height)]
-  (println (get input i)))
+;(show-map input)
+(show-map input 11 13)
 
