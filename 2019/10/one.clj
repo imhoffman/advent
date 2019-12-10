@@ -3,7 +3,7 @@
 ;;  "array" fetcher
 (defn get-map-val [input x y] (get (get input y) x))
 
-;;  visualize data, optionally with solution
+;;  visualize data, optionally with "solution"
 (defn show-map [input & ordered-pair]
   (let [x (first ordered-pair)
         y (second ordered-pair)
@@ -18,6 +18,19 @@
         (println (get input i))))))
 
 
+;;  call initially with empty hash-set for `nearest-found`
+;;   the hash-set is the accumulator
+;;   not sure what slope is yet
+(defn los-search [input x y slope nearest-found]
+  (let [width (count (get input 0))
+        height (count input)]
+    (if (= y height)
+      nearest-found
+      (recur input x (inc y) slope (conj nearest-found (list x y))))))
+
+
+
+
 
 
 ;;
@@ -29,8 +42,6 @@
     (reduce conj [] (vec (line-seq f)))))
 ;(println "Read" (count input) "lines.")
 
-(def width (count (get input 0)))
-(def height (count input))
 
 ;(show-map input)
 (show-map input 11 13)
