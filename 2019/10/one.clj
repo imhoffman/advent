@@ -29,6 +29,15 @@
       (recur input x (inc y) slope (conj nearest-found (list x y))))))
 
 
+;;
+(defn asteroid-set [input]
+  (reduce conj #{}
+          (for [ordered-pair input]    ;;  need to unpack the array axes here ...
+            (let [x (first ordered-pair)
+                  y (second ordered-pair)]
+              (when (= (get-map-val input x y) \#) ordered-pair)))))
+
+
 
 
 ;;
@@ -41,8 +50,9 @@
 ;(println "Read" (count input) "lines.")
 
 
-;(show-map input)
-(show-map input 11 13)
+(show-map input)
+;(show-map input 11 13)
 
-(println (los-search input 11 13 0 #{}))
+;(println (los-search input 11 13 0 #{}))
 
+(println (asteroid-set input))
