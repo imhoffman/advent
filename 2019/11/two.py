@@ -59,7 +59,7 @@ class HullPaintingRobot(object):
         self.ram = program
         self.ip = 0
         self.base_addr = 0
-        self.position = [0,0]
+        self.position = [8,8]     # start somewhere that the state index doesn't go negative
         self.facing = "N"
         self.visited = set()
         self.visited.add( ( self.position[0], self.position[1] ) )
@@ -186,16 +186,9 @@ class HullPaintingRobot(object):
        length = self.length
        width = self.width
        state = self.hull_state
-       ##  work-around for wonky first row
-       print()
-       for i in range( length ):
-           if state[i][0] == 0 :
-               print( '.', end='', flush=True )
-           else:
-               print( '\033[31m\033[1m\033[43m#\033[0m', end='', flush=True )
-       print()
-       ## end work-around
-       for j in range( width-1, 0, -1 ):
+       # swap notions of `width` and `length` and flip vertically
+       #  I'm not sure how I loaded flipped...
+       for j in range( width-1, -1, -1 ):
            for i in range( length ):
                if state[i][j] == 0 :
                    print( '.', end='', flush=True )
@@ -224,7 +217,8 @@ ram_array = np.asarray( program )
 padding = np.zeros( 900000000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
-robot = HullPaintingRobot( ram_array, 6, 44 )
+#  shrunk the hull to fit part two...
+robot = HullPaintingRobot( ram_array, 12, 60 )
 robot.execute()
 print( "\n Number of visited hull locations: %d\n\n" % len( robot.visited ) )
 robot.render()
