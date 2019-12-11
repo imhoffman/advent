@@ -54,7 +54,7 @@ def modal_parameters ( opcode, ram, ip, modes, base ):
     return arg1, arg2, arg3
 
 
-class HullPaintingRobot:
+class HullPaintingRobot(object):
     def __init__( self, program, width, length ):
         self.ram = program
         self.ip = 0
@@ -63,27 +63,31 @@ class HullPaintingRobot:
         self.facing = "N"
         self.visited = set( (0,0) )
         self.number_of_outputs = 0
-        self.array_of_outputs = [0,0]
+        self.array_of_outputs = [-1,-1]
         self.width = width
         self.length = length
         self.hull_state = [ [ 0 for _ in range(width) ] for _ in range(length) ]
         return
 
     def input_to_program ( self ):
+        #print( " camera sees a %d\n" % self.hull_state[ self.position[0] ][ self.position[1] ] )
         return self.hull_state[ self.position[0] ][ self.position[1] ]
 
 
     def output_from_program ( self, value ):
         if self.number_of_outputs == 0:
-            self.array_of_outputs[0] == value
+            self.array_of_outputs[0] = value
             self.number_of_outputs = 1
+            #print( " the program wants to paint a %d\n" % self.array_of_outputs[0] )
             return
         elif self.number_of_outputs == 1:
-            self.array_of_outputs[1] == value
+            self.array_of_outputs[1] = value
             self.hull_state[ self.position[0] ][ self.position[1] ] = \
                     self.array_of_outputs[0]
             self.move_robot( self.array_of_outputs[1] )
             self.number_of_outputs = 0
+            self.array_of_outputs = [-1,-1]
+            #print( " the program wants to turn %d\n" % self.array_of_outputs[1] )
             return
         else:
             print( " problem with output handler\n" )
@@ -134,9 +138,11 @@ class HullPaintingRobot:
             ram[ arg3 ] = arg1 * arg2
             return ram, ip+4, base_addr
         elif opcode == 3:
-            ram[ arg1 ] = self.input_to_program()
+            input_paint_color = self.input_to_program()
+            ram[ arg1 ] = input_paint_color
             return ram, ip+2, base_addr
         elif opcode == 4:
+            #print( " program outputs a %d\n" % arg1 )
             self.output_from_program( arg1 )
             return ram, ip+2, base_addr
         elif opcode == 5:
