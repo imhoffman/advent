@@ -186,15 +186,23 @@ class HullPaintingRobot(object):
        length = self.length
        width = self.width
        state = self.hull_state
+       ##  work-around for wonky first row
        print()
        for i in range( length ):
-           for j in range( width ):
+           if state[i][0] == 0 :
+               print( '.', end='', flush=True )
+           else:
+               print( '\033[31m\033[1m\033[43m#\033[0m', end='', flush=True )
+       print()
+       ## end work-around
+       for j in range( width-1, 0, -1 ):
+           for i in range( length ):
                if state[i][j] == 0 :
                    print( '.', end='', flush=True )
                else:
                    print( '\033[31m\033[1m\033[43m#\033[0m', end='', flush=True )
            print()
-
+       print()
 
 ##  end of robot class
 
@@ -216,7 +224,7 @@ ram_array = np.asarray( program )
 padding = np.zeros( 900000000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
-robot = HullPaintingRobot( ram_array, 128, 128 )
+robot = HullPaintingRobot( ram_array, 6, 44 )
 robot.execute()
 print( "\n Number of visited hull locations: %d\n\n" % len( robot.visited ) )
 robot.render()
