@@ -61,7 +61,8 @@ class HullPaintingRobot(object):
         self.base_addr = 0
         self.position = [0,0]
         self.facing = "N"
-        self.visited = set( (0,0) )
+        self.visited = set()
+        self.visited.add( ( self.position[0], self.position[1] ) )
         self.number_of_outputs = 0
         self.array_of_outputs = [-1,-1]
         self.width = width
@@ -70,7 +71,6 @@ class HullPaintingRobot(object):
         return
 
     def input_to_program ( self ):
-        #print( " camera sees a %d\n" % self.hull_state[ self.position[0] ][ self.position[1] ] )
         return self.hull_state[ self.position[0] ][ self.position[1] ]
 
 
@@ -78,7 +78,6 @@ class HullPaintingRobot(object):
         if self.number_of_outputs == 0:
             self.array_of_outputs[0] = value
             self.number_of_outputs = 1
-            #print( " the program wants to paint a %d\n" % self.array_of_outputs[0] )
             return
         elif self.number_of_outputs == 1:
             self.array_of_outputs[1] = value
@@ -87,7 +86,6 @@ class HullPaintingRobot(object):
             self.move_robot( self.array_of_outputs[1] )
             self.number_of_outputs = 0
             self.array_of_outputs = [-1,-1]
-            #print( " the program wants to turn %d\n" % self.array_of_outputs[1] )
             return
         else:
             print( " problem with output handler\n" )
@@ -142,7 +140,6 @@ class HullPaintingRobot(object):
             ram[ arg1 ] = input_paint_color
             return ram, ip+2, base_addr
         elif opcode == 4:
-            #print( " program outputs a %d\n" % arg1 )
             self.output_from_program( arg1 )
             return ram, ip+2, base_addr
         elif opcode == 5:
@@ -204,4 +201,6 @@ ram_array = np.append( ram_array, padding )
 robot = HullPaintingRobot( ram_array, 1024, 1024 )
 robot.execute()
 print( "\n Number of visited hull locations: %d\n\n" % len( robot.visited ) )
+
+# 2042 is too high
 
