@@ -10,11 +10,19 @@
               (str/index-of moon \,) (str/index-of moon \>))]
       (recur (subs moon (inc j))
              (conj accum (Integer/parseInt (subs moon (inc i) j)))))))
-                                        
-(defn find-vel [moons-xp]
-  (let [x (first moons-xp)
-        v (second moons-xp)]))
 
+
+(defn find-vel [moons-xp]
+  (let [moon-x (first moons-xp)
+        moon-v (second moons-xp)]
+    (for [moon moon-x]
+       ;; compute self-pair since no Dvel
+      (for [pair1 (range 4)] (for [pair2 (range 4)]
+        (for [axis (range 3)]
+          (do
+            (when (> (get (get moon pair1) axis) (get (get moon pair2) axis) 1))
+            (when (< (get (get moon pair1) axis) (get (get moon pair2) axis) -1))
+            (when (= (get (get moon pair1) axis) (get (get moon pair2) axis) 0)))))))))
 
 
 
@@ -28,11 +36,12 @@
 (println "Read" (count input) "lines.")
 
 ;;  load up boundary condition
-;;   vector of: vector of x, vector of xdot
+;;   array of: array of x, array of xdot ... arrays are dirty here
 (def initial-phases
-  (vector 
-    (vec (for [moon input] (get-xyz moon [])))
-    (vec (for [_ (range 4)] (vector 0 0 0)))))
+  (into-array (vector
+    (into-array (vec (for [moon input] (get-xyz moon []))))
+    (into-array (vec (for [_ (range 4)] (vector 0 0 0)))))))
 
-(println initial-phases)
+(println (get (aget initial-phases 0 3) 1))
+
 
