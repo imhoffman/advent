@@ -64,7 +64,7 @@ class ArcadeCabinet(object):
         self.array_of_outputs = [-1,-1,-1]     # for testing
         self.width = width
         self.length = length
-        self.hull_state = [ [ 0 for _ in range(width) ] for _ in range(length) ]
+        self.screen_state = [ [ 0 for _ in range(width) ] for _ in range(length) ]
         return
 
 
@@ -87,6 +87,7 @@ class ArcadeCabinet(object):
             if (-1,0) == ( self.array_of_outputs[0], self.array_of_outputs[1] ):
                 print( " current score: %d\n" % value )
             else:
+                self.screen_state[ self.array_of_outputs[0] ][ self.array_of_outputs[1] ] = value
                 self.render()
             self.number_of_outputs = 0
             self.array_of_outputs = [-1,-1,-1]
@@ -113,6 +114,7 @@ class ArcadeCabinet(object):
             ram[ arg1 ] = joystick
             return ram, ip+2, base_addr
         elif opcode == 4:
+            #print( " output: %d\n" % arg1 )
             self.output_from_program( arg1 )
             return ram, ip+2, base_addr
         elif opcode == 5:
@@ -153,19 +155,23 @@ class ArcadeCabinet(object):
 
 
     def render ( self ):
-       length = self.length
-       width = self.width
-       state = self.hull_state
-       # swap notions of `width` and `length` and flip vertically
-       #  I'm not sure how I loaded flipped...
-       for j in range( width-1, -1, -1 ):
-           for i in range( length ):
-               if state[i][j] == 0 :
-                   print( '.', end='', flush=True )
-               else:
-                   print( '\033[31m\033[1m\033[43m#\033[0m', end='', flush=True )
-           print()
-       print()
+        length = self.length
+        width = self.width
+        state = self.screen_state
+        for i in range( length ):
+            for j in range( width ):
+                if state[i][j] == 0:
+                    print( ' ', end='', flush=True )
+                elif state[i][j] == 1:
+                    print( '#', end='', flush=True )
+                elif state[i][j] == 2:
+                    print( ':', end='', flush=True )
+                elif state[i][j] == 3:
+                    print( '[', end='', flush=True )
+                elif state[i][j] == 4:
+                    print( '\033[31m\033[1m\033[43mo\033[0m', end='', flush=True )
+            print()
+        print()
 
 ##  end of robot class
 
@@ -184,11 +190,10 @@ print( "\n read %d Intcodes from input file\n" % ( len(program) ) )
 # "The computer's available memory should be much larger than the initial program."
 #   numpy arrays are faster that linked lists
 ram_array = np.asarray( program )
-padding = np.zeros( 900000000, dtype=int )
+padding = np.zeros( 900000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
-#  guess at screen size
-cabinet = ArcadeCabinet( ram_array, 128, 128 )
+#  guess at screen size based on output integers
+cabinet = ArcadeCabinet( ram_array, 24, 44 )
 cabinet.execute()
-print( "\n Number of block tiles: %d\n\n" % cabinet.tiles[2] )
 
