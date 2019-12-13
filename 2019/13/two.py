@@ -59,7 +59,7 @@ class ArcadeCabinet(object):
         self.ram = program
         self.ip = 0
         self.base_addr = 0
-        self.tiles ={} 
+        self.blocks = 0
         self.number_of_outputs = 0
         self.array_of_outputs = [-1,-1,-1]     # for testing
         self.width = width
@@ -84,6 +84,8 @@ class ArcadeCabinet(object):
             return
         elif self.number_of_outputs == 2:
             self.array_of_outputs[2] = value
+            if value == 2:
+                self.blocks += 1
             if (-1,0) == ( self.array_of_outputs[0], self.array_of_outputs[1] ):
                 print( " current score: %d\n" % value )
             else:
@@ -165,7 +167,7 @@ class ArcadeCabinet(object):
                 elif state[i][j] == 1:
                     print( '#', end='', flush=True )
                 elif state[i][j] == 2:
-                    print( ':', end='', flush=True )
+                    print( '\033[36m8\033[0m', end='', flush=True )
                 elif state[i][j] == 3:
                     print( '[', end='', flush=True )
                 elif state[i][j] == 4:
