@@ -12,5 +12,13 @@
 (println "Read" (count input) "lines.")
 
 
+(def ins-and-outs
+(for [rxn input]
+  (let [j    (dec (str/index-of rxn \=))
+        ins  (subs rxn 0 j)
+        outs (subs rxn (+ j 4))]
+    (list ins outs)))
+   )
 
+(doseq [s ins-and-outs] (println s))
 
