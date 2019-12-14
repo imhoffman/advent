@@ -65,11 +65,24 @@ class ArcadeCabinet(object):
         self.width = width
         self.length = length
         self.screen_state = [ [ 0 for _ in range(width) ] for _ in range(length) ]
+        self.cheat = False
+        self.cheat_count = 0
+        self.cheat_limit = 5000
         return
 
 
     def input_to_program ( self ):
-        joystick = int( input( "Joystick (-1, 0, 1): " ) )
+        if self.cheat and self.cheat_count < self.cheat_limit:
+            joystick = 0
+            self.cheat_count += 1
+        else:
+            self.cheat_count = 0
+            self.cheat = False
+            joystick = int( input( "Joystick (-1, 0, 1): " ) )
+            if joystick > 1:
+                self.cheat_limit = joystick
+                self.cheat = True
+                joystick = 0
         return joystick
 
 
