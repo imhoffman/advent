@@ -79,9 +79,19 @@ class ArcadeCabinet(object):
             self.cheat_count = 0
             self.cheat = False
             joystick = int( input( "Joystick (-1, 0, 1): " ) )
-            if joystick > 1:
+            if joystick in ( -1, 0, 1 ):
+                joystick = joystick
+            elif joystick >= self.length:
                 self.cheat_limit = joystick
                 self.cheat = True
+                joystick = 0
+            elif joystick < -1 and self.screen_state[ joystick ][ 5 ] == 1:
+                self.screen_state[ joystick ][ 5 ] = 0
+                joystick = 0
+            elif joystick > 1 and joystick < self.length and self.screen_state[ joystick ][ 5 ] == 0:
+                self.screen_state[ joystick ][ 5 ] = 1
+                joystick = 0
+            else:
                 joystick = 0
         return joystick
 
