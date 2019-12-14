@@ -39,7 +39,14 @@
     (reduce conj [] (vec (line-seq f)))))
 (println "Read" (count input) "lines.")
 
+;(println (parser input {}))
 
-(println (parser input {}))
+(let [dict (parser input {})]
+  (println (keys dict)))       ;; why doesn't this work ?
+;      product-dicts (keys dict)]
+;  (println product-dicts))
+;  (doseq [product-dict product-dicts]
+;    (println product-dict)))
+;    (when (= (key product-dict) "ORE") (println product-dict))))
 
 
