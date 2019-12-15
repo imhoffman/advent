@@ -63,7 +63,8 @@ class RepairDroid(object):
         self.width = width
         self.length = length
         self.position = [ int( self.width/2 ),int( self.length/2) ]
-        self.requested_position = self.position
+        self.requested_position = []
+        self.requested_position[:] = self.position[:]      # OMG, burned again by the pointer !!!!!
         #   -1 for unexplored
         self.section_map = [ [ -1 for _ in range(length) ] for _ in range(width) ]
         self.section_map[ self.position[0] ][ self.position[1] ] = 3
@@ -78,7 +79,8 @@ class RepairDroid(object):
         return self.user_input
 
 
-    #  like Arkanoid: 0 for empty, 1 for wall, 3 for player, default -1 for unexplored
+    #  like Arkanoid:
+    #   0 for empty, 1 for wall, 3 for player, default -1 for unexplored
     def output_from_program ( self, value ):
         if value == 0:
             self.section_map[ self.requested_position[0] ][ self.requested_position[1] ] = 1
@@ -94,10 +96,12 @@ class RepairDroid(object):
             
 
     def move_robot ( self, move, actual_move ):
-        self.requested_position = self.position
+        self.requested_position[:] = self.position[:]
         if move == 1:
             if actual_move:
+                # set old position to explored but empty
                 self.section_map[ self.position[0] ][ self.position[1] ] = 0
+                # update position appropriately
                 self.position[1] -= 1
             else:
                 self.requested_position[1] -= 1
@@ -122,6 +126,7 @@ class RepairDroid(object):
         else:
             print( " problem with move instructions\n" )
         print( " current position: %d, %d\n" % ( self.position[0], self.position[1] ) )
+        # set new position to robot
         self.section_map[ self.position[0] ][ self.position[1] ] = 3
         return
 
