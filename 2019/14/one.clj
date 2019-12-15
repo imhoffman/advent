@@ -1,7 +1,7 @@
 (require '[clojure.string :as str])
 
 ;;  can't seem to get this literal figured out !!!
-(def FUEL (keys (assoc {} 'FUEL 1)))
+(def FUEL (keys (hash-map 'FUEL nil)))
 
 ;;  unpack reagents from comma-separated string
 (defn uncomma [string-of-chemicals]
@@ -45,7 +45,10 @@
 
 (let [dict (parser input {})
       product-dicts (keys dict)]
+  (println product-dicts)
   (doseq [product-dict product-dicts]
-    ; this next line is not producing a match ... ?
+    (println (keys product-dict))
+    ; this next line is not producing a match ... why?
+    ; uh oh ... https://clojure.org/guides/equality#equality_and_hash
     (when (= (keys product-dict) FUEL) (println 'Yasss.))))
 
