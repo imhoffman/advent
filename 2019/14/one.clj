@@ -1,5 +1,7 @@
 (require '[clojure.string :as str])
 
+;;  can't seem to get this literal figured out !!!
+(def FUEL (keys (assoc {} 'FUEL 1)))
 
 ;;  unpack reagents from comma-separated string
 (defn uncomma [string-of-chemicals]
@@ -15,7 +17,7 @@
 
 ;;  dictionary of dictionaries of reaction inputs and outputs
 ;;   key = {product amt}; value = { {reactant amt} }
-(defn parser [rxns dict]
+(defn parser [rxns dict] (into (hash-map)
   (for [chems 
         (for [rxn rxns]
           (let [j    (dec (str/index-of rxn \=))
@@ -26,7 +28,7 @@
           ws-outs-list (str/split (second chems) #"\s+")]
       (assoc dict
              {(second ws-outs-list) (first ws-outs-list)}
-             (make-inputs-dict (first ws-ins-list) {})))))
+             (make-inputs-dict (first ws-ins-list) {}))))))
 
 
 
@@ -41,12 +43,9 @@
 
 ;(println (parser input {}))
 
-(let [dict (parser input {})]
-  (println (keys dict)))       ;; why doesn't this work ?
-;      product-dicts (keys dict)]
-;  (println product-dicts))
-;  (doseq [product-dict product-dicts]
-;    (println product-dict)))
-;    (when (= (key product-dict) "ORE") (println product-dict))))
-
+(let [dict (parser input {})
+      product-dicts (keys dict)]
+  (doseq [product-dict product-dicts]
+    ; this next line is not producing a match ... ?
+    (when (= (keys product-dict) FUEL) (println 'Yasss.))))
 
