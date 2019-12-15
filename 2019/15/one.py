@@ -125,7 +125,6 @@ class RepairDroid(object):
                 self.requested_position[0] += 1
         else:
             print( " problem with move instructions\n" )
-        print( " current position: %d, %d\n" % ( self.position[0], self.position[1] ) )
         # set new position to robot
         self.section_map[ self.position[0] ][ self.position[1] ] = 3
         return
