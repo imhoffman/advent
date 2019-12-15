@@ -74,7 +74,18 @@ class RepairDroid(object):
 
 
     def input_to_program ( self ):
-        self.user_input = int( input( " Movement instruction for the droid: " ) )
+        minecraft = input( " Movement instruction for the droid: " )
+        if minecraft == 'a':
+            self.user_input = 3
+        elif minecraft == 'd':
+            self.user_input = 4
+        elif minecraft == 's':
+            self.user_input = 2
+        elif minecraft == 'w':
+            self.user_input = 1
+        else:
+            print( " invalid input\n" )
+            return self.input_to_program()
         self.move_robot( self.user_input, False )
         return self.user_input
 
@@ -228,7 +239,7 @@ padding = np.zeros( 900000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
 #  guess at necessary map size
-droid = RepairDroid( ram_array, 24, 24 )
+droid = RepairDroid( ram_array, 128, 128 )
 droid.render()
 droid.execute()
 
