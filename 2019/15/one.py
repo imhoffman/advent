@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import random, os
+import random, os, sys
 random.seed( os.urandom( 128 ) )
 
 ##
@@ -65,11 +65,15 @@ class RepairDroid(object):
         self.width = width
         self.length = length
         self.position = [ int( self.width/2 ),int( self.length/2) ]
+        self.orig_position = []
+        self.orig_position[:] = self.position[:]
         self.requested_position = []
         self.requested_position[:] = self.position[:]      # OMG, burned again by the pointer !!!!!
         #   -1 for unexplored
         self.section_map = [ [ -1 for _ in range(length) ] for _ in range(width) ]
         self.section_map[ self.position[0] ][ self.position[1] ] = 3
+        self.visited = set()
+        self.visited.add( ( self.position[0], self.position[1] ) )
         self.system_status = -1       # -1 for testing
         self.user_input = -1          # -1 for testing
         return
@@ -103,7 +107,10 @@ class RepairDroid(object):
         elif value == 2:
             self.move_robot( self.user_input, True )
             self.section_map[ self.position[0] ][ self.position[1] ] = 2
-            print( "Found oxygen system at: ", self.position[0], self.position[1] )
+            self.oxygen_location = ( self.position[0], self.position[1] )
+            #print( "Found oxygen system at: ", self.position[0], self.position[1] )
+            #print( " number of unique locations visited: %d\n" % ( len( self.visited) ) )
+            self.final_render()
         else:
             print( " problem processing output\n" )
         #self.render()
@@ -142,6 +149,8 @@ class RepairDroid(object):
             print( " problem with move instructions\n" )
         # set new position to robot
         self.section_map[ self.position[0] ][ self.position[1] ] = 3
+        self.visited.add( ( self.position[0], self.position[1] ) )
+        self.section_map[ self.orig_position[0] ][ self.orig_position[1] ] = 4
         return
 
 
@@ -221,6 +230,35 @@ class RepairDroid(object):
                    print( ' ', end='', flush=True )
            print()
        print()
+       return
+
+
+    def final_render ( self ):
+       length = self.length
+       width = self.width
+       Dx = abs( width - self.oxygen_location[0] )
+       Dy = abs( length - self.oxygen_location[1] )
+       state = self.section_map
+       for j in range( length ):
+           for i in range( width ):
+               if state[i][j] == -1 :
+                   print( '-', end='', flush=True )
+               elif state[i][j] == 0 :
+                   print( ' ', end='', flush=True )
+               elif state[i][j] == 1 :
+                   print( '#', end='', flush=True )
+               elif state[i][j] == 3 :
+                   print( '\033[31m\033[1m\033[43m+\033[0m', end='', flush=True )
+               elif state[i][j] == 2 :
+                   print( '\033[36mX\033[0m', end='', flush=True )
+               elif state[i][j] == 4 :
+                   print( '\033[31mX\033[0m', end='', flush=True )
+               else:
+                   print( ' ', end='', flush=True )
+           print()
+       print()
+       sys.exit(0)
+       return
 
 ##  end of robot class
 
@@ -234,7 +272,7 @@ with open("puzzle.txt") as fo:
 
 program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 
-print( "\n read %d Intcodes from input file\n" % ( len(program) ) )
+#print( "\n read %d Intcodes from input file\n" % ( len(program) ) )
 
 # "The computer's available memory should be much larger than the initial program."
 #   numpy arrays are faster that linked lists
@@ -243,7 +281,9 @@ padding = np.zeros( 900000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
 #  guess at necessary map size --- enter `width`, `length`
-droid = RepairDroid( ram_array, 8192, 8192 )
+droid = RepairDroid( ram_array, 100, 80 )
 #droid.render()
 droid.execute()
+
+# Found oxygen system at:  4108 4110 when 8192,8192
 
