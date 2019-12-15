@@ -84,7 +84,6 @@ class RepairDroid(object):
             self.section_map[ self.requested_position[0] ][ self.requested_position[1] ] = 1
         elif value == 1:
             self.move_robot( self.user_input, True )
-            self.section_map[ self.position[0] ][ self.position[1] ] = 3
         elif value == 2:
             self.move_robot( self.user_input, True )
             self.section_map[ self.position[0] ][ self.position[1] ] = 2
@@ -122,6 +121,7 @@ class RepairDroid(object):
                 self.requested_position[0] += 1
         else:
             print( " problem with move instructions\n" )
+        print( " current position: %d, %d\n" % ( self.position[0], self.position[1] ) )
         self.section_map[ self.position[0] ][ self.position[1] ] = 3
         return
 
@@ -223,7 +223,8 @@ ram_array = np.asarray( program )
 padding = np.zeros( 900000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
-#  shrunk the hull to fit part two...
+#  guess at necessary map size
 droid = RepairDroid( ram_array, 24, 24 )
+droid.render()
 droid.execute()
 
