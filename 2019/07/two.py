@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from math import factorial
+import numpy as np
 from itertools import permutations
 
 ##
@@ -39,6 +39,7 @@ def modal_parameters ( opcode, ram, ip, modes, base ):
         elif modes[0] == 2:
             arg1 = ram[ ram[ip+1] + base ]
         else:
+            print( " providing mode 0 to arg 1 for opcode:", opcode )
             arg1 = ram[ ram[ip+1] ]
     # second param
     if modes[1] == 1:
@@ -59,12 +60,12 @@ def modal_parameters ( opcode, ram, ip, modes, base ):
 class Amplifier(object):
     def __init__( self, program, phase_setting ):
         self.ram = program
+        self.ip = 0
         self.base_addr = 0
         self.input_value = phase_setting
         self.phase_not_yet_set = True
         self.original_program = []
         self.original_program[:] = program[:]
-        self.ip = 0
         return
 
 
@@ -76,9 +77,6 @@ class Amplifier(object):
         return
 
 
-    def output_from_program ( self, value ):
-        return value
-            
 
     def processor ( self ):
         ram = self.ram
@@ -97,13 +95,14 @@ class Amplifier(object):
             input_value = self.input_value
             if input_value < 0:
                 output_value = -3   # this means `still running, waiting for input`
-                return ram, ip, base_addr, output_value    # hold on input ip
+                return ram, ip, base_addr, output_value    # hold on input ip (?)
             else:
                 ram[ arg1 ] = input_value
                 output_value = -4   # a neg value other than -3 ??
-            return ram, ip+2, base_addr, output_value
+                return ram, ip+2, base_addr, output_value
         elif opcode == 4:
             output_value = arg1
+            print( " outputting (opcode 4):", output_value )
             return ram, ip+2, base_addr, output_value
         elif opcode == 5:
             if arg1:
@@ -130,7 +129,6 @@ class Amplifier(object):
         elif opcode == 9:
             return ram, ip+2, base_addr + arg1, output_value
         elif opcode == 99:
-            output_value = -1
             return ram, -1, base_addr, output_value
         else:
             print("unknown opcode")
@@ -138,17 +136,18 @@ class Amplifier(object):
 
 
     def generate_output( self ):
-        output_value = 0
+        output_value = -1
         good_output_value = -888
-        while output_value not in (-1,-3):  # halted or needs to wait for input
-            self.program, self.ip, self.base_addr, output_value = \
+        while output_value != -3:  # needs to wait for input
+        #while output_value < 0:
+            self.ram, self.ip, self.base_addr, output_value = \
                     self.processor()
-        if output_value >= 0:   # keep any good output, then continue program
-            good_output_value = output_value
-        if output_value == -1:
-            good_output_value = -999   # some irrelevant value; we're hatling
-        if good_output_value == -888 and output_value == -3:
-            print( "\n attemping to enter wait mode without having outputed!" )
+            if output_value >= 0:   # keep any good output, then continue program
+                good_output_value = output_value
+            if self.ip == -1:
+                break
+#        if good_output_value == -888 and output_value == -3:
+#            print( "\n attemping to enter wait mode without having outputed!" )
         return good_output_value, output_value
 ##  end of Amplifier class
 
@@ -162,7 +161,7 @@ def thrusters( program, phase_settings ):
     Amp_C = Amplifier( program, phase_settings[2] )
     Amp_D = Amplifier( program, phase_settings[3] )
     Amp_E = Amplifier( program, phase_settings[4] )
-    amps = [ Amp_A, Amp_B, Amp_C, Amp_D, Amp_E ]
+    amps = ( Amp_A, Amp_B, Amp_C, Amp_D, Amp_E )
 
     for amp in amps:
         amp.input_to_program(0)      # initialize phase setting
@@ -176,7 +175,7 @@ def thrusters( program, phase_settings ):
         if exit_code == -1:    # if E halts (-1 rather than -3), we're done
             break
         print( " Amp A just received %d from Amp E\n" % inp_A )
-        Amp_A.input_to_program( inp_A )
+        Amp_A.input_to_program( inp_A )  # go around again
 
     return inp_A
 
@@ -184,8 +183,9 @@ def thrusters( program, phase_settings ):
 #  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
 def search_phase_settings( program ):
     temp_max = 0
-    for p in ( (9,7,8,5,6), (5,6,7,8,9) ):
+    for p in ( (9,7,8,5,6), (9,8,7,6,5), (5,6,7,8,9) ):
     #for p in permutations( (9,8,7,6,5) ):
+        print( "testing", p )
         trial = thrusters( program, p )
         if trial > temp_max:
             temp_max = trial
@@ -204,6 +204,10 @@ program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 
 print( "\n read %d commands from input file\n" % ( len(program) ) )
 
-answer, config = search_phase_settings( program ) 
+ram_array = np.asarray( program )
+padding = np.zeros( 90000, dtype=int )
+ram_array = np.append( ram_array, padding )
+
+answer, config = search_phase_settings( ram_array ) 
 print( "\n For phases", config, "maximal thruster output", answer, "is obtained.\n\n" )
 
