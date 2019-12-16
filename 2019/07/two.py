@@ -39,7 +39,7 @@ def modal_parameters ( opcode, ram, ip, modes, base ):
         elif modes[0] == 2:
             arg1 = ram[ ram[ip+1] + base ]
         else:
-            print( " providing mode 0 to arg 1 for opcode:", opcode )
+            #print( " providing mode 0 to arg 1 for opcode:", opcode )
             arg1 = ram[ ram[ip+1] ]
     # second param
     if modes[1] == 1:
@@ -62,7 +62,9 @@ class Amplifier(object):
         self.ram = program
         self.ip = 0
         self.base_addr = 0
+        self.halted = False
         self.input_value = phase_setting
+        self.output_value = 0
         self.phase_not_yet_set = True
         self.original_program = []
         self.original_program[:] = program[:]
@@ -84,7 +86,7 @@ class Amplifier(object):
         base_addr = self.base_addr
         opcode, modes = parse_opcode( ram[ip] )
         arg1, arg2, arg3 = modal_parameters( opcode, ram, ip, modes, base_addr )
-        output_value = -5
+        output_value = self.output_value
         if   opcode == 1:
             ram[ arg3 ] = arg1 + arg2
             return ram, ip+4, base_addr, output_value
@@ -92,16 +94,11 @@ class Amplifier(object):
             ram[ arg3 ] = arg1 * arg2
             return ram, ip+4, base_addr, output_value
         elif opcode == 3:
-            input_value = self.input_value
-            if input_value < 0:
-                output_value = -3   # this means `still running, waiting for input`
-                return ram, ip, base_addr, output_value    # hold on input ip (?)
-            else:
-                ram[ arg1 ] = input_value
-                output_value = -4   # a neg value other than -3 ??
-                return ram, ip+2, base_addr, output_value
+            ram[ arg1 ] = self.input_value
+            return ram, ip+2, base_addr, output_value
         elif opcode == 4:
-            output_value = arg1
+            self.output_value = arg1
+            output_value = self.output_value
             print( " outputting (opcode 4):", output_value )
             return ram, ip+2, base_addr, output_value
         elif opcode == 5:
@@ -136,19 +133,14 @@ class Amplifier(object):
 
 
     def generate_output( self ):
-        output_value = -1
-        good_output_value = -888
-        while output_value != -3:  # needs to wait for input
-        #while output_value < 0:
-            self.ram, self.ip, self.base_addr, output_value = \
+        output_value = self.output_value
+        while self.output_value == output_value:
+            self.ram, self.ip, self.base_addr, self.output_value = \
                     self.processor()
-            if output_value >= 0:   # keep any good output, then continue program
-                good_output_value = output_value
             if self.ip == -1:
+                self.halted = True
                 break
-#        if good_output_value == -888 and output_value == -3:
-#            print( "\n attemping to enter wait mode without having outputed!" )
-        return good_output_value, output_value
+        return self.output_value, self.halted
 ##  end of Amplifier class
 
 
@@ -171,18 +163,18 @@ def thrusters( program, phase_settings ):
         Amp_C.input_to_program( Amp_B.generate_output()[0] )
         Amp_D.input_to_program( Amp_C.generate_output()[0] )
         Amp_E.input_to_program( Amp_D.generate_output()[0] )
-        inp_A, exit_code = Amp_E.generate_output()
-        if exit_code == -1:    # if E halts (-1 rather than -3), we're done
+        inp_A, halted = Amp_E.generate_output()
+        if halted:
             break
         print( " Amp A just received %d from Amp E\n" % inp_A )
         Amp_A.input_to_program( inp_A )  # go around again
-
+    print( " E has halted with a final output of", inp_A )
     return inp_A
 
 
 #  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
 def search_phase_settings( program ):
-    temp_max = 0
+    temp_max = -1 
     for p in ( (9,7,8,5,6), (9,8,7,6,5), (5,6,7,8,9) ):
     #for p in permutations( (9,8,7,6,5) ):
         print( "testing", p )
