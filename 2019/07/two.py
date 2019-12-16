@@ -2,6 +2,7 @@
 
 import numpy as np
 from itertools import permutations
+from time import sleep
 
 ##
 ##  subprograms
@@ -98,9 +99,9 @@ class Amplifier(object):
             return ram, ip+2, base_addr, output_value
         elif opcode == 4:
             self.output_value = arg1
-            output_value = self.output_value
-            print( " outputting (opcode 4):", output_value )
-            return ram, ip+2, base_addr, output_value
+            print( " outputting (opcode 4):", arg1 )
+            sleep(0.250)
+            return ram, ip+2, base_addr, self.output_value
         elif opcode == 5:
             if arg1:
                 return ram, arg2, base_addr, output_value
@@ -132,9 +133,11 @@ class Amplifier(object):
         return
 
 
+    #  hold the program after outputting and incrementing the program counter
+    #  such that we'll jump back in at the instruction that follows the output
     def generate_output( self ):
-        output_value = self.output_value
-        while self.output_value == output_value:
+        old_output_value = self.output_value
+        while self.output_value == old_output_value:
             self.ram, self.ip, self.base_addr, self.output_value = \
                     self.processor()
             if self.ip == -1:
@@ -174,8 +177,8 @@ def thrusters( program, phase_settings ):
 
 #  https://docs.python.org/3.8/library/itertools.html#itertools.permutations
 def search_phase_settings( program ):
-    temp_max = -1 
-    for p in ( (9,7,8,5,6), (9,8,7,6,5), (5,6,7,8,9) ):
+    temp_max = 0
+    for p in (  (5,6,7,8,9), (9,7,8,5,6), (9,8,7,6,5) ):
     #for p in permutations( (9,8,7,6,5) ):
         print( "testing", p )
         trial = thrusters( program, p )
@@ -197,7 +200,7 @@ program = [ int( s ) for s in line.rstrip().split(sep=",") ]
 print( "\n read %d commands from input file\n" % ( len(program) ) )
 
 ram_array = np.asarray( program )
-padding = np.zeros( 90000, dtype=int )
+padding = np.zeros( 900000, dtype=int )
 ram_array = np.append( ram_array, padding )
 
 answer, config = search_phase_settings( ram_array ) 
