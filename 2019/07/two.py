@@ -40,7 +40,6 @@ def modal_parameters ( opcode, ram, ip, modes, base ):
         elif modes[0] == 2:
             arg1 = ram[ ram[ip+1] + base ]
         else:
-            #print( " providing mode 0 to arg 1 for opcode:", opcode )
             arg1 = ram[ ram[ip+1] ]
     # second param
     if modes[1] == 1:
@@ -137,7 +136,7 @@ class Amplifier(object):
     #  such that we'll jump back in at the instruction that follows the output
     def generate_output( self ):
         old_output_value = self.output_value
-        while self.output_value == old_output_value:
+        while not self.halted and self.output_value == old_output_value:
             self.ram, self.ip, self.base_addr, self.output_value = \
                     self.processor()
             if self.ip == -1:
