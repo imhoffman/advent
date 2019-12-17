@@ -59,7 +59,8 @@ class DroidCamera(object):
         self.ram = program
         self.ip = 0
         self.base_addr = 0
-        self.output_array = []
+        self.output_list = []
+        self.output_array = [[]]
         return
 
 
@@ -76,11 +77,11 @@ class DroidCamera(object):
             ram[ arg3 ] = arg1 * arg2
             return ram, ip+4, base_addr
         elif opcode == 3:
-            input_command = input( " Movement instruction for the droid: " )
+            input_command = input( " Input: " )
             ram[ arg1 ] = input_command
             return ram, ip+2, base_addr
         elif opcode == 4:
-            self.output_array.append( arg1 )
+            self.output_list.append( arg1 )
             return ram, ip+2, base_addr
         elif opcode == 5:
             if arg1:
@@ -120,21 +121,30 @@ class DroidCamera(object):
 
 
     def render ( self ):
-        for c in self.output_array:
+        j = 0
+        for c in self.output_list:
             if c == 35:
                 print( '#', end='', flush=True )
+                self.output_array[j].append('#')
             elif c == 46:
                 print( '.', end='', flush=True )
+                self.output_array[j].append('.')
             elif c == 10:
-                print( '\n', end='', flush=True )
+                print( ' %3d\n' % j, end='', flush=True )
+                self.output_array.append([])
+                j += 1
             elif c == 94:
                 print( '^', end='', flush=True )
+                self.output_array[j].append('^')
             elif c == 118:
                 print( 'v', end='', flush=True )
+                self.output_array[j].append('v')
             elif c == 60:
                 print( '<', end='', flush=True )
+                self.output_array[j].append('<')
             elif c == 62:
                 print( '>', end='', flush=True )
+                self.output_array[j].append('>')
         return
 
 ##  end of robot class
