@@ -145,6 +145,8 @@ class DroidCamera(object):
             elif c == 62:
                 print( '>', end='', flush=True )
                 self.output_array[j].append('>')
+            else:
+                print( " other output: ", c )
         return
 
 ##  end of robot class
