@@ -1,13 +1,11 @@
 (require '[clojure.string :as str])
 
-;;  can't seem to get this literal figured out !!!
-(def FUEL (keys (hash-map 'FUEL nil)))
-
 ;;  unpack reagents from comma-separated string
 (defn uncomma [string-of-chemicals]
   (list (str/split (str/replace string-of-chemicals \, \space) #"\s+")))
 
 ;;  dictionary of reagents
+;;  (are the inputs to a reaction called the reagents? reactants?)
 ;;   key = chemical; value = amount
 (defn make-inputs-dict [ins accum]
   (if (empty? ins)
@@ -24,11 +22,11 @@
                 ins  (str/trim (subs rxn 0 j))
                 outs (str/trim (subs rxn (+ j 4)))]
             (list ins outs)))]
-    (let [ws-ins-list (uncomma (first chems))
-          ws-outs-list (str/split (second chems) #"\s+")]
+    (let [whitesplit-ins-list (uncomma (first chems))
+          whitesplit-outs-list (str/split (second chems) #"\s+")]
       (assoc dict
-             {(second ws-outs-list) (first ws-outs-list)}
-             (make-inputs-dict (first ws-ins-list) {}))))))
+             {(second whitesplit-outs-list) (first whitesplit-outs-list)}
+             (make-inputs-dict (first whitesplit-ins-list) {}))))))
 
 
 
@@ -41,14 +39,10 @@
     (reduce conj [] (vec (line-seq f)))))
 (println "Read" (count input) "lines.")
 
-;(println (parser input {}))
 
 (let [dict (parser input {})
       product-dicts (keys dict)]
-  (println product-dicts)
   (doseq [product-dict product-dicts]
-    (println (keys product-dict))
-    ; this next line is not producing a match ... why?
-    ; uh oh ... https://clojure.org/guides/equality#equality_and_hash
-    (when (= (keys product-dict) FUEL) (println 'Yasss.))))
+    (when (get product-dict "FUEL") (println 'Yasss.))
+    (println (keys product-dict))))
 
