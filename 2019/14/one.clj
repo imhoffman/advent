@@ -14,19 +14,29 @@
 
 
 ;;  dictionary of dictionaries of reaction inputs and outputs
-;;   key = {product amt}; value = { {reactant amt} }
+;;   key = product; value = (amt of product, {reactant,amt})
 (defn parser [rxns dict] (into (hash-map)
-  (for [chems 
-        (for [rxn rxns]
-          (let [j    (dec (str/index-of rxn \=))
-                ins  (str/trim (subs rxn 0 j))
-                outs (str/trim (subs rxn (+ j 4)))]
-            (list ins outs)))]
+  (for [chems (for [rxn rxns]
+                (let [j    (dec (str/index-of rxn \=))
+                      ins  (str/trim (subs rxn 0 j))
+                      outs (str/trim (subs rxn (+ j 4)))]
+                  (list ins outs)))]
     (let [whitesplit-ins-list (uncomma (first chems))
           whitesplit-outs-list (str/split (second chems) #"\s+")]
       (assoc dict
-             {(second whitesplit-outs-list) (first whitesplit-outs-list)}
-             (make-inputs-dict (first whitesplit-ins-list) {}))))))
+             (second whitesplit-outs-list)
+             (list (first whitesplit-outs-list)
+                   (make-inputs-dict (first whitesplit-ins-list) {})))))))
+
+
+(defn find-cost [product rxn-dict accum]
+  (let [inputs-dict (second (get rxn-dict) product)
+        inputs      (keys inputs-dict)]
+    (if (get inputs-dict 'ORE)
+      accum
+      (recur ...
+
+
 
 
 
@@ -40,9 +50,6 @@
 (println "Read" (count input) "lines.")
 
 
-(let [dict (parser input {})
-      product-dicts (keys dict)]
-  (doseq [product-dict product-dicts]
-    (when (get product-dict "FUEL") (println 'Yasss.))
-    (println (keys product-dict))))
+(let [dict (parser input {})]
+  (println (get dict "FUEL")))
 
