@@ -1,0 +1,18 @@
+
+slope of inner edge:  m1 = 18
+slope of outer edge:  m2 = 6
+
+for a closest corner at x = x2 - 100, y = y1
+
+(y1 - 37)  = m1 * (x1 - 4)
+(y1 - 46)  = m2 * (x2 - 8)
+(y1 + 100 - 37) = m1 * (x2 - 100 - 4)
+
+y = 964 or 965
+x = 161 - 100 = 61  or 62
+
+640983 is too low ... probably an indexing/pixelation problem
+but 650983 is too low, too
+
+found an algebra error, but it brings x even lower ... ?
+
