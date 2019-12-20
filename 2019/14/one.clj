@@ -29,12 +29,19 @@
                    (make-inputs-dict (first whitesplit-ins-list) {})))))))
 
 
+(def inputs-loop [reagents accum]
+  (if (empty? reagents)
+    accum
+
+
+
 (defn find-cost [product rxn-dict accum]
   (let [inputs-dict (second (get rxn-dict) product)
         inputs      (keys inputs-dict)]
     (if (get inputs-dict 'ORE)
       accum
-      (recur ...
+      (fn [reagents cost]
+
 
 
 
