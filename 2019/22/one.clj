@@ -14,6 +14,38 @@
       :else (println " problem parsing technique"))))
 
 
+;;  ruleset for "deal with increment N" on current deck
+;;  "Of course, this technique is carefully designed..."  :)
+;;  I'm going to cheat the Lisp gods and make a mutable Java array
+(defn increment-deal [N deck]
+  (let [deck-array (into-array Integer/TYPE deck)]
+    (dotimes [i (count deck)]
+      (aset deck-array i (get deck i)))     ;; testing without changes
+    (into [] deck-array)))
+
+
+
+;;  perform the requested shuffle technique on the
+;;  current state of the deck...return the new state of the deck
+(defn shuffle-exec [instruction deck]
+  (let [technique (technique-parser instruction)]
+    (cond
+      (= (first technique) "deal")
+        (reverse deck)
+      (= (first technique) "cut")
+        (let [n (second technique)]
+          (conj (subvec deck n) (subvec deck 0 n)))
+      (= (first technique) "increment")
+        (let [n (second technique)]
+          (increment-deal n deck))
+      :else
+        (println " problem executing shuffle technique"))))
+
+        
+
+
+
+
 
 ;;
 ;;  main program
@@ -24,6 +56,13 @@
   (with-open [f (clojure.java.io/reader "puzzle.txt")]
     (reduce conj [] (line-seq f))))           ;; order matters, so vector
 (println "Read" (count input) "lines.")
+
+
+(def number-of-cards 10007)
+
+(def factory-deck
+  (vec (for [i (range number-of-cards)] i)))
+
 
 ;; dummy test
 (doseq [x input]
