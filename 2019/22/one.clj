@@ -34,8 +34,9 @@
       (= (first technique) "deal")
         (reverse deck)
       (= (first technique) "cut")
-        (let [n (second technique)]   ;; this can't handle negative cuts ...
-          (conj (subvec deck n) (subvec deck 0 n)))
+        (let [n (second technique)
+              m (if (< n 0) (+ n (count deck)) n)]
+          (reduce conj (subvec deck m) (subvec deck 0 m)))
       (= (first technique) "increment")
         (let [n (second technique)]
           (increment-deal n deck))
