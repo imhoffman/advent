@@ -20,8 +20,9 @@
 (defn increment-deal [N deck]
   (let [deck-array (into-array Integer/TYPE deck)]
     (dotimes [i (count deck)]
-      (aset deck-array i (get deck i)))     ;; testing without changes
-    (into [] deck-array)))
+      (let [j (mod (+ N i) N)]
+        (aset deck-array j (get deck j)))
+      (into [] deck-array))))
 
 
 
@@ -41,11 +42,6 @@
       :else
         (println " problem executing shuffle technique"))))
 
-        
-
-
-
-
 
 ;;
 ;;  main program
@@ -60,11 +56,19 @@
 
 (def number-of-cards 10007)
 
-(def factory-deck
-  (vec (for [i (range number-of-cards)] i)))
+(def factory-deck (vec (range number-of-cards)))
 
+(doseq [x input] (get (shuffle-exec (technique-parser x) factory-deck) 0))
 
-;; dummy test
-(doseq [x input]
-  (println (technique-parser x)))
+;(println " card 2019 is at location"
+;         (.indexOf 
+;  ((fn [list-of-instructions deck]
+;    (if (empty? list-of-instructions)
+;      deck
+;      (recur
+;        (rest list-of-instructions)
+;        (shuffle-exec (technique-parser (first list-of-instructions)) deck))))
+;    input factory-deck)
+;  2019))
+
 
