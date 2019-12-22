@@ -34,7 +34,7 @@
       (= (first technique) "deal")
         (reverse deck)
       (= (first technique) "cut")
-        (let [n (second technique)]
+        (let [n (second technique)]   ;; this can't handle negative cuts ...
           (conj (subvec deck n) (subvec deck 0 n)))
       (= (first technique) "increment")
         (let [n (second technique)]
@@ -58,17 +58,17 @@
 
 (def factory-deck (vec (range number-of-cards)))
 
-(doseq [x input] (get (shuffle-exec (technique-parser x) factory-deck) 0))
-
-;(println " card 2019 is at location"
-;         (.indexOf 
-;  ((fn [list-of-instructions deck]
-;    (if (empty? list-of-instructions)
-;      deck
-;      (recur
-;        (rest list-of-instructions)
-;        (shuffle-exec (technique-parser (first list-of-instructions)) deck))))
-;    input factory-deck)
-;  2019))
+(println
+  " card 2019 is at location"
+         (.indexOf
+  ((fn [list-of-instructions deck]
+    (if (empty? list-of-instructions)
+      deck
+      (recur
+        (rest list-of-instructions)
+        (shuffle-exec (first list-of-instructions) deck))))
+    input factory-deck)
+  2019)
+)
 
 
