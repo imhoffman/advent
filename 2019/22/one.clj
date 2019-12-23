@@ -21,8 +21,8 @@
   (let [deck-array (into-array Integer/TYPE deck)]
     (dotimes [i (count deck)]
       (let [j (mod (+ N i) N)]
-        (aset deck-array j (get deck j)))
-      (into [] deck-array))))
+        (aset deck-array j (get deck j))))
+      (into [] deck-array)))
 
 
 
@@ -32,11 +32,13 @@
   (let [technique (technique-parser instruction)]
     (cond
       (= (first technique) "deal")
-        (reverse deck)
+        (vec (reverse deck))    ;; `reverse` return a list, despite a vector input
       (= (first technique) "cut")
-        (let [n (second technique)
-              m (if (< n 0) (+ n (count deck)) n)]
-          (reduce conj (subvec deck m) (subvec deck 0 m)))
+        (let [n (second technique)]
+          (if (< n 0)
+            (let [m (+ n (count deck))]
+              (reduce conj (subvec deck m) (subvec deck 0 m)))
+            (reduce conj (subvec deck n) (subvec deck 0 n))))
       (= (first technique) "increment")
         (let [n (second technique)]
           (increment-deal n deck))
@@ -72,4 +74,5 @@
   2019)
 )
 
+; 1435 is too low
 
