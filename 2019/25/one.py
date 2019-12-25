@@ -81,6 +81,8 @@ class Droid(object):
             return ram, ip+2, base_addr
         elif opcode == 4:
             self.output_list.append( arg1 )
+            if arg1 == 10:
+                self.output_report()
             if arg1 > 127:
                 print( " non-ASCII output:", arg1 )
             return ram, ip+2, base_addr
@@ -122,7 +124,7 @@ class Droid(object):
 
 
     def output_report ( self ):
-        ''.join( [ chr(c) for c in self.output_list ] )
+        print( ''.join( [ chr(c) for c in self.output_list ] ) )
         self.output_list.clear()
         return
 
@@ -149,6 +151,6 @@ ram_array = np.append( ram_array, padding )
 #  map size seems unecessary --- enter `width`, `length`
 droid = Droid( ram_array, 18, 40 )
 droid.execute()
-droid.render()
+droid.output_report()
 
 
