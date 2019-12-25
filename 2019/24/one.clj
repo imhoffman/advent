@@ -2,10 +2,8 @@
 
 (defn update-layout [current-scan]
   (let [bordered-scan
-        (conj
-          ['.......]      ; need to prepend one of these blank lines...
-          (into ['.......]
-                (vec (for [row current-scan] (str '. row '.)))))]
+          (into (into ['.......]    ;; one of these `into`s should be an O(1) conj...
+                (vec (for [row current-scan] (str '. row '.)))) ['.......])]
     bordered-scan))
 
 
