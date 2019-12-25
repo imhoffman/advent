@@ -139,7 +139,7 @@ class SpringDroid(object):
                 print( '@', end='', flush=True )
                 self.output_array[j].append('^')
             else:
-                print( " other output: ", c )
+                print( ''.join( [ chr(c) for c in self.output_list ] ) )
         return
 
 ##  end of robot class
