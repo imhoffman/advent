@@ -52,7 +52,7 @@
 ;;  is not sorted; the list from dict-of-satl is the peek/pop work stack
 (defn tally-up-children [dictionary-of-satellites children accum]
   (let [child (peek children)]
-    (if (contains? dictionary-of-satellites child)
+    (if (contains? dictionary-of-satellites child) ; is the child/val also a parent/key
       (recur dictionary-of-satellites (pop children) (inc accum))
       accum)))
 
@@ -60,10 +60,14 @@
 ;; run final sum as something like (apply + (total-tally master-dictionary))
 ;;  perhaps invoke directly rather than with `get`:
 ;;  https://clojure.org/guides/learn/hashed_colls#_looking_up_by_key
-;(defn total-tally [dictionary-of-satellites accum]
-;  (let [parent (first (keys dictionary-of-satellites))
-;        children (get dictionary-of-satellites parent)]
-; recur with (dissoc dictionary-of-satellites parent)...
+(defn total-tally [dictionary-of-satellites accum]
+  (let [parent (first (keys dictionary-of-satellites))
+        children (get dictionary-of-satellites parent)]
+    (if (empty? dictionary-of-satellites)
+      accum
+      (recur
+        (dissoc dictionary-of-satellites parent)
+        (tally-up-children dictionary-of-satellites children accum)))))
 
 
 
