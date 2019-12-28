@@ -33,6 +33,7 @@
 
 
 ;;  key = bary, val = list of satl
+;;   the list in val will be recursively traversed by `tally`
 (defn dictionary-of-satellites [pairs output-dict]
   (let [a (bary (first pairs))
         b (satl (first pairs))]
@@ -43,6 +44,16 @@
                     (if (contains? output-dict a)
                       (conj (get output-dict a) b)
                       (list b)))))))
+
+
+;;  recursive counter ... call initially with accum of zero
+;;  depth-first traversal; it is not important that the dictionary
+;;  is not sorted; perhaps invoke directly rather than with `get`:
+;;  https://clojure.org/guides/learn/hashed_colls#_looking_up_by_key
+(defn tally-up-orbits [dictionary-of-satellites accum]
+  (let [parent (first (keys dictionary-of-satellites))]
+    (apply + accum
+           (for [children (get dictionary-of-satellites parent)]
 
 
 
