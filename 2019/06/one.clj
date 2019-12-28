@@ -50,24 +50,29 @@
 ;;  recursive counter ... call initially with accum of zero
 ;;  depth-first traversal; it is not important that the dictionary
 ;;  is not sorted; the list from dict-of-satl is the peek/pop work stack
-(defn tally-up-children [dictionary-of-satellites children accum]
+(defn tally-up-children [dict-of-satl children accum]
   (let [child (peek children)]
-    (if (contains? dictionary-of-satellites child) ; is the child/val also a parent/key
-      (recur dictionary-of-satellites (pop children) (inc accum))
+    (if child
+    ;(if (contains? dictionary-of-satellites child) ; is the child/val also a parent/key
+      (recur dict-of-satl (pop children) (inc accum))
       accum)))
 
 
 ;; run final sum as something like (apply + (total-tally master-dictionary))
 ;;  perhaps invoke directly rather than with `get`:
 ;;  https://clojure.org/guides/learn/hashed_colls#_looking_up_by_key
-(defn total-tally [dictionary-of-satellites accum]
-  (let [parent (first (keys dictionary-of-satellites))
-        children (get dictionary-of-satellites parent)]
-    (if (empty? dictionary-of-satellites)
+(defn total-tally [dict-of-satl accum]
+    (if (empty? dict-of-satl)
       accum
-      (recur
-        (dissoc dictionary-of-satellites parent)
-        (tally-up-children dictionary-of-satellites children accum)))))
+      (let [parent (first (keys dict-of-satl))
+            children (get dict-of-satl parent)]
+        (if children     ;; problem ?? ... is this always true because we don't pop them down here ??
+          (recur
+            dict-of-satl
+            (tally-up-children dict-of-satl children accum))
+          (recur
+            (dissoc dict-of-satl parent)
+            accum)))))
 
 
 
@@ -84,8 +89,9 @@
 ;;  load up vector of pairs for processing going forward
 (def pairs (parse-orbits input))
 
-
-(println " Number of direct orbits in map:" (apply + (vals (direct-orbit-dict pairs {}))))
-
 (println (dictionary-of-satellites pairs {}))
+
+(println
+ (total-tally (dictionary-of-satellites pairs {}) 0))
+
 
