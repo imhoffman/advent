@@ -14,17 +14,35 @@
 
 ;;  for determining direct orbits
 ;;   call initially with dict as an empty hash map (i.e., dictionary)
-(defn direct-orbit-dict [pairs dict]
+(defn direct-orbit-dict [pairs output-dict]
   (let [a (bary (first pairs))]
     (if (empty? a)
-      dict
+      output-dict
       (recur (rest pairs)
-             (assoc dict a (if (contains? dict a) (inc (get dict a)) 1)))
+             (assoc output-dict a (if (contains? output-dict a) (inc (get output-dict a)) 1)))
+      )))
+
+;;  I don't think that this is useful---simply writing it, just in case
+(defn indirect-orbit-dict [pairs output-dict]
+  (let [a (satl (first pairs))]
+    (if (empty? a)
+      output-dict
+      (recur (rest pairs)
+             (assoc output-dict a (if (contains? output-dict a) (inc (get output-dict a)) 1)))
       )))
 
 
-;;  find the intersection of the keys of the barycenter set and the satellite set ...
-;;   then add up the values of those keys ?
+;;  key = bary, val = list of satl
+(defn dictionary-of-satellites [pairs output-dict]
+  (let [a (bary (first pairs))
+        b (satl (first pairs))]
+    (if (empty? a)
+      output-dict
+      (recur (rest pairs)
+             (assoc output-dict a
+                    (if (contains? output-dict a)
+                      (conj (get output-dict a) b)
+                      (list b)))))))
 
 
 
@@ -45,5 +63,5 @@
 
 (println " Number of direct orbits in map:" (apply + (vals (direct-orbit-dict pairs {}))))
 
-(println (direct-orbit-dict pairs {}))
+(println (dictionary-of-satellites pairs {}))
 
