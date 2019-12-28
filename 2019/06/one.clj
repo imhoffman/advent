@@ -34,6 +34,7 @@
 
 ;;  key = bary, val = list of satl
 ;;   the list in val will be recursively traversed by `tally`
+;;   as the work stack
 (defn dictionary-of-satellites [pairs output-dict]
   (let [a (bary (first pairs))
         b (satl (first pairs))]
@@ -48,13 +49,21 @@
 
 ;;  recursive counter ... call initially with accum of zero
 ;;  depth-first traversal; it is not important that the dictionary
-;;  is not sorted; perhaps invoke directly rather than with `get`:
-;;  https://clojure.org/guides/learn/hashed_colls#_looking_up_by_key
-(defn tally-up-orbits [dictionary-of-satellites accum]
-  (let [parent (first (keys dictionary-of-satellites))]
-    (apply + accum
-           (for [children (get dictionary-of-satellites parent)]
+;;  is not sorted; the list from dict-of-satl is the peek/pop work stack
+(defn tally-up-children [dictionary-of-satellites children accum]
+  (let [child (peek children)]
+    (if (contains? dictionary-of-satellites child)
+      (recur dictionary-of-satellites (pop children) (inc accum))
+      accum)))
 
+
+;; run final sum as something like (apply + (total-tally master-dictionary))
+;;  perhaps invoke directly rather than with `get`:
+;;  https://clojure.org/guides/learn/hashed_colls#_looking_up_by_key
+;(defn total-tally [dictionary-of-satellites accum]
+;  (let [parent (first (keys dictionary-of-satellites))
+;        children (get dictionary-of-satellites parent)]
+; recur with (dissoc dictionary-of-satellites parent)...
 
 
 
