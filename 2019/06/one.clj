@@ -30,13 +30,18 @@
 ;; run final sum as something like
 ;;  (apply + (for [s (keys dict)] (bary-tally dict (get dict s) 0)))
 (defn bary-tally [dict-of-satl children accum]
-  (if (contains? dict-of-satl (peek children)) ; is the child/val also a parent/key ?
-    (recur
-      dict-of-satl
-      (pop children)
-      (inc accum)) ;; this needs to add the whole branch, not just the single orbit
-    accum))   ; if nothing is orbiting the child: end of the branch
-
+  (let [child (peek children)]    ;; the list of satl's is the job stack
+    (if child
+      (if (contains? dict-of-satl child) ; is the child/val also a parent/key ?
+       (recur
+         dict-of-satl
+         (get dict-of-satl child)    ;; investigate the child's satl list
+         (inc accum))
+        (recur
+         dict-of-satl
+         (pop children)
+         (inc accum)))
+      (inc accum))))   ; if nothing is orbiting the child: end of the branch
 
 
 ;;
@@ -52,7 +57,7 @@
 ;;  load up vector of pairs for processing going forward
 (def pairs (parse-orbits input))
 
-(println (dictionary-of-satellites pairs {}))
+;(println (dictionary-of-satellites pairs {}))
 
 (println
   " part one answer:"
