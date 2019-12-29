@@ -28,7 +28,7 @@
 
 
 ;; run final sum as something like
-;;  (apply + (for [s (keys dict)] (bary-tally dict (get dict s) 0)))
+;;  (apply + (for [s (keys dict)] (bary-tally dict (get dict s) 1)))
 (defn bary-tally [dict-of-satl children accum]
   (let [child (peek children)]    ;; the list of satl's is the job stack
     (if child
@@ -41,7 +41,7 @@
          dict-of-satl
          (pop children)
          (inc accum)))
-      (inc accum))))   ; if nothing is orbiting the child: end of the branch
+      accum)))   ; if nothing is orbiting the child: end of the branch
 
 
 ;;
@@ -59,10 +59,12 @@
 
 ;(println (dictionary-of-satellites pairs {}))
 
+;;  start accumulator at 1 since if the body is a key, it must be a bary
+;;  and have at least one satellite
 (println
   " part one answer:"
   (apply +
         (let [d (dictionary-of-satellites pairs {})]
-          (for [s (keys d)] (bary-tally d (get d s) 0)))))
+          (for [s (keys d)] (bary-tally d (get d s) 1)))))
 
-
+;;  20014 is too low
