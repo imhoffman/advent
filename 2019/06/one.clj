@@ -12,26 +12,6 @@
 
 (defn satl [pair] (last pair))
 
-;;  for determining direct orbits
-;;   call initially with dict as an empty hash map (i.e., dictionary)
-(defn direct-orbit-dict [pairs output-dict]
-  (let [a (bary (first pairs))]
-    (if (empty? a)
-      output-dict
-      (recur (rest pairs)
-             (assoc output-dict a (if (contains? output-dict a) (inc (get output-dict a)) 1)))
-      )))
-
-;;  I don't think that this is useful---simply writing it, just in case
-(defn indirect-orbit-dict [pairs output-dict]
-  (let [a (satl (first pairs))]
-    (if (empty? a)
-      output-dict
-      (recur (rest pairs)
-             (assoc output-dict a (if (contains? output-dict a) (inc (get output-dict a)) 1)))
-      )))
-
-
 ;;  key = bary, val = list of satl
 ;;   the list in val will be recursively traversed by `tally`
 ;;   as the work stack
@@ -47,32 +27,15 @@
                       (list b)))))))
 
 
-;;  recursive counter ... call initially with accum of zero
-;;  depth-first traversal; it is not important that the dictionary
-;;  is not sorted; the list from dict-of-satl is the peek/pop work stack
-(defn tally-up-children [dict-of-satl children accum]
-  (let [child (peek children)]
-    (if child
-    ;(if (contains? dictionary-of-satellites child) ; is the child/val also a parent/key
-      (recur dict-of-satl (pop children) (inc accum))
-      accum)))
-
-
-;; run final sum as something like (apply + (total-tally master-dictionary))
-;;  perhaps invoke directly rather than with `get`:
-;;  https://clojure.org/guides/learn/hashed_colls#_looking_up_by_key
-(defn total-tally [dict-of-satl accum]
-    (if (empty? dict-of-satl)
-      accum
-      (let [parent (first (keys dict-of-satl))
-            children (get dict-of-satl parent)]
-        (if children     ;; problem ?? ... is this always true because we don't pop them down here ??
-          (recur
-            dict-of-satl
-            (tally-up-children dict-of-satl children accum))
-          (recur
-            (dissoc dict-of-satl parent)
-            accum)))))
+;; run final sum as something like
+;;  (apply + (for [s (keys dict)] (bary-tally dict (get dict s) 0)))
+(defn bary-tally [dict-of-satl children accum]
+  (if (contains? dict-of-satl (peek children)) ; is the child/val also a parent/key ?
+    (recur
+      dict-of-satl
+      (pop children)
+      (inc accum)) ;; this needs to add the whole branch, not just the single orbit
+    accum))   ; if nothing is orbiting the child: end of the branch
 
 
 
@@ -92,6 +55,9 @@
 (println (dictionary-of-satellites pairs {}))
 
 (println
- (total-tally (dictionary-of-satellites pairs {}) 0))
+  " part one answer:"
+  (apply +
+        (let [d (dictionary-of-satellites pairs {})]
+          (for [s (keys d)] (bary-tally d (get d s) 0)))))
 
 
