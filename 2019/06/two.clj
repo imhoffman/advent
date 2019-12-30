@@ -60,6 +60,9 @@
       (recur d bary-of-satl (assoc accum-dict bary-of-satl orbit-count) (inc orbit-count)))))
 
 
+;;  of the barycenters that the initial and final nodes have in common, the ones
+;;  in the respective dicts that are closest to the end of the respective branches
+;;  will have the smallest orbit-count val from `climb-list`
 (defn find-path-total [initial-satl-count-dict final-satl-count-dict]
   (let [common-barys
         (sets/intersection (set (keys initial-satl-count-dict))
@@ -83,22 +86,11 @@
 (def pairs (parse-orbits input))
 
 
-;;  testing inverted dictionary...
-(println
-  (dictionary-of-satellites pairs {}))
-
-(println
-  (invert-one-to-many (dictionary-of-satellites pairs {}) {}))
-
-
 ;;  part two
 ;;   start recursion at 0
 ;;   "Between the objects they are orbiting - not between YOU and SAN."
-;;  testing branch climber
 (println
-  (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" {} 0))
-
-(println
+  " minimum number of moves from YOU to SAN:"
   (find-path-total
     (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" {} 0)
     (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "SAN" {} 0)))
