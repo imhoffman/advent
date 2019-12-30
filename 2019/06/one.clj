@@ -28,18 +28,19 @@
 
 
 ;; run final sum as something like
-;;  (apply + (for [s (keys dict)] (bary-tally dict (get dict s) 1)))
-(defn bary-tally [dict-of-satl children accum]
-  (let [child (peek children)]    ;; the list of satl's is the job stack
-    (if child
-      (if (contains? dict-of-satl child) ; is the child/val also a parent/key ?
+;;  (apply + (for [s (keys dict)] (bary-tally dict (get dict s) 0)))
+(defn bary-tally [dict-of-satl traversal-stack accum]
+  (let [job (peek traversal-stack)]    ;; the list of satl's is the job stack
+    (if job
+      (if (contains? dict-of-satl job) ; is the child/val also a parent/key ?
        (recur
          dict-of-satl
-         (get dict-of-satl child)    ;; investigate the child's satl list
+         ;;  if so, add the children to the stack, inc accum, and pop that bary
+         (reduce conj (pop traversal-stack) (get dict-of-satl job))
          (inc accum))
         (recur
          dict-of-satl
-         (pop children)
+         (pop traversal-stack)
          (inc accum)))
       accum)))   ; if nothing is orbiting the child: end of the branch
 
@@ -59,12 +60,13 @@
 
 ;(println (dictionary-of-satellites pairs {}))
 
-;;  start accumulator at 1 since if the body is a key, it must be a bary
-;;  and have at least one satellite
+;;  start accumulator at 0 since if the current job is a key, it
+;;  must be a bary and have at least one satellite _but_ in `bary-tally`
+;;  there is an (inc accum) when (pop stack)
 (println
   " part one answer:"
   (apply +
         (let [d (dictionary-of-satellites pairs {})]
-          (for [s (keys d)] (bary-tally d (get d s) 1)))))
+          (for [s (keys d)] (bary-tally d (get d s) 0)))))
 
-;;  20014 is too low
+
