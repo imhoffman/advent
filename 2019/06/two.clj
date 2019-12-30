@@ -1,4 +1,5 @@
 (require '[clojure.string :as str])
+(require '[clojure.set :as sets])
 
 (def sep #"[)]")     ;; my vim highlighter is reading the guts of the regex!
 
@@ -49,15 +50,23 @@
          (val dict-entry) output-dict)))))
 
 
-;;   climb toward COM and keep a list of barycenters
+;;   climb toward COM and keep a dict of {bary, orbit count}
 ;;   then compare YOU and SAN for the closest commonality
-(defn climb-list [inverted-dict-of-satl satellite accum-list]
+(defn climb-list [inverted-dict-of-satl satellite accum-dict orbit-count]
   (let [d inverted-dict-of-satl
         bary-of-satl (get d satellite)]
     (if (= bary-of-satl "COM")
-      accum-list
-      (recur d bary-of-satl (conj accum-list bary-of-satl)))))
+      accum-dict
+      (recur d bary-of-satl (assoc accum-dict bary-of-satl orbit-count) (inc orbit-count)))))
 
+
+(defn find-path-total [initial-satl-count-dict final-satl-count-dict]
+  (let [common-barys
+        (sets/intersection (set (keys initial-satl-count-dict))
+                           (set (keys final-satl-count-dict)))
+        common-barys-initial (select-keys initial-satl-count-dict common-barys)
+        common-barys-final (select-keys final-satl-count-dict common-barys)]
+    (+ (apply min (vals common-barys-initial)) (apply min (vals common-barys-final)))))
 
 
 ;;
@@ -82,8 +91,16 @@
   (invert-one-to-many (dictionary-of-satellites pairs {}) {}))
 
 
+;;  part two
+;;   start recursion at 0
+;;   "Between the objects they are orbiting - not between YOU and SAN."
 ;;  testing branch climber
 (println
-  (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" []))
+  (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" {} 0))
+
+(println
+  (find-path-total
+    (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" {} 0)
+    (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "SAN" {} 0)))
 
 
