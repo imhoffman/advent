@@ -33,7 +33,7 @@
 ;;  https://stackoverflow.com/questions/15595986/swap-keys-and-values-in-a-map
 ;;  https://clojure.org/reference/transients
 ;;   I didn't use the above technique ... the following makes more
-;;   sense to me, but maybe slow
+;;   sense to me, but may be slow
 (defn invert-one-to-many [input-dict output-dict]
   (if (empty? input-dict)    ;; work through dictionary recursively until empty
     output-dict
@@ -51,10 +51,12 @@
 
 ;;   climb toward COM and keep a list of barycenters
 ;;   then compare YOU and SAN for the closest commonality
-;;   it would be nice to flatten the vals and invert the
-;;   orbit dict... done! with `invert-one-to-many`
-(defn climb-list [inverted-dict-of-satl node accum-list]
-  true)
+(defn climb-list [inverted-dict-of-satl satellite accum-list]
+  (let [d inverted-dict-of-satl
+        bary-of-satl (get d satellite)]
+    (if (= bary-of-satl "COM")
+      accum-list
+      (recur d bary-of-satl (conj accum-list bary-of-satl)))))
 
 
 
@@ -78,5 +80,10 @@
 
 (println
   (invert-one-to-many (dictionary-of-satellites pairs {}) {}))
+
+
+;;  testing branch climber
+(println
+  (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" []))
 
 
