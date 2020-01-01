@@ -29,18 +29,17 @@
                    (make-inputs-dict (first whitesplit-ins-list) {})))))))
 
 
-(def inputs-loop [reagents accum]
-  (if (empty? reagents)
-    accum
-
-
-
+;;  recursively walk the tree, tallying costs
+;;   each reactant dictionary in the val of each rxn-dict entry
+;;   will provide a work stack
 (defn find-cost [product rxn-dict accum]
   (let [inputs-dict (second (get rxn-dict) product)
         inputs      (keys inputs-dict)]
-    (if (get inputs-dict 'ORE)
-      accum
+    (if (get inputs-dict "ORE")
+      (* accum (first (get inputs-dict "ORE")))
       (fn [reagents cost]
+       ;; stuff
+       true))))
 
 
 
