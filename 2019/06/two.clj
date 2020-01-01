@@ -66,8 +66,12 @@
 ;;  the commonality of interest is at the beginning or end of the `select`ed dict
 ;;  below, and thus be O(1) ... or speed up `min` with transients?
 ;;   https://clojure.org/reference/transients
-(defn find-path-total [initial-satl-count-dict final-satl-count-dict]
-  (let [common-barys (sets/intersection (set (keys initial-satl-count-dict))
+;;  start recursion at 0
+;;   "Between the objects they are orbiting - not between YOU and SAN."
+(defn find-path-total [inverted-dict initial-satl final-satl]
+  (let [initial-satl-count-dict (climb-list inverted-dict initial-satl {} 0)
+        final-satl-count-dict   (climb-list inverted-dict   final-satl {} 0)
+        common-barys (sets/intersection (set (keys initial-satl-count-dict))
                                         (set (keys final-satl-count-dict)))
         common-barys-initial  (select-keys initial-satl-count-dict common-barys)
         common-barys-final    (select-keys final-satl-count-dict   common-barys)]
@@ -88,13 +92,21 @@
 (def pairs (parse-orbits input))
 
 ;;  part two
-;;   start recursion at 0
-;;   "Between the objects they are orbiting - not between YOU and SAN."
-(println
-  " minimum number of moves from YOU to SAN:"
-  (find-path-total
-    (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" {} 0)
-    (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "SAN" {} 0)))
+;;   from the CLI
+;;   https://clojure.org/reference/repl_and_main
+(let [argv *command-line-args*]
+  (if (not (= 2 (count argv)))
+    (do
+      (println " usage: clj two.clj INITIAL FINAL")   ;; $ clj two.clj YOU SAN
+      (System/exit 1))
+    (let [initial (first argv)
+          final   (second argv)]
+      (println
+        " minimum number of moves from" initial "to" final ":"
+        (find-path-total
+          (invert-one-to-many
+            (dictionary-of-satellites pairs {}) {})
+          initial final)))))
 
 ;;
 ;; What are the ways around me having to pass an empty accumulator when calling a tail-
