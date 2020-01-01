@@ -31,15 +31,19 @@
 
 ;;  recursively walk the tree, tallying costs
 ;;   each reactant dictionary in the val of each rxn-dict entry
-;;   will provide a work stack
-(defn find-cost [product rxn-dict accum]
+;;   will provide a work stack;
+;;  initially, the traversal stack is equal to (get rxn-dict product)
+(defn find-cost [rxn-dict product accum]
   (let [inputs-dict (second (get rxn-dict) product)
-        inputs      (keys inputs-dict)]
+        inputs      (keys inputs-dict)]    ;; inputs aka reagents
     (if (get inputs-dict "ORE")
-      (* accum (first (get inputs-dict "ORE")))
-      (fn [reagents cost]
-       ;; stuff
-       true))))
+      (* accum (first (get inputs-dict "ORE")))  ;; scale by coeff
+      (let [work-stack (keys inputs-dict)
+            job (peek work-stack)]
+        (recur rxn-dict job   ;; does job go here?
+               ((fn [reagents cost]   ;; this lambda is for the accum in the recur
+                  (if (empty? reagents)
+                    cost ; ... hmmm
 
 
 
