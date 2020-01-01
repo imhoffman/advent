@@ -4,6 +4,7 @@
 (def sep #"[)]")     ;; my vim highlighter is reading the guts of the regex!
 
 ;;  the input list is called `the orbit map` on advent
+;;   parses out the parenthesis notation in the puzzle input
 ;;   produces a vector of barycenter--satellite vector pairs
 (defn parse-orbits [orbit-map] 
   (vec (for [listing orbit-map]
@@ -17,31 +18,29 @@
 ;;   the list in val will be recursively traversed by `tally`
 ;;   as the work stack
 (defn dictionary-of-satellites [pairs output-dict]
-  (let [a (bary (first pairs))
-        b (satl (first pairs))]
-    (if (empty? a)
+  (let [b (bary (first pairs))
+        s (satl (first pairs))]
+    (if (empty? b)
       output-dict
       (recur (rest pairs)
-             (assoc output-dict a
-                    (if (contains? output-dict a)
-                      (conj (get output-dict a) b)
-                      (list b)))))))
-
+             (assoc output-dict b
+                    (if (contains? output-dict b)
+                      (conj (get output-dict b) s)
+                      (list s)))))))
 
 ;;  part two
 
 ;;   invert orbit dict with every satl in val lists becoming keys
 ;;  https://stackoverflow.com/questions/15595986/swap-keys-and-values-in-a-map
-;;  https://clojure.org/reference/transients
 ;;   I didn't use the above technique ... the following makes more
-;;   sense to me, but may be slow
+;;   sense to me, but it may be slow
 (defn invert-one-to-many [input-dict output-dict]
-  (if (empty? input-dict)    ;; work through dictionary recursively until empty
+  (if (empty? input-dict)    ;; work through dict stack recursively until empty
     output-dict
     (let [dict-entry (first input-dict)]
       (recur
         (dissoc input-dict (key dict-entry))  ;; pop job out of dictionary
-        ((fn [satls bary-dict]                ;; assoc satls of the bary as keys
+        ((fn [satls bary-dict]                ;; lambda to assoc satls of the bary as keys
            (if (empty? satls)                 ;; recursively work through satl list
              bary-dict
              (recur
@@ -51,7 +50,7 @@
 
 
 ;;   climb toward COM and keep a dict of {bary, orbit count}
-;;   then compare YOU and SAN for the closest commonality
+;;   for later comparison b/w YOU and SAN for the closest commonality
 (defn climb-list [inverted-dict-of-satl satellite accum-dict orbit-count]
   (let [d inverted-dict-of-satl
         bary-of-satl (get d satellite)]
@@ -60,15 +59,18 @@
       (recur d bary-of-satl (assoc accum-dict bary-of-satl orbit-count) (inc orbit-count)))))
 
 
-;;  of the barycenters that the initial and final nodes have in common, the ones
-;;  in the respective dicts that are closest to the end of the respective branches
-;;  will have the smallest orbit-count val from `climb-list`
+;;  Of the barycenters that the initial and final nodes have in common, the ones
+;;  in the respective dicts that are furthest from COM on their path
+;;  will have the smallest orbit-count val from `climb-list`, thus find the `min`.
+;;  However, `min` is likely O(n) and there may be a creative way to garauntee that
+;;  the commonality of interest is at the beginning or end of the `select`ed dict
+;;  below, and thus be O(1) ... or speed up `min` with transients?
+;;   https://clojure.org/reference/transients
 (defn find-path-total [initial-satl-count-dict final-satl-count-dict]
-  (let [common-barys
-        (sets/intersection (set (keys initial-satl-count-dict))
-                           (set (keys final-satl-count-dict)))
-        common-barys-initial (select-keys initial-satl-count-dict common-barys)
-        common-barys-final (select-keys final-satl-count-dict common-barys)]
+  (let [common-barys (sets/intersection (set (keys initial-satl-count-dict))
+                                        (set (keys final-satl-count-dict)))
+        common-barys-initial  (select-keys initial-satl-count-dict common-barys)
+        common-barys-final    (select-keys final-satl-count-dict   common-barys)]
     (+ (apply min (vals common-barys-initial)) (apply min (vals common-barys-final)))))
 
 
@@ -79,12 +81,11 @@
 ;;   https://clojuredocs.org/clojure.core/line-seq
 (def input
   (with-open [f (clojure.java.io/reader "puzzle.txt")]
-    (reduce conj () (line-seq f))))
+    (reduce conj () (line-seq f))))             ;; order doesn't matter, so ()
 (println "Read" (count input) "lines.")
 
 ;;  load up vector of pairs for processing going forward
 (def pairs (parse-orbits input))
-
 
 ;;  part two
 ;;   start recursion at 0
@@ -95,4 +96,8 @@
     (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "YOU" {} 0)
     (climb-list (invert-one-to-many (dictionary-of-satellites pairs {}) {}) "SAN" {} 0)))
 
+;;
+;; What are the ways around me having to pass an empty accumulator when calling a tail-
+;; recursive function?  (into {} map ... ?   (reduce ... ?
+;; I like having the argument be passed in, but is it slow or worse somehow?
 
