@@ -6,19 +6,25 @@
 
 ;;  since there are no leading zeros, a zero anywhere
 ;;  would break the always-increasing rule
-(defn has-zeros? [number]
-  (some (map #(= \0 %) (str number))))
+(defn no-zeros? [number]
+  (not (some #(= \0 %) (str number))))    ; easier to negate here than in filter
 
 
 ;;  using `partition` as seen on (apropos
 (defn has-repeats? [number]
-  (some (map #(= (first %) (second %)) (partition 2 1 (str number)))))
+  (some #(= (first %) (second %)) (partition 2 1 (str number))))
+
+;;  chars come out of partition, but `>=` requires numbers, and `parseInt` requires strings !
+(defn is-increasing? [number]
+  (some #(<=
+           (Integer/parseInt (str (first %)))
+           (Integer/parseInt (str (second %)))) (partition 2 1 (str number))))
 
 
-
+;;  part one
 (defn tally-possibilities [ni nf]
-  (let [zeros-free-list (range ni nf)]   ; ... `filter` here, etc
-    (count zeros-free-list)))
+  (let [zero-free-list (filter no-zeros? (range ni nf))]
+    (count (filter has-repeats? (filter is-increasing? zero-free-list)))))
 
 
 ;;
