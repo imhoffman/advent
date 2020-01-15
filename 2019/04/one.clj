@@ -6,6 +6,7 @@
 
 ;;  since there are no leading zeros, a zero anywhere
 ;;  would break the always-increasing rule
+;;   but this predicate is superfluous
 (defn no-zeros? [number]
   (not (some #(= \0 %) (str number))))    ; easier to negate here than in filter
 
@@ -14,9 +15,11 @@
 (defn has-repeats? [number]
   (some #(= (first %) (second %)) (partition 2 1 (str number))))
 
-;;  chars come out of partition, but `>=` requires numbers, and `parseInt` requires strings !
+;;  chars come out of partition,
+;;  but `>=` requires numbers,
+;;  and `parseInt` requires strings
 (defn is-increasing? [number]
-  (some #(<=
+  (every? #(<=
            (Integer/parseInt (str (first %)))
            (Integer/parseInt (str (second %)))) (partition 2 1 (str number))))
 
