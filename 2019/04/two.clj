@@ -12,20 +12,14 @@
   (not (some #(= \0 %) (str number))))    ; easier to negate here than in filter
 
 
-;;  using `partition` as seen on (apropos
 ;;  updated for part two
+;;   since `has-repeats?` is applied after `is-increasing?`,
+;;   multiple occurences are garaunteed to be consecutive
 (defn has-repeats? [number]
-  (some
-    #(
-      (let [a (first %)
-            b (second %)
-            c (nth % 2)]    ;; zero-indexed
-        (if (= a b c)
-          false
-          (or (= a b) (= b c)))))
-    (partition 3 1 (str number))))
+  (some #(= 2 %) (vals (frequencies (str number)))))   ;; exactly 2
 
 
+;;  using `partition` as seen on (apropos
 ;;  chars come out of partition,
 ;;  but `>=` requires numbers,
 ;;  and `parseInt` requires strings
