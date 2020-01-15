@@ -4,14 +4,6 @@
 ;(require '[clojure.set :as sets])
 
 
-;;  since there are no leading zeros, a zero anywhere
-;;  would break the always-increasing rule, but this
-;;  predicate is superfluous, and is probably slower
-;;  then letting `is-increasing?` catch them...
-(defn no-zeros? [number]
-  (not (some #(= \0 %) (str number))))    ; easier to negate here than in filter
-
-
 ;;  updated for part two
 ;;   since `has-repeats?` is applied after `is-increasing?`,
 ;;   multiple occurences are garaunteed to be consecutive
@@ -25,14 +17,14 @@
 ;;  and `parseInt` requires strings
 (defn is-increasing? [number]
   (every? #(<=
-           (Integer/parseInt (str (first %)))
-           (Integer/parseInt (str (second %))))
-          (partition 2 1 (str number))))
+             (Integer/parseInt (str (first %)))
+             (Integer/parseInt (str (second %))))
+           (partition 2 1 (str number))))
 
-
+;;  not sure if the boundaries of `range` satisfy the rule "within the range" ...
+;;   so simply inspect the two input values for compliance
 (defn tally-possibilities [ni nf]
-  (let [zero-free-list (filter no-zeros? (range ni nf))]
-    (count (filter has-repeats? (filter is-increasing? zero-free-list)))))
+  (count (filter has-repeats? (filter is-increasing? (range ni nf)))))
 
 
 ;;
