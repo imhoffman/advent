@@ -15,14 +15,19 @@
 ;;  chars come out of partition,
 ;;  but `>=` requires numbers,
 ;;  and `parseInt` requires strings
-(defn is-increasing? [number]
+(defn old-is-increasing? [number]
   (every? #(<=
              (Integer/parseInt (str (first %)))
              (Integer/parseInt (str (second %))))
            (partition 2 1 (str number))))
 
+;;  `compare` can work on the ascii chars directly --- no `parseInt`
+(defn is-increasing? [number]
+  (every? #(>= 0 (apply compare %)) (partition 2 1 (str number))))
+
+
 ;;  not sure if the boundaries of `range` satisfy the rule "within the range" ...
-;;   so simply inspect the two input values for compliance
+;;   the user should inspect the two input values for compliance
 (defn tally-possibilities [ni nf]
   (count (filter has-repeats? (filter is-increasing? (range ni nf)))))
 
