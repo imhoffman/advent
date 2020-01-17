@@ -31,24 +31,26 @@ void reader ( FILE* f, int* n, int* maxlen, char lines[][MAX_LINE_LENGTH] ) {
 //  recursive function to parse mass into fuel from input strings
 int fuel_parser ( const char input[], int accum ) {
   int mass, fuel;
-  char next[80];
+  char next[32];
 
   // parse integer from input string
   sscanf( input, "%d", &mass );
 
-  fuel =(int) floor( (double)mass / 3.0 );
+  // compute fuel as per ruleset
+  fuel = ( mass - mass%3 ) / 3;
   fuel = fuel - 2;
 
   // base case
   if ( fuel <= 0 ) { return accum; }
 
   // recursive case
+  //   tally latest entry
   accum = accum + fuel;
 
-  // write integer to a string for recursive pass
+  //   write integer to a string for recursive pass
   sprintf( next, "%d", fuel );
 
-  // tail call
+  //   tail call
   return fuel_parser( next, accum );
 }
 
@@ -79,6 +81,7 @@ int main( int argc, char *argv[] ) {
  free( temp );  // keeper now has the data...free the big temp array from the file read
  //  end of file I/O
 
+ // puzzle solution
  total = 0; 
  for ( int i=0; i < number_of_lines; i++ ) {
    total += fuel_parser( input[i], 0 );
