@@ -13,6 +13,12 @@
    99 {:ip-inc 0, :func #(identity %)}
    })
 
+;;  perhaps some sort of mutable bookkeeping ?
+;;   ... hopefully not, simply `(assoc state :ip ...)` should do
+(def state  ; (to-array ???
+  {:ip 0
+   :base 0})
+
 
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
@@ -46,7 +52,7 @@
                         (str/trim (slurp f)))]
     (into-array (vec
      (for [c (str/split file-contents #"[,]")]
-       (Long/parseLong c))))))                ;; must be parsed as Long for interop
+       (Long/parseLong c))))))        ;; must be parsed as Long for clojure arithmetic
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
