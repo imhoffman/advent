@@ -23,10 +23,16 @@
 
 
 ;;  apply the opcode function to the arguments
+;;  altering the entire, mutable RAM array
 (defn operate [ram ip]
   (let [instruction (parse-opcode ram ip)]
-    ((:func (opcodes (instruction 0))) instruction)))
+    (aset ram (instruction 3) ((:func (opcodes (instruction 0))) instruction))))
 
+
+
+;;  diagnostic tool
+(defn display-ram [ram]
+  (println (for [n (range (count ram))] (aget ram n))))
 
 ;;
 ;;  main program
@@ -40,12 +46,14 @@
                         (str/trim (slurp f)))]
     (into-array (vec
      (for [c (str/split file-contents #"[,]")]
-       (Integer/parseInt c))))))
+       (Long/parseLong c))))))                ;; must be parsed as Long for interop
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
-;;  test print
-(println (for [n (range (count intcode-program))] (aget intcode-program n)))
-(println (operate intcode-program 0))
+
+;;  test prints
+(display-ram intcode-program)
+(operate intcode-program 0)
+(display-ram intcode-program)
 
 
