@@ -1,36 +1,31 @@
 (require '[clojure.string :as str])
 
 
-;;  program counter lookup
-;;  dictionary of {opcode, ip increment}
-(def opcode-widths {1 4, 2 4, 99 0})
 
-
-;;  dictionary of {opcode, function}
-;;   perhaps the keys should be chars like \1, \2
-;;   depending on how to int-as-str shakes out
-(def operations
-  {1 #(+ (% 1) (% 2)),
-   2 #(* (% 1) (% 2))})
-
-
-;;  perhaps a single, large assoc array ?
-;(def opcodes
-;  {1 {:ip-inc 4, :func #(+ (% 1) (% 2))}
+;;  put all opcode info in a single, large assoc array
+;;   key is opcode (currently an int, perhaps it should
+;;    be a char like \1, \2 depending on how int-as-str
+;;    shakes out when we advance to modality
+;;   val is itself a dictionary of properties
+(def opcodes
+  {1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
+   2  {:ip-inc 4, :func #(* (% 1) (% 2))}
+   99 {:ip-inc 0, :func #(identity %)}
+   })
 
 
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
   (into []
         (for
-          [n (range ip (+ ip (opcode-widths (ram ip))))]
+          [n (range ip (+ ip (:ip-inc (opcodes (ram ip)))))]
           (ram n))))
 
 
 ;;  apply the opcode function to the arguments
 (defn operate [ram ip]
   (let [instruction (parse-opcode ram ip)]
-    ((operations (instruction 0)) instruction)))
+    ((:func (opcodes (instruction 0))) instruction)))
 
 
 ;;
