@@ -18,8 +18,8 @@
 (defn parse-opcode [ram ip]
   (into []
         (for
-          [n (range ip (+ ip (:ip-inc (opcodes (ram ip)))))]
-          (ram n))))
+          [n (range ip (+ ip (:ip-inc (opcodes (aget ram ip)))))]
+          (aget ram n))))
 
 
 ;;  apply the opcode function to the arguments
@@ -32,18 +32,20 @@
 ;;  main program
 ;;
 ;;   file I/O
+;;    program will be read into "RAM" as a Java array
+;;    so that `aset` can simply modify it
 (def intcode-program
   (let [file-contents (with-open
                         [f (clojure.java.io/reader "puzzle.txt")]
                         (str/trim (slurp f)))]
-    (vec
+    (into-array (vec
      (for [c (str/split file-contents #"[,]")]
-       (Integer/parseInt c)))))
+       (Integer/parseInt c))))))
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
 ;;  test print
-(println intcode-program)
+(println (for [n (range (count intcode-program))] (aget intcode-program n)))
 (println (operate intcode-program 0))
 
 
