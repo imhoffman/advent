@@ -13,12 +13,6 @@
    99 {:ip-inc 0, :func #(identity %)}
    })
 
-;;  perhaps some sort of mutable bookkeeping ?
-;;   ... hopefully not, simply `(assoc state :ip ...)` should do
-(def state  ; (to-array ???
-  {:ip 0
-   :base 0})
-
 
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
@@ -29,11 +23,16 @@
 
 
 ;;  apply the opcode function to the arguments
-;;  altering the entire, mutable RAM array
-(defn operate [ram ip]
-  (let [instruction (parse-opcode ram ip)]
-    (aset ram (instruction 3) ((:func (opcodes (instruction 0))) instruction))))
+;;  altering the entire, mutable RAM array then
+;;  returning the dictionary that includes the ip
+(defn operate [ram counters]
+  (let [ip          (:ip counters)
+        instruction (parse-opcode ram ip)]
+    (aset ram (instruction 3) ((:func (opcodes (instruction 0))) instruction))
+    (assoc counters :ip (+ ip (:ip-inc (opcodes (instruction 0)))))))
 
+;;  recur until halt
+;(defn run-program [ram counters]
 
 
 ;;  diagnostic tool
@@ -59,7 +58,7 @@
 
 ;;  test prints
 (display-ram intcode-program)
-(operate intcode-program 0)
+(println " current counters dict" (operate intcode-program {:ip 0, :base 0}))
 (display-ram intcode-program)
 
 
