@@ -48,8 +48,7 @@
 
 ;;  recur until halt
 (defn run-program [ram counters]
-  (if (empty? counters)             ; empty `counters` is the signal to halt
-    (println " program has halted")
+  (when (not (empty? counters))     ; empty `counters` is the signal to halt
     (recur ram (operate ram counters))))
     ;; `ram` is successfully mutated by `operate` before the function recurs
     ;; even though it seems that `ram` has been passed in its "old" state
@@ -71,13 +70,21 @@
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
+;;  copy program
 (def original-program (aclone intcode-program))
 
-;;  program input is mutable
-;;   dictionary of counters is recursively returned; start with an `ip` of 0
-(run-program intcode-program {:ip 0, :base 0})
-
-(println " address 0 in RAM currently holds" (aget intcode-program 0))
-(println " address 0 in RAM currently holds" (aget original-program 0))
+;;  part two
+(doseq [noun (range 1 100)]
+  (doseq [verb (range 1 100)]
+    (dotimes
+      [i (count intcode-program)]
+      (aset intcode-program i (aget original-program i)))
+    (aset intcode-program 1 noun)
+    (aset intcode-program 2 verb)
+    (run-program intcode-program {:ip 0, :base 0})
+    (when (= 19690720 (aget intcode-program 0))
+      (do
+        (println " success with noun--verb combo" (+ (* 100 noun) verb))
+        (System/exit 0)))))
 
 
