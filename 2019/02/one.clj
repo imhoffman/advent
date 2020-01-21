@@ -72,6 +72,9 @@
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
 ;;  program input is mutable
+;;   change inputs as per puzzle
+(aset intcode-program 1 12)
+(aset intcode-program 2  2)
 ;;   dictionary of counters is recursively returned; start with an `ip` of 0
 (run-program intcode-program {:ip 0, :base 0})
 
