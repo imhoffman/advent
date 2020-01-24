@@ -43,7 +43,8 @@
 
 ;;  diagnostic tool
 (defn display-ram [ram]
-  (println (for [n (range (count ram))] (aget ram n))))
+  (println (seq ram)))
+  ;(println (for [n (range (count ram))] (aget ram n))))
 
 
 ;;  recur until halt
@@ -79,5 +80,4 @@
 (run-program intcode-program {:ip 0, :base 0})
 
 (println " address 0 in RAM currently holds" (aget intcode-program 0))
-
 

@@ -43,7 +43,8 @@
 
 ;;  diagnostic tool
 (defn display-ram [ram]
-  (println (for [n (range (count ram))] (aget ram n))))
+  (println (seq ram)))
+  ;(println (for [n (range (count ram))] (aget ram n))))
 
 
 ;;  recur until halt
