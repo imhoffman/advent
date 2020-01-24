@@ -8,8 +8,9 @@
 ;;   val is itself a dictionary of properties
 (def opcodes
   {1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
-   2  {:ip-inc 4, :func #(* (% 1) (% 2))}    ;; change 1 & 2 to accept ram like 3
-   3  {:ip-inc 2, :func #((let [in (Long/parseLong (read-line)) ignore (aset (% 1) (% 2) in)]) \x)}
+   2  {:ip-inc 4, :func #(* (% 1) (% 2))}    ;; change 1 & 2 to accept `ram` like 3 ??
+   ;;  `aset` returns the set'ed value ... is that a problem here ?
+   3  {:ip-inc 2, :func #((let [in (Long/parseLong (read-line))] (aset (% 1) (% 2) in)))}
    4  {:ip-inc 2, :func #((println " the progam outputs" (% 1)))}
    99 {:ip-inc 1, :func #(identity %)}
    })
@@ -57,8 +58,7 @@
 
 
 ;;  diagnostic tool
-(defn display-ram [ram]
-  (println (for [n (range (count ram))] (aget ram n))))
+(defn display-ram [ram] (println (seq ram)))
 
 
 ;;  recur until halt
