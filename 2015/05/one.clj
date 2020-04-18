@@ -27,3 +27,35 @@
 
 
 
+(defn has-repeats? [s]
+  (loop [stack (vec s)]
+    (if (or (empty? stack) (> 2 (count stack)))
+      false
+      (if (= (first stack) (second stack))
+        true
+        (recur (rest stack))))))
+
+
+;;
+;;  main program
+;;
+
+(println " part one:"
+
+(loop [work-stack (re-seq #"\w+" (slurp "puzzle.txt"))
+       counter    0]
+  (if (empty? work-stack)
+    counter
+    (let [s (first work-stack)]
+      (recur
+        (rest work-stack)
+        (+ counter
+           (if (and
+                    (free-of-bad-pairs? s)
+                    (has-three-vowels? s)
+                    (has-repeats? s))
+             1 0))))))
+
+)
+
+
