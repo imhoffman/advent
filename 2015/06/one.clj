@@ -44,21 +44,24 @@
     (if (= y (count screen))
       out
       (if (or (< y yi) (> y yf))
-        (recur (inc y) (conj out (screen y)))
-        (loop [x           0
-               new-row     []
-               new-entries (map (ops op) (subvec (screen y) xi (inc xf)))]
-          (if (= x (count screen))
-            (recur (inc y) (conj out new-row))
-            (if (or (< x xi) (> x xf))
-              (recur (inc x)
-                     (conj new-row ((screen y) x))
-                     new-entries)
-              (recur (inc x)
-                     (conj new-row (first new-entires))
-                     (rest new-entries)))))))))
-
-
+        (recur
+          (inc y)
+          (conj out (screen y)))
+        (recur
+          (inc y)
+          (conj out
+                (loop [x           0
+                       new-row     []
+                       new-entries (map (ops op) (subvec (screen y) xi (inc xf)))]
+                  (if (= x (count screen))
+                    new-row
+                    (if (or (< x xi) (> x xf))
+                      (recur (inc x)
+                             (conj new-row ((screen y) x))
+                             new-entries)
+                      (recur (inc x)
+                             (conj new-row (first new-entries))
+                             (rest new-entries)))))))))))
 
 
 
@@ -72,6 +75,10 @@
             new-screen           (update-screen screen op xi yi xf yf)]
         (recur (rest instr-list) new-screen)))))
 
+
+
+(println " part one: the number of lit lights at the end is"
+         (apply + (flatten (run-screen "puzzle.txt"))))
 
 
 
