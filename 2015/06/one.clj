@@ -38,4 +38,19 @@
 
 
 
+(defn run-screen [filename]
+  (loop [instr-list (str/split-lines (slurp filename))
+         screen     initial-screen]
+    (if (empty? instr-list)
+      screen
+      (let [instr                (first instr-list)
+            [op [xi,yi] [xf,yf]] (parser instr)]
+        (println instr op xi yi xf yf)
+        (recur (rest instr-list) screen)))))
+
+
+
+
+
+
 
