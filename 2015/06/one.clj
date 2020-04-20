@@ -37,6 +37,30 @@
    :turn-off (fn [x] 0)})
 
 
+; "inclusive ranges given as coordinate pairs"
+(defn update-screen [screen op xi yi xf yf]
+  (loop [y   0
+         out []]
+    (if (= y (count screen))
+      out
+      (if (or (< y yi) (> y yf))
+        (recur (inc y) (conj out (screen y)))
+        (loop [x           0
+               new-row     []
+               new-entries (map (ops op) (subvec (screen y) xi (inc xf)))]
+          (if (= x (count screen))
+            (recur (inc y) (conj out new-row))
+            (if (or (< x xi) (> x xf))
+              (recur (inc x)
+                     (conj new-row ((screen y) x))
+                     new-entries)
+              (recur (inc x)
+                     (conj new-row (first new-entires))
+                     (rest new-entries)))))))))
+
+
+
+
 
 (defn run-screen [filename]
   (loop [instr-list (str/split-lines (slurp filename))
@@ -44,9 +68,10 @@
     (if (empty? instr-list)
       screen
       (let [instr                (first instr-list)
-            [op [xi,yi] [xf,yf]] (parser instr)]
-        (println instr op xi yi xf yf)
-        (recur (rest instr-list) screen)))))
+            [op [xi,yi] [xf,yf]] (parser instr)
+            new-screen           (update-screen screen op xi yi xf yf)]
+        (recur (rest instr-list) new-screen)))))
+
 
 
 
