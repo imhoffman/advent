@@ -33,8 +33,8 @@
 ;;   map will return a list ... so must `into []` on the other end
 (def ops
   {:toggle   #(if (= % 1) 0 1)
-   :turn-on  (fn [x] 1)
-   :turn-off (fn [x] 0)})
+   :turn-on  (constantly 1)
+   :turn-off (constantly 0)})
 
 
 ; "inclusive ranges given as coordinate pairs"
