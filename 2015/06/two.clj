@@ -40,27 +40,27 @@
 ; "inclusive ranges given as coordinate pairs"
 (defn update-screen [screen op xi yi xf yf]
   (loop [y   0
-         out []]
+         out (transient [])]
     (if (= y (count screen))
-      out
+      (persistent! out)
       (if (or (< y yi) (> y yf))
         (recur
           (inc y)
-          (conj out (screen y)))
+          (conj! out (screen y)))
         (recur
           (inc y)
-          (conj out
+          (conj! out
                 (loop [x           0
-                       new-row     []
+                       new-row     (transient [])
                        new-entries (map (ops op) (subvec (screen y) xi (inc xf)))]
-                  (if (= x (count screen))
-                    new-row
+                  (if (= x (count (screen 0)))
+                    (persistent! new-row)
                     (if (or (< x xi) (> x xf))
                       (recur (inc x)
-                             (conj new-row ((screen y) x))
+                             (conj! new-row ((screen y) x))
                              new-entries)
                       (recur (inc x)
-                             (conj new-row (first new-entries))
+                             (conj! new-row (first new-entries))
                              (rest new-entries)))))))))))
 
 
