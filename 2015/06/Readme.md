@@ -1,7 +1,7 @@
 
 ## performance investigation
 
-Without any [tranients](https://clojure.org/reference/transients) in the code, it runs as
+Without any [transients](https://clojure.org/reference/transients) in the code, it runs as
 
 ```
 13.2684 +- 0.0311 seconds time elapsed  ( +-  0.23% )
@@ -15,7 +15,7 @@ For the code with transients as in the repo, it runs as
 ```
 
 
-With transients but without [arbitrary-precision integers](https://clojure.org/guides/learn/syntax), it is
+With transients but without [arbitrary-precision integers](https://clojure.org/guides/learn/syntax#_numeric_types), it is
 
 ```
 6.2999 +- 0.0432 seconds time elapsed  ( +-  0.68% )
