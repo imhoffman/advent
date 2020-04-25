@@ -17,14 +17,11 @@
            (recur (rest stack) accum))))))
 
 
-(println "part one:"
-  ((fn [filename]
-     (->> filename
-          slurp
-          ;(re-seq #"\w+")
-          ;(map #(subs % 1 (count %)))
-          differencer))
-   "puzzle.txt"))
+(def input-list-of-data-entries
+  (with-open [f (clojure.java.io/reader "puzzle.txt")]
+    (reduce conj () (line-seq f))))
+
+(println " read" (count input-list-of-data-entries) "lines")
 
 
 ;; 4978 is too high
