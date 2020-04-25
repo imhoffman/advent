@@ -22,6 +22,7 @@
 
 (def input-list-of-data-entries
   (with-open [f (clojure.java.io/reader "puzzle.txt")]
+    ;; strip the literal surrounding "'s from the input file
     (reduce conj () (map #(subs % 1 (dec(count %))) (line-seq f)))))
 
 ;(println " read" (count input-list-of-data-entries) "lines")
