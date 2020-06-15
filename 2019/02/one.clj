@@ -1,10 +1,10 @@
 (require '[clojure.string :as str])
 
 
-;;  put all opcode info in a single, large assoc array
+;;  put all opcodes info in a single, large assoc array
 ;;   key is opcode (currently an int, perhaps it should
 ;;    be a char like \1, \2 depending on how int-as-str
-;;    shakes out when we advance to modality
+;;    shakes out when we advance to modality)
 ;;   val is itself a dictionary of properties
 (def opcodes
   {1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
@@ -13,71 +13,77 @@
    })
 
 
+;;  parse the Intcode instruction
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
-  (let [opcode (aget ram ip)]
+  (let [opcode (ram ip)]
       (case opcode
         1 (vector opcode
-                  (aget ram (aget ram (+ 1 ip)))
-                  (aget ram (aget ram (+ 2 ip)))
-                  (aget ram (+ 3 ip)))
+                  (ram (ram (+ 1 ip)))
+                  (ram (ram (+ 2 ip)))
+                  (ram (+ 3 ip)))
         2 (vector opcode
-                  (aget ram (aget ram (+ 1 ip)))
-                  (aget ram (aget ram (+ 2 ip)))
-                  (aget ram (+ 3 ip)))
+                  (ram (ram (+ 1 ip)))
+                  (ram (ram (+ 2 ip)))
+                  (ram (+ 3 ip)))
         99 [99])))
 
 
-;;  apply the opcode function to the arguments
-;;  altering the entire, mutable RAM array then
-;;  returning the dictionary that includes the ip
-(defn operate [ram counters]
-  (let [ip          (:ip counters)
+;;  execute a single operation
+;;  look up the `func` in the `opcode` dict and act that func on
+;;   the vector of instructions, then `assoc` the func return into
+;;   the RAM vector at the appropriate address as per `(instruction 3)`
+;;  return the dictionary that includes the new ip along with the
+;;   new RAM vector
+(defn operate [ram dict-of-counters]
+  (let [ip          (:ip dict-of-counters)
         instruction (parse-opcode ram ip)]
     (cond
-      (= 99 (instruction 0)) {}     ; empty dict signals halt
-      :default (do
-        (aset ram (instruction 3) ((:func (opcodes (instruction 0))) instruction))
-        (assoc counters :ip (+ ip (:ip-inc (opcodes (instruction 0)))))))))
+      (= 99 (instruction 0)) (vector ram {})     ;;  *** empty dict signals halt ***
+      :default (vector
+                 (assoc ram (instruction 3) ((:func (opcodes (instruction 0))) instruction))
+                 (assoc dict-of-counters :ip (+ ip (:ip-inc (opcodes (instruction 0)))))))))
 
 
-;;  diagnostic tool
-(defn display-ram [ram]
-  (println (seq ram)))
-  ;(println (for [n (range (count ram))] (aget ram n))))
 
+;;  run the program by recurring over RAM and IP until halt
+(defn run-program [ram counters-dict]
+  (if (empty? counters-dict)             ; empty `counters-dict` is the signal to halt
+    (do
+      (println " The program has halted, run-program is returning the RAM state.")
+      ram)
+    (let [[a,b] (operate ram counters-dict)] ;;  destructure return
+      (recur a b))))                         ;;  how to recur w/o `let` destructuring?
 
-;;  recur until halt
-(defn run-program [ram counters]
-  (if (empty? counters)             ; empty `counters` is the signal to halt
-    (println " program has halted")
-    (recur ram (operate ram counters))))
-    ;; `ram` is successfully mutated by `operate` before the function recurs
-    ;; even though it seems that `ram` has been passed in its "old" state
 
 ;;
 ;;  main program
 ;;
 ;;   file I/O
-;;    program will be read into "RAM" as a Java array
-;;    so that `aset` can simply modify it, but mutability
-;;    is dirty and is messing with my flow!
+;;    program will be read into "RAM" as a vector for subsequent `assoc`s
 (def intcode-program
   (let [file-contents (with-open
                         [f (clojure.java.io/reader "puzzle.txt")]
                         (str/trim (slurp f)))]
-    (into-array (vec
-     (for [c (str/split file-contents #"[,]")]
-       (Long/parseLong c))))))        ;; must be parsed as Long for clojure arithmetic
+    (vec
+      (for [c (str/split file-contents #"[,]")]
+        (Long/parseLong c)))))
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
-;;  program input is mutable
-;;   change inputs as per puzzle
-(aset intcode-program 1 12)
-(aset intcode-program 2  2)
-;;   dictionary of counters is recursively returned; start with an `ip` of 0
-(run-program intcode-program {:ip 0, :base 0})
 
-(println " address 0 in RAM currently holds" (aget intcode-program 0))
+;;  initialize the run with the dictionary of counters that is to
+;;   be recursively returned
+;;    start with an `ip` of 0 and with the program loaded into RAM
+;;    input the `12` and the `2` as per the puzzle
+;;  `run-program` will return the current RAM vector upon halt
+(println " address 0 in RAM currently holds"
+         ((run-program
+            (#(-> %                  ;; the RAM argument to `run-program`
+                  (assoc 1 12)
+                  (assoc 2 2))
+                  intcode-program)
+            {:ip 0, :base 0})        ;; the counter dict argument
+          0))                        ;; retreive the zeroth element of RAM upon return
+
 
