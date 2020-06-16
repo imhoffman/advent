@@ -31,7 +31,7 @@
 
 ;;  execute a single operation
 ;;  look up the `func` in the `opcode` dict and act that func on
-;;   the vector of instructions, then `assoc` the func return into
+;;   the vector `instruction`, then `assoc` the func return into
 ;;   the RAM vector at the appropriate address as per `(instruction 3)`
 ;;  return the dictionary that includes the new ip along with the
 ;;   new RAM vector
@@ -39,17 +39,24 @@
   (let [ip          (:ip dict-of-counters)
         instruction (parse-opcode ram ip)]
     (cond
-      (= 99 (instruction 0)) (vector ram {})     ;;  *** empty dict signals halt ***
-      :default (vector
-                 (assoc ram (instruction 3) ((:func (opcodes (instruction 0))) instruction))
-                 (assoc dict-of-counters :ip (+ ip (:ip-inc (opcodes (instruction 0)))))))))
+      (= 99 (instruction 0)) (vector
+                               ram     ;;  return the current RAM state
+                               {})     ;;  *** empty IP dict signals halt ***
+      :default               (vector
+                               (assoc  ;;  update RAM
+                                 ram
+                                 (instruction 3)
+                                 ((:func (opcodes (instruction 0))) instruction))
+                               (assoc  ;;  update IP
+                                 dict-of-counters
+                                 :ip (+ ip (:ip-inc (opcodes (instruction 0)))))))))
 
 
 
 ;;  run the program by recurring over RAM and IP until halt
 (defn run-program [ram counters-dict]
-  (if (empty? counters-dict)             ; empty `counters-dict` is the signal to halt
-    ram
+  (if (empty? counters-dict)             ;;  *** empty `counters-dict` signals halt ***
+    ram                                  ;;  return RAM vector at halt
     (let [[a,b] (operate ram counters-dict)] ;;  destructure return
       (recur a b))))                         ;;  how to recur w/o `let` destructuring?
 
@@ -74,7 +81,7 @@
 (doseq [noun (range 1 100)]
   (doseq [verb (range 1 100)]
     (when (= 19690720
-             ((run-program
+             ((run-program               ;; is the RAM vector upon return
                 (#(-> %                  ;; the RAM argument to `run-program`
                       (assoc 1 noun)
                       (assoc 2 verb))
