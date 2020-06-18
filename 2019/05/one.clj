@@ -1,95 +1,105 @@
 (require '[clojure.string :as str])
 
 
-;;  put all opcode info in a single, large assoc array
+;;  put all opcodes info in a single, large assoc array
 ;;   key is opcode (currently an int, perhaps it should
 ;;    be a char like \1, \2 depending on how int-as-str
-;;    shakes out when we advance to modality
+;;    shakes out when we advance to modality)
 ;;   val is itself a dictionary of properties
 (def opcodes
   {1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
-   2  {:ip-inc 4, :func #(* (% 1) (% 2))}    ;; change 1 & 2 to accept `ram` like 3 ??
-   ;;  `aset` returns the set'ed value ... is that a problem here ?
-   3  {:ip-inc 2, :func #((let [in (Long/parseLong (read-line))] (aset (% 1) (% 2) in)))}
+   2  {:ip-inc 4, :func #(* (% 1) (% 2))}
+   3  {:ip-inc 2, :func (fn [& xs] (Long/parseLong (read-line)))}
    4  {:ip-inc 2, :func #((println " the progam outputs" (% 1)))}
    99 {:ip-inc 1, :func #(identity %)}
    })
 
 
+;;  parse the Intcode instruction
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
-  (let [opcode (aget ram ip)]
-    (println " processing opcode" opcode)
-    (case opcode
-      1 (vector opcode
-                (aget ram (aget ram (+ 1 ip)))
-                (aget ram (aget ram (+ 2 ip)))
-                (aget ram (+ 3 ip)))
-      2 (vector opcode
-                (aget ram (aget ram (+ 1 ip)))
-                (aget ram (aget ram (+ 2 ip)))
-                (aget ram (+ 3 ip)))
-      3 (vector opcode ram (aget ram (+ 1 ip)))
-      4 (vector opcode (aget ram (aget ram (+ 1 ip))))
-      99 [99])))
+  (let [opcode (ram ip)]
+      (case opcode
+        1 (vector opcode
+                  (ram (ram (+ 1 ip)))
+                  (ram (ram (+ 2 ip)))
+                  (ram (+ 3 ip)))
+        2 (vector opcode
+                  (ram (ram (+ 1 ip)))
+                  (ram (ram (+ 2 ip)))
+                  (ram (+ 3 ip)))
+        99 [99])))
 
 
-;;  apply the opcode function to the arguments
-;;  altering the entire, mutable RAM array then
-;;  returning the dictionary that includes the ip
-(defn operate [ram counters]
-  (let [ip          (:ip counters)
+;;  execute a single operation
+;;  look up the `func` in the `opcode` dict and act that func on
+;;   the vector `instruction`, then `assoc` the func return into
+;;   the RAM vector at the appropriate address as per `(instruction 3)`
+;;  return the dictionary that includes the new ip along with the
+;;   new RAM vector
+(defn operate [ram dict-of-counters]
+  (let [ip          (dict-of-counters :ip)
         instruction (parse-opcode ram ip)
-        opcode      (instruction 0)]
-    (case opcode
-      99 {}     ; empty dict signals halt
-      1 (do
-          (aset ram (instruction 3) ((:func (opcodes opcode)) instruction))
-          (assoc counters :ip (+ ip (:ip-inc (opcodes opcode)))))
-      2 (do
-          (aset ram (instruction 3) ((:func (opcodes opcode)) instruction))
-          (assoc counters :ip (+ ip (:ip-inc (opcodes opcode)))))
-      3 (let [ignore ((:func (opcodes opcode)) instruction)]
-          (assoc counters :ip (+ ip (:ip-inc (opcodes opcode)))))
-      4 (do
-          ((:func (opcodes opcode)) instruction)
-          (assoc counters :ip (+ ip (:ip-inc (opcodes opcode))))))))
+        opcode-dict (opcodes (instruction 0))]
+    (case (instruction 0)
+      99 (vector
+           ram     ;;  return the current RAM state
+           {})     ;;  *** empty IP dict signals halt ***
+      4  (do
+           ((opcode-dict :func) instruction)
+           (vector
+             ram
+             (assoc
+               dict-of-counters
+               :ip (+ ip (opcode-dict :ip-inc)))))
+         (vector
+           (assoc
+             ram
+             (last instruction)
+             ((opcode-dict :func) instruction))
+           (assoc
+             dict-of-counters
+             :ip (+ ip (opcode-dict :ip-inc)))))))
 
 
 
-;;  diagnostic tool
-(defn display-ram [ram] (println (seq ram)))
+;;  run the program by recurring over RAM and IP until halt
+(defn run-program [ram counters-dict]
+  (if (empty? counters-dict)             ;;  *** empty `counters-dict` signals halt ***
+    ram                                  ;;  return RAM vector at halt
+    (let [[a,b] (operate ram counters-dict)] ;;  destructure return
+      (recur a b))))                         ;;  how to recur w/o `let` destructuring?
 
-
-;;  recur until halt
-(defn run-program [ram counters]
-  (if (empty? counters)             ; empty `counters` is the signal to halt
-    (println " program has halted")
-    (recur ram (operate ram counters))))
-    ;; `ram` is successfully mutated by `operate` before the function recurs
-    ;; even though it seems that `ram` has been passed in its "old" state
 
 ;;
 ;;  main program
 ;;
 ;;   file I/O
-;;    program will be read into "RAM" as a Java array
-;;    so that `aset` can simply modify it, but mutability
-;;    is dirty and is messing with my flow!
+;;    program will be read into "RAM" as a vector for subsequent `assoc`s
 (def intcode-program
   (let [file-contents (with-open
                         [f (clojure.java.io/reader "puzzle.txt")]
                         (str/trim (slurp f)))]
-    (into-array (vec
-     (for [c (str/split file-contents #"[,]")]
-       (Long/parseLong c))))))        ;; must be parsed as Long for clojure arithmetic
+    (vec
+      (for [c (str/split file-contents #"[,]")]
+        (Long/parseLong c)))))
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 
-;;  program input is mutable
-;;   dictionary of counters is recursively returned; start with an `ip` of 0
-(run-program intcode-program {:ip 0, :base 0})
 
-(println " address 0 in RAM currently holds" (aget intcode-program 0))
+;;  brute loop through the possibilities
+(doseq [noun (range 1 100)]
+  (doseq [verb (range 1 100)]
+    (when (= 19690720
+             ((run-program               ;; is the RAM vector upon return
+                (#(-> %                  ;; the RAM argument to `run-program`
+                      (assoc 1 noun)
+                      (assoc 2 verb))
+                      intcode-program)
+                {:ip 0, :base 0})        ;; the counter dict argument
+              0))                        ;; retreive the zeroth element of RAM upon return
+      (do
+        (println " success with noun--verb combo" (+ (* 100 noun) verb))
+        (System/exit 0)))))              ;; poor man's bail out
 
 
