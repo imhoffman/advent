@@ -10,11 +10,10 @@
   {1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
    2  {:ip-inc 4, :func #(* (% 1) (% 2))}
    3  {:ip-inc 2, :func (fn [&x]
-                          (print " input: ")
-                          (flush)
+                          (print " input: ") (flush)
                           (Long/parseLong (read-line)))}
    4  {:ip-inc 2, :func #(let [out (% 1)]
-                           (println " the progam outputs" out)
+                           (println " the progam outputs:" out)
                            out)}       ;; also return what is printed
    99 {:ip-inc 1, :func #(identity %)}
    })
@@ -24,7 +23,6 @@
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
   (let [opcode (ram ip)] 
-    ;(println " parsing" opcode)
     (case opcode
       1 (vector opcode
                 (ram (ram (+ 1 ip)))
@@ -41,7 +39,7 @@
       99 [99])))
 
 
-;;  execute a single operation
+;;  execution routine for a single operation
 ;;  look up the `func` in the `opcode` dict and act that func on
 ;;   the vector `instruction`, then `assoc` the func return into
 ;;   the RAM vector at the appropriate address as per `(last instruction)`
@@ -54,18 +52,17 @@
         opcode-dict  (opcodes opcode)
         operation    (opcode-dict :func)
         ip-increment (opcode-dict :ip-inc)]
-    ;(println " current RAM state:" ram)
     (vector
       (case opcode            ;;  RAM return
         99 ram                ;;   unaltered RAM for 99
          4 (do                ;;   side-effect for 4 ...
              (operation instruction)
              ram)             ;;   ...then return unaltered RAM
-           (assoc             ;;   else
+           (assoc             ;;   else return alter RAM
                   ram (last instruction) (operation instruction)))
       (case opcode            ;;  counter return
         99      {}            ;;   *** empty IP dict signals halt ***
-                (assoc        ;;   else
+                (assoc        ;;   else update counter(s)
                   dict-of-counters
                   :ip (+ ip ip-increment))))))
 
@@ -75,8 +72,8 @@
 (defn run-program [ram counters-dict]
   (if (empty? counters-dict)                 ;;  *** empty `counters-dict` signals halt ***
     ram                                      ;;  return RAM vector at halt
-    (let [[a,b] (operate ram counters-dict)] ;;  destructure return
-      (recur a b))))                         ;;  how to recur w/o `let` destructuring?
+    (let [[a,b] (operate ram counters-dict)] ;;  else recur w/ destructured return
+      (recur a b))))                         ;;   how to recur w/o `let` destructuring?
 
 
 ;;
