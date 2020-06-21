@@ -21,6 +21,10 @@
 
 ;;  parse the Intcode instruction
 ;;  return a vector of the opcode and its arguments
+;;
+;;   initial sketch of parameter parsing
+;; (let [positions (vec (reverse (map char "ABCDE")))] ((fn [charcode out] (if (empty? charcode) out (recur (rest charcode) (conj out (first charcode))))) (map char (str 5678)) []))
+;;
 (defn parse-opcode [ram ip]
   (let [opcode (ram ip)] 
     (case opcode
