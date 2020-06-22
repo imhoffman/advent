@@ -111,6 +111,7 @@
 ;;  main program
 ;;
 
+;;
 ;;   file I/O
 ;;    the program will be read into "RAM" as a vector for subsequent `assoc`s
 (def intcode-program
@@ -123,12 +124,17 @@
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
 ;;   end file I/O
+;;
 
 
-
-;;  load the program and run it beginning with IP of 0
-(run-program
-  intcode-program
-  {:ip 0, :base 0})
+;;
+;;  run the Intcode program
+;;
+(println " at halt, memory address 0 holds:"
+         (
+          (run-program         ;; execute program, returning RAM vector at halt
+            intcode-program    ;;  load the program into RAM
+            {:ip 0, :base 0})  ;;  initialize counters
+          0))                  ;; print zeroth element from returned RAM vec
 
 
