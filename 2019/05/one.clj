@@ -21,25 +21,42 @@
 
 ;;  parse the Intcode instruction
 ;;  return a vector of the opcode and its arguments
-;;
-;;   initial sketch of parameter parsing
-;; (let [positions (vec (reverse (map char "ABCDE")))] ((fn [charcode out] (if (empty? charcode) out (recur (rest charcode) (conj out (first charcode))))) (map char (str 5678)) []))
-;;
+;;   NB for `charcode` https://stackoverflow.com/a/35200594
 (defn parse-opcode [ram ip]
-  (let [opcode (ram ip)] 
-    (case opcode
-      1 (vector opcode
-                (ram (ram (+ 1 ip)))
-                (ram (ram (+ 2 ip)))
-                (ram (+ 3 ip)))
-      2 (vector opcode
-                (ram (ram (+ 1 ip)))
-                (ram (ram (+ 2 ip)))
-                (ram (+ 3 ip)))
-      3 (vector opcode
-                (ram (+ 1 ip)))
-      4 (vector opcode
-                (ram (ram (+ 1 ip))))
+  (let [opcode    (ram ip)
+        charcode  (vec ((fn [c]
+                          (->> c, str, (map char), (map str), (map #(Long/parseLong %))))
+                        opcode))
+        positions (vec (map char "EDCBA"))
+        parmsdict (loop [charstack (reverse charcode)
+                         outdict   {}
+                         counter   0]
+                    (if (empty? charstack)
+                      (loop [out      outdict,
+                             keystack positions]
+                        (if (empty? keystack)
+                          out
+                          (if (out (first keystack))
+                            (recur out                            (rest keystack))
+                            (recur (assoc out (first keystack) 0) (rest keystack)))))
+                      (recur
+                        (vec (rest charstack))
+                        (assoc outdict (positions counter) (charcode counter))
+                        (inc counter))))]
+    (case (parmsdict \E)
+      1  (vector opcode
+                 (ram (ram (+ 1 ip)))
+                 (ram (ram (+ 2 ip)))
+                 (ram (+ 3 ip)))
+      2  (vector opcode
+                 (ram (ram (+ 1 ip)))
+                 (ram (ram (+ 2 ip)))
+                 (ram (+ 3 ip)))
+      3  (vector opcode
+                 (ram (+ 1 ip)))
+      4  (vector opcode
+                 (ram (ram (+ 1 ip))))
+      9  [99]
       99 [99])))
 
 
