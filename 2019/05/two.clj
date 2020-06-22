@@ -52,9 +52,12 @@
                       (ram (+ 3 ip)))         ;; "will never be in immediate mode"
           \3  (vector opchar
                       (ram (+ 1 ip)))         ;; "will never be in immediate mode"
-          (\4,\5,\6)
-              (vector opchar
+          \4  (vector opchar
                       (if (= \0 (parmsdict \C)) (pos \C) (imm \C)))
+          (\5,\6)
+              (vector opchar
+                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
+                      (if (= \0 (parmsdict \B)) (pos \B) (imm \B)))
           \9  [opchar])))))
 
 
@@ -85,7 +88,7 @@
         (\5,\6)
            (if (operation instruction)
              (assoc dict-of-counters
-                    :ip (instruction 1))
+                    :ip (instruction 2))
              (assoc dict-of-counters
                     :ip (+ ip ip-increment)))
            (assoc             ;;   else update counter(s)
