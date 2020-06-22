@@ -26,10 +26,9 @@
 ;;   internally, a dictionary of modal parameters is used
 (defn parse-opcode [ram ip]
   (let [opcode    (ram ip)
-        charcode  (vec (map char (str opcode)))        ;; Intcode as vec of chars
-        positions (vec (map char (reverse "ABCDE")))   ;; modality position names, for keys
-        offsets   {\C 1, \B 2, \A 3}                   ;; relative location of value for mode args
-        parmsdict (loop [charstack (reverse charcode)  ;; dictionary of ABCDE values
+        charcode  (vec (map char (str opcode)))       ;; Intcode as vec of chars
+        positions (vec (map char (reverse "ABCDE")))  ;; modality position names, for keys
+        parmsdict (loop [charstack (reverse charcode) ;; dictionary of ABCDE values
                          outdict   {}
                          counter   0]
                     (if (empty? charstack)     ;; before returning, create explicit leading zeroes
@@ -41,25 +40,26 @@
                       (recur                   ;; work through chars in the Intcode instr
                         (vec (rest charstack))
                         (assoc outdict (positions counter) ((vec (reverse charcode)) counter))
-                        (inc counter))))]
-    (letfn [(pos [charkey] (ram (ram (+ (offsets charkey) ip))))
-            (imm [charkey] (ram      (+ (offsets charkey) ip)))]
-      (let [opchar (parmsdict \E)]
-        (case opchar
-          (\1,\2,\7,\8)
-              (vector opchar
-                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
-                      (if (= \0 (parmsdict \B)) (pos \B) (imm \B))
-                      (ram (+ 3 ip)))         ;; "will never be in immediate mode"
-          \3  (vector opchar
-                      (ram (+ 1 ip)))         ;; "will never be in immediate mode"
-          \4  (vector opchar
-                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C)))
-          (\5,\6)
-              (vector opchar
-                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
-                      (if (= \0 (parmsdict \B)) (pos \B) (imm \B)))
-          \9  [opchar])))))
+                        (inc counter))))
+        offsets {\C 1, \B 2, \A 3}                    ;; relative location of value for mode args
+        pos     (fn [charkey] (ram (ram (+ (offsets charkey) ip))))
+        imm     (fn [charkey] (ram      (+ (offsets charkey) ip)))
+        opchar  (parmsdict \E)]
+    (case opchar
+      (\1,\2,\7,\8)
+         (vector opchar
+                 (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
+                 (if (= \0 (parmsdict \B)) (pos \B) (imm \B))
+                 (ram (+ 3 ip)))         ;; "will never be in immediate mode"
+      \3 (vector opchar
+                 (ram (+ 1 ip)))         ;; "will never be in immediate mode"
+      \4 (vector opchar
+                 (if (= \0 (parmsdict \C)) (pos \C) (imm \C)))
+      (\5,\6)
+         (vector opchar
+                 (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
+                 (if (= \0 (parmsdict \B)) (pos \B) (imm \B)))
+      \9 [opchar])))
 
 
 ;;  execution routine for a single operation
@@ -67,8 +67,9 @@
 ;;   the vector `instruction`, then `assoc` the func return into
 ;;   the RAM vector (or IP dict) at the appropriate address as
 ;;   per `(last instruction)`
-;;  return the dictionary that includes the new IP along with the
-;;   new RAM vector
+;;  return a vector with two elements (perhaps a dict would be better?)
+;;   -the dictionary that includes the new IP program counter
+;;   -the possibly-updated RAM vector
 (defn operate [ram dict-of-counters]
   (let [ip           (dict-of-counters :ip)  ;; lookup the current IP
         instruction  (parse-opcode ram ip)   ;; obtain vector of op char and int args
@@ -104,7 +105,9 @@
   (if (empty? counters-dict)                 ;;  *** empty `counters-dict` signals halt ***
     ram                                      ;;  return RAM vector at halt
     (let [[a,b] (operate ram counters-dict)] ;;  else recur w/ destructured return
-      (recur a b))))                         ;;   how to recur w/o `let` destructuring?
+      (recur a b))))                         ;;   ?? how to recur w/o `let` destructuring ?
+                                             ;;    perhaps if `operate` returned a dict ...
+                                             ;;    bet the return would still be `let`ted ...
 
 
 ;;
