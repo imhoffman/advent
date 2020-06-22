@@ -2,62 +2,61 @@
 
 
 ;;  put all opcodes info in a single, large assoc array
-;;   key is opcode (currently an int, perhaps it should
-;;    be a char like \1, \2 depending on how int-as-str
-;;    shakes out when we advance to modality)
+;;   key is opcode as a char
 ;;   val is itself a dictionary of properties
 (def opcodes
-  {1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
-   2  {:ip-inc 4, :func #(* (% 1) (% 2))}
-   3  {:ip-inc 2, :func (fn [&x]
-                          (print " input: ") (flush)
-                          (Long/parseLong (read-line)))}
-   4  {:ip-inc 2, :func #(let [out (% 1)]
-                           (println " the progam outputs:" out)
-                           out)}       ;; also return what is printed
-   99 {:ip-inc 1, :func #(identity %)}
+  {\1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
+   \2  {:ip-inc 4, :func #(* (% 1) (% 2))}
+   \3  {:ip-inc 2, :func (fn [&x]
+                           (print " input: ") (flush)
+                           (Long/parseLong (read-line)))}
+   \4  {:ip-inc 2, :func #(let [out (% 1)]
+                            (println " the progam outputs:" out)
+                            out)}       ;; also return what is printed
+   \9  {:ip-inc 1, :func #(identity %)}
    })
 
 
 ;;  parse the Intcode instruction
 ;;  return a vector of the opcode and its arguments
-;;   NB for `charcode` https://stackoverflow.com/a/35200594
 (defn parse-opcode [ram ip]
   (let [opcode    (ram ip)
-        charcode  (vec ((fn [c]
-                          (->> c, str, (map char), (map str), (map #(Long/parseLong %))))
-                        opcode))
-        positions (vec (map char "EDCBA"))
+        charcode  (vec (map char (str opcode)))
+        positions (vec (map char (reverse "ABCDE")))
+        offsets   {\C 1, \B 2, \A 3}
         parmsdict (loop [charstack (reverse charcode)
                          outdict   {}
                          counter   0]
-                    (if (empty? charstack)
-                      (loop [out      outdict,
-                             keystack positions]
+                    (if (empty? charstack)     ;; when done, amend implicit leading zeroes
+                      (loop [out      outdict
+                             keystack (nthrest positions counter)]
+                             ;keystack positions]
                         (if (empty? keystack)
                           out
                           (if (out (first keystack))
-                            (recur out                            (rest keystack))
-                            (recur (assoc out (first keystack) 0) (rest keystack)))))
+                            (recur out                             (rest keystack))
+                            (recur (assoc out (first keystack) \0) (rest keystack)))))
                       (recur
                         (vec (rest charstack))
-                        (assoc outdict (positions counter) (charcode counter))
+                        (assoc outdict (positions counter) ((vec (reverse charcode)) counter))
                         (inc counter))))]
-    (case (parmsdict \E)
-      1  (vector opcode
-                 (ram (ram (+ 1 ip)))
-                 (ram (ram (+ 2 ip)))
-                 (ram (+ 3 ip)))
-      2  (vector opcode
-                 (ram (ram (+ 1 ip)))
-                 (ram (ram (+ 2 ip)))
-                 (ram (+ 3 ip)))
-      3  (vector opcode
-                 (ram (+ 1 ip)))
-      4  (vector opcode
-                 (ram (ram (+ 1 ip))))
-      9  [99]
-      99 [99])))
+    (letfn [(pos [charkey] (ram (ram (+ (offsets charkey) ip))))
+            (imm [charkey] (ram      (+ (offsets charkey) ip)))]
+      (let [opchar (parmsdict \E)]
+        (case opchar
+          \1  (vector opchar
+                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
+                      (if (= \0 (parmsdict \B)) (pos \B) (imm \B))
+                      (ram (+ 3 ip)))         ;; "will never be in immediate mode"
+          \2  (vector opchar
+                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C))
+                      (if (= \0 (parmsdict \B)) (pos \B) (imm \B))
+                      (ram (+ 3 ip)))         ;; "will never be in immediate mode"
+          \3  (vector opchar
+                      (ram (+ 1 ip)))         ;; "will never be in immediate mode"
+          \4  (vector opchar
+                      (if (= \0 (parmsdict \C)) (pos \C) (imm \C)))
+          \9  [opchar])))))
 
 
 ;;  execution routine for a single operation
@@ -75,14 +74,14 @@
         ip-increment (opcode-dict :ip-inc)]
     (vector
       (case opcode            ;;  RAM return
-        99 ram                ;;   unaltered RAM for 99
-         4 (do                ;;   side-effect for 4 ...
+        \9 ram                ;;   unaltered RAM for 99
+        \4 (do                ;;   side-effect for 4 ...
              (operation instruction)
              ram)             ;;   ...then return unaltered RAM
            (assoc             ;;   else return alter RAM
                   ram (last instruction) (operation instruction)))
       (case opcode            ;;  counter return
-        99      {}            ;;   *** empty IP dict signals halt ***
+        \9      {}            ;;   *** empty IP dict signals halt ***
                 (assoc        ;;   else update counter(s)
                   dict-of-counters
                   :ip (+ ip ip-increment))))))
