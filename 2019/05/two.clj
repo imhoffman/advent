@@ -1,7 +1,7 @@
 (require '[clojure.string :as str])
 
 
-;;  put all opcodes info in a single, large assoc array
+;;  master dict of opcode functions and program-counter properties
 ;;   key is opcode as a char, treating "99" as simply \9
 ;;   val is itself a dictionary of properties
 (def opcodes
@@ -21,23 +21,24 @@
    })
 
 
-;;  parse the Intcode instruction
-;;  return a vector of the opcode and its arguments
+;;  parse an Intcode instruction
+;;   return a vector of the opcode and its arguments
+;;   internally, a dictionary of modal parameters is used
 (defn parse-opcode [ram ip]
   (let [opcode    (ram ip)
         charcode  (vec (map char (str opcode)))        ;; Intcode as vec of chars
-        positions (vec (map char (reverse "ABCDE")))   ;; modality position names for keys
+        positions (vec (map char (reverse "ABCDE")))   ;; modality position names, for keys
         offsets   {\C 1, \B 2, \A 3}                   ;; relative location of value for mode args
-        parmsdict (loop [charstack (reverse charcode)  ;; dictionary ABCDE values
+        parmsdict (loop [charstack (reverse charcode)  ;; dictionary of ABCDE values
                          outdict   {}
                          counter   0]
-                    (if (empty? charstack)     ;; when done, amend implicit leading zeroes
+                    (if (empty? charstack)     ;; before returning, create explicit leading zeroes
                       (loop [out      outdict
                              keystack (nthrest positions counter)]
                         (if (empty? keystack)
                           out
                           (recur (assoc out (first keystack) \0) (rest keystack))))
-                      (recur                   ;; work through chars in the Intcode op
+                      (recur                   ;; work through chars in the Intcode instr
                         (vec (rest charstack))
                         (assoc outdict (positions counter) ((vec (reverse charcode)) counter))
                         (inc counter))))]
@@ -64,34 +65,35 @@
 ;;  execution routine for a single operation
 ;;  look up the `func` in the `opcode` dict and act that func on
 ;;   the vector `instruction`, then `assoc` the func return into
-;;   the RAM vector at the appropriate address as per `(last instruction)`
-;;  return the dictionary that includes the new ip along with the
+;;   the RAM vector (or IP dict) at the appropriate address as
+;;   per `(last instruction)`
+;;  return the dictionary that includes the new IP along with the
 ;;   new RAM vector
 (defn operate [ram dict-of-counters]
-  (let [ip           (dict-of-counters :ip)
-        instruction  (parse-opcode ram ip)
-        opcode       (instruction 0)
-        opcode-dict  (opcodes opcode)
-        operation    (opcode-dict :func)
-        ip-increment (opcode-dict :ip-inc)]
+  (let [ip           (dict-of-counters :ip)  ;; lookup the current IP
+        instruction  (parse-opcode ram ip)   ;; obtain vector of op char and int args
+        opcode       (instruction 0)         ;;  the op char
+        opcode-dict  (opcodes opcode)        ;; the properties of the current op
+        operation    (opcode-dict :func)     ;;  the op function
+        ip-increment (opcode-dict :ip-inc)]  ;;  the IP update amount
     (vector
-      (case opcode            ;;  RAM return
+      (case opcode                           ;; RAM return
         (\9,\5,\6)
-           ram                ;;   unaltered RAM for 99, 5, and 6
-        \4 (do                ;;   side-effect for 4 ...
+           ram                               ;;  unaltered RAM for 99, 5, and 6
+        \4 (do                               ;;  side-effect for 4 ...
              (operation instruction)
-             ram)             ;;   ...then return unaltered RAM
-           (assoc             ;;   else return altered RAM
+             ram)                            ;;   ...then return unaltered RAM
+           (assoc                            ;;   else return altered RAM as per func
                   ram (last instruction) (operation instruction)))
-      (case opcode            ;;  counter return
-        \9 {}                 ;;   *** empty IP dict signals halt ***
-        (\5,\6)
+      (case opcode                           ;; counter return
+        \9 {}                                ;;  *** empty IP dict signals halt ***
+        (\5,\6)                              ;;  5 & 6 func returns go to IP
            (if (operation instruction)
              (assoc dict-of-counters
                     :ip (instruction 2))
              (assoc dict-of-counters
                     :ip (+ ip ip-increment)))
-           (assoc             ;;   else update counter(s)
+           (assoc                            ;;   else update counter(s)
                   dict-of-counters
                   :ip (+ ip ip-increment))))))
 
@@ -110,7 +112,7 @@
 ;;
 
 ;;   file I/O
-;;    program will be read into "RAM" as a vector for subsequent `assoc`s
+;;    the program will be read into "RAM" as a vector for subsequent `assoc`s
 (def intcode-program
   (let [file-contents (with-open
                         [f (clojure.java.io/reader "puzzle.txt")]
@@ -128,4 +130,5 @@
 (run-program
   intcode-program
   {:ip 0, :base 0})
+
 
