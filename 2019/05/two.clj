@@ -88,7 +88,7 @@
                   ram (last instruction) (operation instruction)))
       (case opcode                           ;; counter return
         \9 {}                                ;;  *** empty IP dict signals halt ***
-        (\5,\6)                              ;;  5 & 6 func returns go to IP
+        (\5,\6)                              ;;  5 & 6 func returns go to into IP dict
            (if (operation instruction)
              (assoc dict-of-counters
                     :ip (instruction 2))
