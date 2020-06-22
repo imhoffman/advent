@@ -13,8 +13,8 @@
    \4 {:ip-inc 2, :func #(let [out (% 1)]
                            (println " the progam outputs:" out)
                            out)}       ;; also return what is printed
-   \5 {:ip-inc 2, :func #(not= 0 (% 1))}
-   \6 {:ip-inc 2, :func #(= 0 (% 1))}
+   \5 {:ip-inc 3, :func #(not= 0 (% 1))}
+   \6 {:ip-inc 3, :func #(= 0 (% 1))}
    \7 {:ip-inc 4, :func #(if (< (% 1) (% 2)) 1 0)}
    \8 {:ip-inc 4, :func #(if (= (% 1) (% 2)) 1 0)}
    \9 {:ip-inc 1, :func #(identity %)}
@@ -73,7 +73,8 @@
         ip-increment (opcode-dict :ip-inc)]
     (vector
       (case opcode            ;;  RAM return
-        (\9,\5,\6) ram        ;;   unaltered RAM for 99, 5, and 6
+        (\9,\5,\6)
+           ram                ;;   unaltered RAM for 99, 5, and 6
         \4 (do                ;;   side-effect for 4 ...
              (operation instruction)
              ram)             ;;   ...then return unaltered RAM
@@ -81,12 +82,8 @@
                   ram (last instruction) (operation instruction)))
       (case opcode            ;;  counter return
         \9 {}                 ;;   *** empty IP dict signals halt ***
-        \5 (if (operation instruction)
-             (assoc dict-of-counters
-                    :ip (instruction 1))
-             (assoc dict-of-counters
-                    :ip (+ ip ip-increment)))
-        \6 (if (operation instruction)
+        (\5,\6)
+           (if (operation instruction)
              (assoc dict-of-counters
                     :ip (instruction 1))
              (assoc dict-of-counters
