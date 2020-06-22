@@ -2,7 +2,7 @@
 
 
 ;;  put all opcodes info in a single, large assoc array
-;;   key is opcode as a char
+;;   key is opcode as a char, treating "99" as simply \9
 ;;   val is itself a dictionary of properties
 (def opcodes
   {\1  {:ip-inc 4, :func #(+ (% 1) (% 2))}
@@ -21,22 +21,19 @@
 ;;  return a vector of the opcode and its arguments
 (defn parse-opcode [ram ip]
   (let [opcode    (ram ip)
-        charcode  (vec (map char (str opcode)))
-        positions (vec (map char (reverse "ABCDE")))
-        offsets   {\C 1, \B 2, \A 3}
-        parmsdict (loop [charstack (reverse charcode)
+        charcode  (vec (map char (str opcode)))        ;; Intcode as vec of chars
+        positions (vec (map char (reverse "ABCDE")))   ;; modality position names for keys
+        offsets   {\C 1, \B 2, \A 3}                   ;; relative location of value for mode args
+        parmsdict (loop [charstack (reverse charcode)  ;; dictionary ABCDE values
                          outdict   {}
                          counter   0]
                     (if (empty? charstack)     ;; when done, amend implicit leading zeroes
                       (loop [out      outdict
                              keystack (nthrest positions counter)]
-                             ;keystack positions]
                         (if (empty? keystack)
                           out
-                          (if (out (first keystack))
-                            (recur out                             (rest keystack))
-                            (recur (assoc out (first keystack) \0) (rest keystack)))))
-                      (recur
+                          (recur (assoc out (first keystack) \0) (rest keystack))))
+                      (recur                   ;; work through chars in the Intcode op
                         (vec (rest charstack))
                         (assoc outdict (positions counter) ((vec (reverse charcode)) counter))
                         (inc counter))))]
@@ -99,6 +96,7 @@
 ;;
 ;;  main program
 ;;
+
 ;;   file I/O
 ;;    program will be read into "RAM" as a vector for subsequent `assoc`s
 (def intcode-program
@@ -110,6 +108,7 @@
         (Long/parseLong c)))))
 
 (println "Read" (count intcode-program) "Intcode ints from one line.")
+;;   end file I/O
 
 
 
