@@ -17,10 +17,13 @@
           ))
      "puzzle.txt"))
 
+(def set-of-cities
+  (set
+    (flatten
+      (for [s (keys distances-dict)] (apply list s)))))
+
 (def cities-list
-  (apply list
-    (set (flatten
-      (for [s (keys distances-dict)] (apply list s))))))
+  (apply list set-of-cities))
 
 (def num-cities (count cities-list))
 
@@ -28,7 +31,11 @@
 ;;  could check `frequencies` for suspects, but
 ;;   might as well loop over all of them
 ;;
-(defn add-missing-entries [distances-dict cities-list]
+(defn add-missing-entries [distances-dict]
+  (let [set-of-cities (set (flatten
+                        (for [s (keys distances-dict)] (apply list s))))
+        cities-list   (apply list set-of-cities)
+        num-cities    (count set-of-cities)]
   (if (= (count distances-dict)
          (/ (- (* (count cities-list) (count cities-list))
                (count cities-list))
@@ -54,10 +61,9 @@
                         (if (contains? (set (keys o)) test-set)
                           o
                           (assoc o test-set inf))))))))
-            (rest c)))))))
+            (rest c))))))))
 
-(def amended-distances-dict
-  (add-missing-entries distances-dict cities-list))
+(def amended-distances-dict (add-missing-entries distances-dict))
 
 ;;
 ;;  utility to help make a coll hot-swappable by elem/index
@@ -112,13 +118,28 @@
                            #(into (vector v) %)
                            (permutations (vals (dissoc s-dict k))))))))
           :else 
-            ;;  singleton returns a singleton!
+            ;;  (permutations 3)   -->  (3)
+            ;;  (permutations [3]) -->  [[3]]
             (vector s)))))           ;;  trivial scalar case
 
 
-(println " cities:" cities-list)
-(println "    number of cities:" num-cities)
-(println " number of distances:" (count amended-distances-dict))
-(doseq [kv amended-distances-dict]
-  (println (key kv) (val kv)))
+(defn cost [city set-of-cities dictionary-of-distances]
+  (let [d dictionary-of-distances
+        stack-set (if (contains? set-of-cities city)
+                    (disj set-of-cities city)
+                    set-of-cities)]
+    (loop [s   stack-set
+           out []]
+      (if (empty? stack-set)
+        (min)))))
+
+
+
+
+
+(println " cities:" set-of-cities)
+;(println "    number of cities:" num-cities)
+;(println " number of distances:" (count amended-distances-dict))
+;(doseq [kv amended-distances-dict]
+;  (println (key kv) (val kv)))
 
