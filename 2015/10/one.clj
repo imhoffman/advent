@@ -18,14 +18,15 @@
       (let [look (loop [s stack
                         c 0]
                    (println " s:" s ", c:" c)
-                   (if true
-                   ;(if (or (= c (count s)) (not= (s c) (s (inc c))))
-                     (vector (first stack) c)
+                   (if (or
+                         (= (inc c) (count s))
+                         (not= (s c) (s (inc c))))
+                     (vector (inc c) (first stack))
                      (recur
                        (vec (rest s))
                        (inc c))))
-            say  (let [digit (look 0)
-                       times (look 1)]
+            say  (let [digit (look 1)
+                       times (look 0)]
                    (loop [c   0
                           out []]
                      (if (= c times)
@@ -34,8 +35,8 @@
                          (inc c)
                          (conj out digit)))))]
         (recur
-          (vec (nthrest stack (dec (look 1))))
-          (concat accum say))))))
+          (vec (nthrest stack (look 0)))
+          (concat accum look))))))
 
 (println (look-and-say input-as-vec-of-longs))
 
