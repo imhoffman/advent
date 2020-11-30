@@ -13,7 +13,7 @@
                 (recur
                   (rest e)
                   (let [s (first e)]
-                    (assoc d #{(s 0) (s 2)} (s 4)))))))
+                    (assoc d #{(s 0) (s 2)} (Long/parseLong (s 4))))))))
           ))
      "puzzle.txt"))
 
@@ -21,15 +21,11 @@
   (set
     (flatten
       (for [s (keys distances-dict)] (apply list s)))))
-
-(def cities-list
-  (apply list set-of-cities))
-
-(def num-cities (count cities-list))
-
+ 
 ;;
-;;  could check `frequencies` for suspects, but
-;;   might as well loop over all of them
+;;  ensure that a lack of entries does not crash the search
+;;   could check `frequencies` for suspects, but
+;;    might as well loop over all of them
 ;;
 (defn add-missing-entries [distances-dict]
   (let [set-of-cities (set (flatten
@@ -65,7 +61,10 @@
 
 (def amended-distances-dict (add-missing-entries distances-dict))
 
+
+
 ;;
+;;  `coll-to-hash-map` is for use in `permutations`
 ;;  utility to help make a coll hot-swappable by elem/index
 ;;  calls `seq` on its argument
 ;;  outputs a dictionary of keys/vals
@@ -88,7 +87,6 @@
              (assoc out
                     (first (first inp))
                     (second (first inp)))))))
-
 
 ;;
 ;;  permutations
@@ -123,23 +121,25 @@
             (vector s)))))           ;;  trivial scalar case
 
 
-(defn cost [city set-of-cities dictionary-of-distances]
-  (let [d dictionary-of-distances
-        stack-set (if (contains? set-of-cities city)
-                    (disj set-of-cities city)
-                    set-of-cities)]
-    (loop [s   stack-set
-           out []]
-      (if (empty? stack-set)
-        (min)))))
+;;  the total distance of any one sequence of cities
+(defn cost [vector-of-cities dictionary-of-distances]
+  (apply + (for [pair (partition 2 1 vector-of-cities)] (dictionary-of-distances (set pair)))))
 
 
+;;  build a dictionary with key/vals of cost/cities
+(def dictionary-of-costs
+  (loop [p   (permutations set-of-cities)
+         out (transient {})]
+    (if (empty? p)
+      (persistent! out)
+      (recur
+        (rest p)
+        (assoc! out (cost (first p) amended-distances-dict) (first p))))))
 
 
+(let [d dictionary-of-costs
+      m (apply min (keys d))]
+  (println " permutation" (d m) "has value" m))
 
-(println " cities:" set-of-cities)
-;(println "    number of cities:" num-cities)
-;(println " number of distances:" (count amended-distances-dict))
-;(doseq [kv amended-distances-dict]
-;  (println (key kv) (val kv)))
+
 
