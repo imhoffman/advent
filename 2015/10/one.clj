@@ -14,29 +14,30 @@
   (loop [stack vector-of-longs
          accum []]
     (if (empty? stack)
-      accum
+      (vec accum)
       (let [look (loop [s stack
                         c 0]
-                   (println " s:" s ", c:" c)
                    (if (or
-                         (= (inc c) (count s))
-                         (not= (s c) (s (inc c))))
+                         (empty? s)
+                         (> 2 (count s))
+                         (not= (s 0) (s 1)))
                      (vector (inc c) (first stack))
                      (recur
                        (vec (rest s))
-                       (inc c))))
-            say  (let [digit (look 1)
-                       times (look 0)]
-                   (loop [c   0
-                          out []]
-                     (if (= c times)
-                       out
-                       (recur
-                         (inc c)
-                         (conj out digit)))))]
+                       (inc c))))]
         (recur
           (vec (nthrest stack (look 0)))
           (concat accum look))))))
 
-(println (look-and-say input-as-vec-of-longs))
+;(println (look-and-say input-as-vec-of-longs))
+
+(println " length of 40th iteration:"
+(loop [i 0
+       s input-as-vec-of-longs]
+  (if (= i 40)
+    (count s)
+    (recur
+      (inc i)
+      (look-and-say s))))
+)
 
