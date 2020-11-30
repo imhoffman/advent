@@ -17,15 +17,13 @@
           ))
      "puzzle.txt"))
 
-(def set-of-cities
-  (set
-    (flatten
-      (for [s (keys distances-dict)] (apply list s)))))
- 
 ;;
-;;  ensure that a lack of entries does not crash the search
+;;  ensure that a lack of edges does not crash the search
+;;  enter "infinity" for cities that are not connected
 ;;   could check `frequencies` for suspects, but
 ;;    might as well loop over all of them
+;;  my input has a complete set of pairs, but perhaps
+;;   this is not true in general
 ;;
 (defn add-missing-entries [distances-dict]
   (let [set-of-cities (set (flatten
@@ -62,32 +60,6 @@
 (def amended-distances-dict (add-missing-entries distances-dict))
 
 
-
-;;
-;;  `coll-to-hash-map` is for use in `permutations`
-;;  utility to help make a coll hot-swappable by elem/index
-;;  calls `seq` on its argument
-;;  outputs a dictionary of keys/vals
-;;   that are the index/elems of the input coll
-;;   e.g., [3 4 5] --> {0 3, 1 4, 2 5}
-;;
-(defn coll-to-hash-map [input-vec]
-  (loop [inp (loop [index 0
-                    elems (seq input-vec)
-                    accum ()]
-               (if (empty? elems)
-                   accum
-                   (recur (inc index)
-                          (rest elems)
-                          (conj accum (list index (first elems))))))
-         out {}] 
-    (if (empty? inp)
-      out
-      (recur (rest inp)
-             (assoc out
-                    (first (first inp))
-                    (second (first inp)))))))
-
 ;;
 ;;  permutations
 ;;
@@ -100,7 +72,30 @@
 ;;  the library version differs in some edge/trivial cases, so
 ;;   I rolled my own
 ;;
+;;  letfn `coll-to-hash-map`
+;;  utility to help make a coll hot-swappable by elem/index
+;;  calls `seq` on its argument
+;;  outputs a dictionary of keys/vals
+;;   that are the index/elems of the input coll
+;;   e.g., [3 4 5] --> {0 3, 1 4, 2 5}
+;;
 (defn permutations [& xs]
+  (letfn [(coll-to-hash-map [input-vec]
+             (loop [inp (loop [index 0
+                               elems (seq input-vec)
+                               accum ()]
+                          (if (empty? elems)
+                            accum
+                            (recur (inc index)
+                                   (rest elems)
+                                  (conj accum (list index (first elems))))))
+                    out {}] 
+               (if (empty? inp)
+                 out
+                 (recur (rest inp)
+                        (assoc out
+                               (first (first inp))
+                               (second (first inp)))))))]
   (cond
     (empty? xs) (list (vector))    ;;  trivial empty case
     :else
@@ -118,7 +113,7 @@
           :else 
             ;;  (permutations 3)   -->  (3)
             ;;  (permutations [3]) -->  [[3]]
-            (vector s)))))           ;;  trivial scalar case
+            (vector s))))))          ;;  trivial scalar case
 
 
 ;;  the total distance of any one sequence of cities
@@ -126,7 +121,14 @@
   (apply + (for [pair (partition 2 1 vector-of-cities)] (dictionary-of-distances (set pair)))))
 
 
+(def set-of-cities
+  (set
+    (flatten
+      (for [s (keys distances-dict)] (apply list s)))))
+
+
 ;;  build a dictionary with key/vals of cost/cities
+;;   uses set-of-cities and amended-distances-dict
 (def dictionary-of-costs
   (loop [p   (permutations set-of-cities)
          out (transient {})]
