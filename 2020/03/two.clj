@@ -29,7 +29,9 @@
                    col   0
                    trees 0]
               (if (> (+ row ((first stack) 1)) nrows)
-                trees
+                (do
+                  (println (first stack) "yields" trees "trees")
+                  trees)
                 (recur
                   (+ row ((first stack) 1))
                   (+ col ((first stack) 0))
@@ -40,7 +42,8 @@
 (println (product tree-map slopes))
 
 
-
-;; 3413906000
 ;; 3435931200
+;; 3413906000
+;; 3350032920
+;; 3521829480  <--  correct; final slope is off by one tree (?)
 
