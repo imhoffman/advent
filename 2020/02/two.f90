@@ -27,7 +27,8 @@
      !!  ruleset
      c1 = s(i1:i1) .eq. c
      c2 = s(i2:i2) .eq. c
-     if ( (c1.or.c2) .and. .not.(c1.and.c2) ) puzzle_count = puzzle_count + 1
+     if ( c1 .neqv. c2 ) puzzle_count = puzzle_count + 1
+     !if ( (c1.or.c2) .and. .not.(c1.and.c2) ) puzzle_count = puzzle_count + 1
 
    enddo
 
