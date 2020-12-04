@@ -3,8 +3,8 @@
 
 (defn parser [r]
   (let [groups (re-seq #"((\w+):([#|\w]+))\s*" r)
-        dict   (into {} (for [e groups] (vector (e 2) (e 3))))]
-        ;dict   (into {} (for [e groups] (vector (e 2) (str/trim (e 3)))))]
+        ;dict   (into {} (for [e groups] (vector (e 2) (e 3))))]
+        dict   (into {} (for [e groups] (vector (e 2) (str/trim (e 3)))))]
     dict))
 
 (def batch
@@ -33,12 +33,15 @@
         (and (>= byr 1920) (<= byr 2002))
         (and (>= iyr 2010) (<= iyr 2020))
         (and (>= eyr 2020) (<= eyr 2030))
-        (when (re-matches #"\d{2,3}[cmin]{2}" hgt)
-          (let [[_ ns u] (re-matches #"(\d+)(\w+)" hgt)
-                n (Long/parseLong ns)]
-            (if (= u "cm")
-              (and (>= n 150) (<= n 192))
-              (and (>= n 59)  (<= n 76)))))
+        (let [matches (re-matches #"(\d{2,3})([cmin]{2}).*" hgt)]
+          (when matches
+            (let [[_ ns u] matches
+                  n (Long/parseLong ns)]
+              (println " hgt matches:" ns u)
+              (cond
+                (= u "cm") (and (>= n 150) (<= n 192))
+                (= u "in") (and (>= n 59)  (<= n 76))
+                :else false))))
         (re-matches #"#[0-9|a-f]{6}" hcl)
         (some #(= ecl %) ["amb" "blu" "brn" "gry" "grn" "hzl" "oth"])
         (re-matches #"[0-9]{9}" pid)
