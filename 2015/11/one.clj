@@ -2,7 +2,9 @@
 (require '[clojure.string :as str])
 
 (def input-string
-  (slurp "puzzle.txt"))
+  (-> "puzzle.txt"
+      slurp
+      str/trim))
 
 (def alphabet
   "abcdefghijklmnopqrstuvwxyz")
@@ -13,8 +15,8 @@
     (not (re-seq #"(i|o|l)" s))                           ;;  bad letters
     (<= 2 (count (set (map first (re-seq #"(.)\1" s)))))  ;;  two or more different doubles
     (loop [i 0]                                           ;;  straight
-      (cond                                               ;;   bad letters are gone by now,
-        (= i (- (count s) 3))                             ;;   but stuff like "ghj" must still fail
+      (cond                                               ;;   bad letters are gone by now, but
+        (= i (- (count s) 3))                             ;;   subs like "ghj" must still fail
           false
         (str/includes? alphabet (subs s i (+ i 3)))
           true
@@ -23,22 +25,27 @@
 
 
 (defn increment-password [s]
-  (let [p (vec "abcdefghjkmnpqrstuvwxyz")  ;;  remove the bad letters now, rather than
-        n (dec (count p))]                 ;;   waste the validator's time
-    (loop [stack (reverse s)
-           accum []]
-      (if (empty? stack)
-        (str/join (reverse accum))
-        (let [next-index (mod (inc (str/index-of (first stack))) n)]
+  (let [a alphabet     ;;  remove the bad letters now? rather than
+        p (vec a)      ;;   waste the validator's time later?
+        n (count p)]
+    (loop [v     (vec (reverse s))
+           place 0
+           ni    (mod (inc (str/index-of a (v place))) n)]
+      (let [out (assoc v place (p ni))]
+        (if (not= ni 0)              ;;  carry the z?
+          (str/join (reverse out))
           (recur
-            (if (= 0 next-index)
-              (loop ;over letters until no carry... then return rest of that stack
-                )
-              (rest stack))  ;; no carry needed
-            (conj accum (p next-index))))))))
+            out
+            (inc place)
+            (mod (inc (str/index-of a (v (inc place)))) n)))))))
 
 
-
-
-
+(println
+  " the first valid password after"
+  input-string
+  "is"
+  (loop [s (increment-password input-string)]
+    (if (valid? s)
+      s
+      (recur (increment-password s)))))
 
