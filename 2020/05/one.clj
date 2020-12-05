@@ -8,50 +8,37 @@
    "puzzle.txt"))
 
 
+(defn pow [b e]
+  (loop [n e
+         a 1]
+    (if (= n 0)
+      a
+      (recur (dec n) (* b a)))))
+
+
+(defn bits-to-int [coll hi-bit]
+  (loop [stack coll
+         place (dec (count stack)) 
+         accum 0]
+    (if (empty? stack)
+      accum
+      (recur
+        (rest stack)
+        (dec place)
+        (if (= (first stack) hi-bit)
+          (+ accum (pow 2 place))
+          accum)))))
+
+
 (defn id [s]
   (let [rows (take 7 s)
         cols (drop 7 s)]
     (+
      (* 8
-        (loop [stack rows
-               lo    0
-               hi    127]
-          (let [diff (/ (+ (- hi lo) 1) 2)]
-            (if (empty? stack)
-              (if (= (first stack) \F)
-                lo
-                hi)
-              (if (= (first stack) \F)
-                (recur
-                  (rest stack)
-                  lo
-                  (- (+ lo diff) 1))
-                (recur
-                  (rest stack)
-                  (- (+ hi 1) diff)
-                  hi))))))
-     (loop [stack cols
-            lo    0
-            hi    7]
-       (let [diff (/ (+ (- hi lo) 1) 2)]
-         (if (empty? stack)
-           (if (= (first stack) \L)
-             lo
-             hi)
-           (if (= (first stack) \L)
-             (recur
-               (rest stack)
-               lo
-               (- (+ lo diff) 1))
-             (recur
-               (rest stack)
-               (- (+ hi 1) diff)
-               hi))))))))
+        (bits-to-int rows \B))
+     (bits-to-int cols \R))))
+
 
 
 (prn (apply max (for [e input-list-of-lines] (id e))))
-
-;(doseq [e input-list-of-lines] (prn (id e)))
-
-;; 6048
 
