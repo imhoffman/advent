@@ -17,7 +17,7 @@
       (recur (dec n) (* b a)))))
 
 
-(defn bits-to-int [coll hi-bit]
+(defn id [coll set-of-hi-bits]
   (loop [stack coll
          place (dec (count stack)) 
          accum 0]
@@ -26,21 +26,12 @@
       (recur
         (rest stack)
         (dec place)
-        (if (= (first stack) hi-bit)
+        (if (contains? set-of-hi-bits (first stack))
           (+ accum (pow 2 place))
           accum)))))
 
 
-(defn id [s]
-  (let [rows (take 7 s)
-        cols (drop 7 s)]
-    (+
-     (* 8
-        (bits-to-int rows \B))
-     (bits-to-int cols \R))))
-
-
 (prn (set/difference
        (set (range (* 127 7)))
-       (set (for [e input-list-of-lines] (id e)))))
+       (set (for [e input-list-of-lines] (id e #{\B \R})))))
 
