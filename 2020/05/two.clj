@@ -31,7 +31,17 @@
           accum)))))
 
 
-(prn (set/difference
+(def missing-set (set/difference
        (set (range (* 127 7)))
        (set (for [e input-list-of-lines] (id e #{\B \R})))))
+
+
+(loop [s missing-set]
+  (let [e (first s)]
+    (if (or
+          (contains? missing-set (inc e))
+          (contains? missing-set (dec e)))
+      (recur (rest s))
+      (println e))))
+  
 
