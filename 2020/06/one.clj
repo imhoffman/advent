@@ -5,7 +5,7 @@
 (def input-sets
   (->> "puzzle.txt"
        slurp
-       ;#(str % "\n\n")            ;;  edited the input file ...
+       (#(str % "\n\n"))
        (re-seq #"([a-z]+\n)+\n")
        (map first)
        (map #(str/split % #"\n"))

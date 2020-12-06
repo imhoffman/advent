@@ -5,7 +5,7 @@
 (def input-sets
   (->> "puzzle.txt"
        slurp
-       ;#(str % "\n\n")            ;;  edited the input file ...
+       (#(str % "\n\n"))
        (re-seq #"([a-z]+\n)+\n")
        (map first)
        (map #(str/split % #"\n"))
@@ -14,10 +14,6 @@
        (map #(apply set/intersection %))))
 
 
-;(prn (nth input-sets 2))
-
 (prn (apply + (for [s input-sets] (count s))))
-
-;(doseq [s input-sets] (prn (count s)))
 
 
