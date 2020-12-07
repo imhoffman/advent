@@ -6,14 +6,32 @@
        slurp
        (#(str/split % #"\n"))
        (map #(re-matches #"(\w+) \w+ (\w+) (\d+).*\s(\w+)." %))
-       (mapv rest)))
+       (map rest)
+       (map vec)))
 
-(println input-happiness-vecs)
+(def peeps (set (for [e input-happiness-vecs] (first e))))
 
 
-(def happy-dict
-  (loop [vs input-happiness-vecs
-         out {}]))
+;;
+;;  each person has a dictionary of benefits
+;;   for each possible neighbor
+;;
+(def happiness-table  ;;  as in tabulation, not dinner table
+  (loop [vecs  input-happiness-vecs
+         out   (into {} (for [p peeps] (vector p {})))]
+    (if (empty? vecs)
+      out
+      (let [v (first vecs)]
+        (recur
+          (rest vecs)
+          (assoc out                  ;;  primary peep dict
+                 (v 0)
+                 (assoc (out (v 0))   ;;  neighbor dict
+                        (v 3)
+                        (let [n (Long/parseLong (v 2))]
+                          (if (= (v 1) "gain") n (- n))))))))))
+
+(println happiness-table)
 
 
 ;;
@@ -71,4 +89,21 @@
             ;;  (permutations [3]) -->  [[3]]
             (vector s))))))          ;;  trivial scalar case
 
+
+(defn delta-happiness [permutation master-happiness-table]
+  (let [h master-happiness-table]
+    (loop [stack (conj (vec permutation) (first permutation)) ;;  close the circle
+           accum 0]
+      (if (= 2 (count stack))
+        accum
+        (recur
+          (rest stack)
+          (+ accum
+             ((h (nth stack 1)) (nth stack 0))
+             ((h (nth stack 1)) (nth stack 2))))))))
+
+
+(prn (apply max (for [p (permutations peeps)] (delta-happiness p happiness-table))))
+
+;; 473 too low
 
