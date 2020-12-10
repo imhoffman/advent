@@ -28,13 +28,15 @@
           (if found (inc c) 0)
           (if found cs (if (< 0 c) (conj cs (inc c)) cs)))))))
 
+
 ;;  any of these (e.g. 2 4 5 or 6 8 9)
 ;;   that break over same-jump seq counts
 (defn two-and-ones-counter [sorted-coll]
   (loop [stack sorted-coll
          c     0
          i     0]
-    )
+    ;;  I don't have any two-jumps ...
+    ))
 
 
 (defn factorial [n]
@@ -45,15 +47,18 @@
       (recur (dec counter) (* accum counter)))))
 
 
+(defn ways [n]     ;; n is length of one-jumps, e.g. (4 5 6 7) --> 4
+   (cond
+     (> n 4) (* (* 7 (quot n 5)) (ways (- n 5)))
+     (= n 4) 4
+     (= n 3) 2
+     :else   1))
+
 (prn
-(let [ones   (sequence-counter 1)
-      twos   (sequence-counter 2)
-      threes (sequence-counter 3)]
-  (apply
-    *
-    (concat
-      (for [n ones] (factorial (- n 1)))
-      (for [n twos] (factorial (- n 2))))))
+(let [ones   (sequence-counter 1)      ;; the 1's are what matters
+      twos   (sequence-counter 2)      ;; I don't have any two-seqs
+      threes (sequence-counter 3)]     ;; these cannot be rearranged 
+  (apply * (for [n ones] (ways n))))
 )
            
 
