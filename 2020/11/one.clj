@@ -23,39 +23,39 @@
   (let [r2 (+ r mr)
         c2 (+ c mc)]
     (cond
-      (or (>= r2 nrows) (< r2 0) (>= c2 ncols) (< c2 0)) false
-      (= \L ((lay r2) c2)) false
+      (or (= r2 nrows) (< r2 0) (= c2 ncols) (< c2 0)) false
       (= \# ((lay r2) c2)) true
       :else false)))
 
 
 ;;  returns the char that replaces r,c
+(def slopes (vector [-1 0] [-1 1] [0 1] [1 1] [1 0] [1 -1] [0 -1] [-1 -1]))
+
 (defn seat [lay r c]
-  (let [slopes '([-1 0] [-1 1] [0 1] [1 1] [1 0] [1 -1] [0 -1] [-1 -1])]
+  (let [ch ((lay r) c)]
     (cond
-      (= \L ((lay r) c))
+      (= \. ch) \.
+      (= \L ch)
         (loop [s slopes]
           (cond
             (empty? s) \#
             (occupied? lay r c ((first s) 0) ((first s) 1)) \L
             :else (recur (rest s))))
-      (= \# ((lay r) c))
+      (= \# ch)
         (loop [s slopes
                o 0]
           (cond
-            (empty? s) \#
             (> o 3) \L
+            (empty? s) \#
             (occupied? lay r c ((first s) 0) ((first s) 1))
-              (recur (rest s)
-                     (inc o))
+              (recur (rest s) (inc o))
             :else (recur (rest s) o)))
-      :else
-        ((lay r) c))))
+      :else (prn " fail: bad char at" r c))))
 
 
 (loop [old-layout nil
        new-layout input]
-  ;(println " old:\n" old-layout "\n new:\n" new-layout)
+  ;(loop [r 0] (if (= r nrows) (println) (do (println (new-layout r)) (recur (inc r)))))
   (if (= old-layout new-layout)
     (prn ((frequencies (flatten new-layout)) \#))
     (let [old new-layout]
@@ -74,6 +74,8 @@
                     rowv
                     (recur
                       (inc col)
-                      (conj rowv (seat old row col)))))))))))))
+                      (let [new-ch (seat old row col)]
+                        ;(println " writing" new-ch "to" row col)
+                        (conj rowv new-ch)))))))))))))
 
 
