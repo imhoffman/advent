@@ -20,13 +20,16 @@
 ;;   return true if a filled seat is found, else false
 ;;
 (defn occupied? [lay r c mr mc]
-  (let [r2 (+ r mr)
-        c2 (+ c mc)]
-    (cond
-      (or (>= r2 nrows) (< r2 0) (>= c2 ncols) (< c2 0)) false
-      (= \L ((lay r2) c2)) false
-      (= \# ((lay r2) c2)) true
-      :else false)))
+  (loop [r1 r
+         c1 c]
+    (let [r2 (+ r1 mr)
+          c2 (+ c1 mc)]
+      (cond
+        (or (>= r2 nrows) (< r2 0) (>= c2 ncols) (< c2 0)) false
+        (= \L ((lay r2) c2)) false
+        (= \# ((lay r2) c2)) true
+        :else
+          (recur r2 c2)))))
 
 
 ;;  returns the char that replaces r,c
@@ -44,7 +47,7 @@
                o 0]
           (cond
             (empty? s) \#
-            (> o 3) \L
+            (> o 4) \L
             (occupied? lay r c ((first s) 0) ((first s) 1))
               (recur (rest s)
                      (inc o))
@@ -76,4 +79,6 @@
                       (inc col)
                       (conj rowv (seat old row col)))))))))))))
 
+;; 1981 too low
+;; 2671 too high
 
