@@ -87,10 +87,15 @@
 
 ;;
 ;;  CRT algo above is working; how to massage the
-;;   puzzle input to use it ?  does Bus ID matter ?
+;;   puzzle input to use it ?
+;;
+;;   t + mins = 0 mod id
+;;      t = (m-a) mod m
+;;
+;;    so, must feed k,v = (m-a),m to CRT !   woohoo!
 ;;
 (def crt-input
-  (for [kv notes-dict] (vector (key kv) (val kv))))
+  (for [kv notes-dict] (vector (- (val kv) (key kv)) (val kv))))
 
 
 (prn (crt crt-input))
