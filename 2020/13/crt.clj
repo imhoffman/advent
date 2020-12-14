@@ -14,6 +14,8 @@
        (map #(if (nil? %) nil (Long/parseLong %)))
        vec))
 
+(prn notes-vec)
+
 
 (def notes-dict
   (loop [s notes-vec
@@ -34,8 +36,7 @@
 ;;
 ;;  Chinese Remainder Theorem
 ;;
-;;  use existing dict of k,v as system of k mod v (???)
-;;   I must be supplying the system incorrectly ... the algo works 
+;;  input list of a,m pairs as system of a mod m
 ;;
 ;;  sources:
 ;;   https://www.youtube.com/watch?v=2-tdwLqyaKo
@@ -43,8 +44,10 @@
 ;;
 ;;  works for this:
 ;;   https://youtu.be/zIFehsBHB8o?t=719 
+;;  and for this (the final line is wrong):
+;;   http://homepages.math.uic.edu/~leon/mcs425-s08/handouts/chinese_remainder.pdf
 ;;
-(defn crt [dict]
+(defn crt [inp]
   (letfn [(gcd [a b] (long (.gcd (biginteger a) (biginteger b))))
           (naive-mmi [a m] (if (not= 1 (gcd a m))
                              (prn " failed mmi condition")
@@ -56,31 +59,42 @@
     ;;  ensure coprime mods
     (if (every?
           #(= 1 %)
-          (for [pair (map (partial take 2) (combo/permutations (vals dict)))]
+          (for [pair (map (partial take 2) (combo/permutations (map second inp)))]
             (gcd (first pair) (second pair))))
       (println " Applying CRT.")
       (do (println " CRT does not apply.\n") (System/exit 1)))
     ;;  compute the answer
-    (let [final-mod (apply * (vals dict))
-          sys (for [kv dict]
-                (*
-                 (* (key kv) (apply * (vals (dissoc dict (key kv)))))
-                 (naive-mmi (apply * (vals (dissoc dict (key kv)))) (val kv))))]
-      (mod (apply + sys) final-mod))))
+    (let [ms  (map second inp)
+          m   (apply * ms)
+          as  (map first inp)
+          zs  (for [p inp] (/ m (second p)))
+          ys  (for [p inp] (naive-mmi (/ m (second p)) (second p)))
+          ws  (for [pair (partition 2 (interleave ys zs))]
+                (mod (* (first pair) (second pair)) m))
+          xs  (for [pair (partition 2 (interleave as ws))]
+                (* (first pair) (second pair)))]
+                ;(mod (* (first pair) (second pair)) m))]
+      (println "  m:"  m)
+      (println " ms:" ms)
+      (println " as:" as)
+      (println " zs:" zs)
+      (println " ys:" ys)
+      (println " ws:" ws)
+      (println " xs:" xs)
+      (println "  x:" (apply + xs))
+      (mod (apply + xs) m))))
 
 
-(prn (crt notes-dict))
+;;
+;;  CRT algo above is working; how to massage the
+;;   puzzle input to use it ?  does Bus ID matter ?
+;;
+(def crt-input
+  (for [kv notes-dict] (vector (key kv) (val kv))))
 
 
-;;  expose for testing ...
-(defn naive-mmi [a m]
-  (letfn [(gcd [a b] (long (.gcd (biginteger a) (biginteger b))))]
-    (if (not= 1 (gcd a m))
-      (prn " failed mmi condition")
-      (loop [x 0]
-        (cond
-          (= 1 (mod (* a x) m)) x
-          (= x m) (prn " failed mmi search")
-          :else (recur (inc x)))))))
+(prn (crt crt-input))
 
+;; 205146236914224 too low
+;; 426411251956034 too high
 
