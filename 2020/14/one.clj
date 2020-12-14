@@ -50,10 +50,27 @@
 
 
 ;;
-;;  accept decimal values, apply mask, return decimal value
+;;  input mask as dict and two decimal values,
+;;   apply mask, return decimal value
 ;;
 (defn assign-value [mask memory-value incoming-value]
-  )
+  (let [memd (dec-to-bit-dict memory-value)
+        vald (dec-to-bit-dict incoming-value)]
+    (loop [es (range (count mask))
+           out memd]
+      (if (empty? es)
+        (bit-dict-to-dec out)
+        (let [e (first es)
+              m (mask e)]
+          (recur
+            (rest es)
+            (cond
+              (= m \1) (assoc out e 1)
+              (= m \0) (assoc out e 0)
+              (= m \X) (assoc out e (vald e))
+              :else (prn " failure in mask application"))))))))
+
+
 
 
 (defn run-program [program-strings]
@@ -78,8 +95,9 @@
                    addr
                    (assign-value mask (if (mem addr) (mem addr) 0) value)))))))))
 
+(prn (apply + (vals (run-program input))))
 
-
+;; 1511828488192 too low
 
 
 
