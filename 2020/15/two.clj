@@ -2,31 +2,47 @@
 (require '[clojure.string :as str])
 (require '[clojure.set :as set])
 
-(def input
+(def input-as-vec
   (->> "puzzle.txt"
        slurp
        str/trim
        (#(str/split % #","))
        (map #(Long/parseLong %))
-       vec
-       (#(apply hash-map (flatten (for [i (range (count %))] (list (% i) (inc i))))))))
+       vec))
 
-(prn input)
 
-;;
-;;  hash map is key:number, val:turn at which last spoken
-;;
+(def input-as-dict
+  (apply hash-map
+         (flatten
+           (for [i (range (count input-as-vec))]
+             (list
+               (input-as-vec i)
+               (inc i))))))
 
-(loop [d     input
-       turn  (count d)
-       prev  (key (apply max-key val d))]  ;;  key with max val
-  (if (= turn 30000000)
-    (prn (key (apply max-key val d)))
-    (let [prev-turn (d prev)
-          current   (if prev-turn (- turn prev-turn) 0)]
+
+(prn input-as-vec)
+;(prn input-as-dict)
+
+
+(loop [just-said (last input-as-vec)
+       newd      input-as-dict
+       oldd      (dissoc newd just-said)
+       turn      (inc (count newd))]          ;;  1-indexed
+  ;(println " turn:" turn "  just-said:" just-said "  newd:" newd)
+  ;(if (= turn (inc 2020))
+  (if (= turn (inc 30000000))
+    (prn just-said)
+    (let [prev (oldd just-said)         ;;  nil if key not present
+          say  (if prev (- (dec turn) prev) 0)]
       (recur
-        (assoc d current turn)
-        (inc turn)
-        current))))
+        say
+        (assoc newd say turn)
+        newd
+        (inc turn)))))
+
+
+
+
+
 
 
