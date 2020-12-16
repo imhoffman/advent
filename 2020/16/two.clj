@@ -28,6 +28,34 @@
 ;(prn nearby-tickets)
 
 
+(def my-ticket
+  (->> "puzzle.txt"
+       slurp
+       (#(str/split % #"your ticket:\n"))
+       second
+       (#(str/split % #"\n"))
+       first
+       (#(str/split % #","))
+       (map #(Long/parseLong %))
+       vec))
+
+;(prn my-ticket)
+
+
+(def departure-rules
+  (->> "puzzle.txt"
+       slurp
+       (#(str/split % #"\n"))
+       (map #(re-matches #"departure.*: (\d+)-(\d+) or (\d+)-(\d+)" %))
+       (filter #(not (nil? %)))
+       (map rest)
+       (map (fn [s] (map #(Long/parseLong %) s)))
+       (map vec)))
+
+;(prn departure-rules)
+
+
+
 (defn valid? [rules ticket]
   (loop [stack ticket]
     (cond
@@ -47,7 +75,6 @@
 
 
 
-;(prn (for [ticket nearby-tickets] (valid? input-rules ticket)))
 
 
 
