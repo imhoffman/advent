@@ -74,6 +74,43 @@
         false)))
 
 
+;;
+;;  return list of fields that might be departure
+;;
+(defn departure-fields [rules ticket]
+  (loop [stack  ticket
+         field  0
+         fields []]
+    (if (empty? stack)
+      fields
+      (recur
+        (rest stack)
+        (inc field)
+        (let [n (first stack)]
+          (if (some true?
+              (for [rule rules]
+                (or
+                  (and (>= n (rule 0))
+                       (<= n (rule 1))
+                       true)
+                  (and (>= n (rule 2))
+                       (<= n (rule 3))
+                       true))))
+            (conj fields field)
+            fields))))))
+
+
+
+;;  assemble set of fields that are departure and apply * to my-ticket
+(loop [stack (filter (partial valid? input-rules) nearby-tickets)
+       out (set (range (count (first nearby-tickets))))]
+  (if (empty? stack)
+    (let [v (vec my-ticket)]
+      (prn out)
+      (prn (apply * (for [i out] (biginteger (v i))))))
+    (recur
+      (rest stack)
+      (set/intersection out (set (departure-fields departure-rules (first stack)))))))
 
 
 
