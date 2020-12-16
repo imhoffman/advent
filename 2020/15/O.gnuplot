@@ -16,16 +16,18 @@ set fit quiet
 set fit errorvariables
 
 set datafile missing "NA"
-stats "times.txt" every ::skip_indexOf_lines using 2 nooutput
+stats "times.txt" every ::skip_indexOf_lines using 2 nooutput name "Y" 
+stats "times.txt" every ::skip_indexOf_lines using 1 nooutput name "X"
 
 fit pow1n(x) "times.txt" every ::skip_indexOf_lines using 1:2:($3/$2) via a1,e1
 fit pow2n(x) "times.txt" every ::skip_dictionary_lines using 1:4:($5/$4) via a2,e2
 
 set terminal pngcairo dashed enhanced size 1024,768 crop font "Helvetica, 18" linewidth 2
 set output "plot.png"
-set size 0.8,1.0
+set size 1.0,0.75
 
-set yrange [0:1.1*STATS_max]
+set xrange [0.9*X_min:3.0*X_max]
+set yrange [0:1.1*Y_max]
 set logscale x
 set xlabel "number of turns (log_{10})"
 set ylabel "execution time (sec)"
