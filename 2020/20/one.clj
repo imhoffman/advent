@@ -17,20 +17,25 @@
 
 ;;
 ;;  accept a tiles-dict val and return a
-;;   dict entry that is an edges-dict val
+;;   dict entry that is an edges-vec-dict
+;;   i.e., a vec of four pairs of vecs: each side and its reverse
 ;;
-(defn bundle-edges [tile-val]
+(defn make-edges-vec [tile-val]
   (let [data (str/split tile-val #"\n")]
-    {:top    (first data)
-     :bottom (last data)
-     :left   (apply str (for [row data] (first row)))
-     :right  (apply str (for [row data] (last row)))}))
+    (vector (let [s (first data)]
+              (vector s (apply str (reverse s))))
+            (let [s (last data)]
+              (vector s (apply str (reverse s))))
+            (let [s (apply str (for [row data] (first row)))]
+              (vector s (apply str (reverse s))))
+            (let [s (apply str (for [row data] (last row)))]
+              (vector s (apply str (reverse s)))))))
 
 
 ;;
-;;  a dictionary of the edges of the tiles
+;;  a dictionary of vector of the edges of the tiles
 ;;
-(def edges-dict
+(def edges-vec-dict
   (loop [ks (keys tiles-dict)
          out tiles-dict]
     (if (empty? ks)
@@ -39,39 +44,17 @@
         (rest ks)
         (assoc out
                (first ks)
-               (bundle-edges (tiles-dict (first ks))))))))
+               (make-edges-vec (tiles-dict (first ks))))))))
 
-;(println edges-dict)
-
-
-;;
-;;  return the new val dict of the tile
-;;
-(defn rotate [tile-val]
-  {:top    (tile-val :left)
-   :bottom (tile-val :right)
-   :left   (tile-val :bottom)
-   :right  (tile-val :top)})
-
-(defn flip-tb [tile-val]
-  {:top    (tile-val :bottom)
-   :bottom (tile-val :top)
-   :left   (apply str (reverse (tile-val :left)))
-   :right  (apply str (reverse (tile-val :right)))})
-
-(defn flip-rl [tile-val]
-  {:top    (apply str (reverse (tile-val :top)))
-   :bottom (apply str (reverse (tile-val :bottom)))
-   :left   (tile-val :right)
-   :right  (tile-val :left)})
+;(println edges-vec-dict)
 
 
 
 ;;
 ;;  any tiles that have a non-matching edge must be a corner
 ;;
-(let [d edges-dict]
-  (loop [ks (keys edges-dict)
+(let [d edges-vec-dict]
+  (loop [ks (keys edges-vec-dict)
          corners (vector)]
     (if (= 4 (count corners))
       (prn (apply * corners))
@@ -85,9 +68,9 @@
               (empty? kis)
                 out
               (every? true?
-                      (for [v (vals (d k))]
-                        (let [poss (set (flatten (for [tv (vals (d (first kis)))] (list tv (apply str (reverse tv))))))]
-                          (or (contains? poss v) (contains? poss (apply str (reverse v)))))))
+                      (for [v (d k)]
+                        (let [poss (set (flatten (for [tv (d (first kis))] (list (tv 0) (tv 1)))))]
+                          (or (contains? poss (v 0)) (contains? poss (v 1))))))
                 out
               :else
                 (conj out k))))))))
