@@ -66,8 +66,33 @@
    :right  (tile-val :left)})
 
 
+
 ;;
-;;  now, search all the permutations...
+;;  any tiles that have a non-matching edge must be a corner
 ;;
+(let [d edges-dict]
+  (loop [ks (keys edges-dict)
+         corners (vector)]
+    (if (= 4 (count corners))
+      (prn (apply * corners))
+      (recur
+        (rest ks)
+        (let [k (first ks)
+              di (dissoc d k)]
+          (loop [kis (keys di)
+                 out corners]
+            (cond
+              (empty? kis)
+                out
+              (every? true?
+                      (for [v (vals (d k))]
+                        (let [poss (set (flatten (for [tv (vals (d (first kis)))] (list tv (apply str (reverse tv))))))]
+                          (or (contains? poss v) (contains? poss (apply str (reverse v)))))))
+                out
+              :else
+                (conj out k))))))))
+
+
+;; 21941333976479 too high
 
 
