@@ -56,7 +56,6 @@
 (let [d edges-vec-dict]
   (loop [ks (keys edges-vec-dict)
          corners (vector)]
-    (println " ks:" ks "  corners:" corners)
     (if (= 4 (count corners))
       (prn corners "-->" (apply * corners))
       (recur
@@ -66,22 +65,18 @@
           (loop [kis (keys di)
                  sides 0
                  out corners]
-            (println "considering" k "against" (first kis))
             (if (empty? kis)
-              out
+              (conj out k)
               (let [c (count
                         (filter true?
                                 (for [v (d k)]
                                   (let [poss (set (flatten (for [tv (di (first kis))] (list (tv 0) (tv 1)))))]
                                     (or (contains? poss (v 0)) (contains? poss (v 1)))))))]
-                (println " found c:" c "for tile" k)
                 (cond
-                  (>= sides 2)
-                    (conj out k)
-                  (< sides 2)
-                    (recur (rest kis) (+ sides c) out)
+                  (> (+ sides c) 2)
+                    out
                   :else
-                    out)))))))))
+                    (recur (rest kis) (+ sides c) out))))))))))
 
 
 ;; 21941333976479 too high
