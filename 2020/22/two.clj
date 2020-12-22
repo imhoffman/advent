@@ -13,27 +13,27 @@
 (def p2 (mapv #(Long/parseLong %) (second two-decks)))
 
 
-(defn play [deck1 deck2 p1-win]
+(defn play [deck1 deck2]
   (loop [d1 deck1
          d2 deck2
-         history #{}]
+         h  #{}]
+    (if (contains? h (vector d1 d2))
+      (do
+        (println "Short-circuit.")
+        (vector d1 d2 true))
+      (let [history (conj h (vector d1 d2))]
     (cond
-      (contains? history (vector d1 d2))
-        (do 
-          (println "Short-circuit.")
-          (vector d1 d2 true))
       (or (empty? d1) (empty? d2))
         (vector d1 d2 false)
       (and (> (count d1) (first d1)) (> (count d2) (first d2)))
-        (let [[rd1 rd2 q] (play (vec (rest d1)) (vec (rest d2)) false)]
-          (if (or q (empty? rd2))
+        (let [[rd1 rd2 p1-win] (play (vec (rest d1)) (vec (rest d2)))]
+          (if (or p1-win (empty? rd2))
             (let [new-d1 (conj (vec (rest d1)) (first d1) (first d2))
                   new-d2 (vec (rest d2))]
               (recur
                 new-d1
                 new-d2
                 (conj history (vector d1 d2))))
-                ;(conj history (vector (vec (rest d1)) (vec (rest d2))))))
             (let [new-d1 (vec (rest d1))
                   new-d2 (conj (vec (rest d2)) (first d2) (first d1))]
               (recur
@@ -55,10 +55,10 @@
             new-d2
             (conj history (vector d1 d2))))
       :else
-        (println "war!"))))
+        (println "war!"))))))
 
 
-(let [return (play p1 p2 false)
+(let [return (play p1 p2)
       winner (if (return 2)
                (return 0)
                (first (filter #(not (empty? %)) (list (return 0) (return 1)))))]
