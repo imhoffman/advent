@@ -13,55 +13,45 @@
 (def p2 (mapv #(Long/parseLong %) (second two-decks)))
 
 
-(defn play [deck1 deck2 p1-win]
+(defn play [deck1 deck2 game]
   (loop [d1 deck1
-         d2 deck2
-         history #{}]
-    ;(when (contains? history (vector d1 d2)) (println "Yes."))
+         d2 deck2]
+    (println " Game #" game "\n" d1 d2 "\n")
     (cond
-      (contains? history (vector d1 d2))
-        (vector d1 d2 true)
       (or (empty? d1) (empty? d2))
-        (vector d1 d2 false)
+        (vector d1 d2)
       (and (> (count d1) (first d1)) (> (count d2) (first d2)))
-        (let [[rd1 rd2 q] (play (vec (rest d1)) (vec (rest d2)) false)]
-          (if (or q (empty? rd2))
-            (let [new-d1 (conj (vec (rest d1)) (first d1) (first d2))
-                  new-d2 (vec (rest d2))]
-              (recur
-                new-d1
-                new-d2
-                (conj history (vector new-d1 new-d2))))
+        (let [[rd1 rd2] (play (vec (rest d1)) (vec (rest d2)) (inc game))]
+          (if (empty? rd1)
             (let [new-d1 (vec (rest d1))
                   new-d2 (conj (vec (rest d2)) (first d2) (first d1))]
               (recur
                 new-d1
-                new-d2
-                (conj history (vector new-d1 new-d2))))))
+                new-d2))
+            (let [new-d1 (conj (vec (rest d1)) (first d1) (first d2))
+                  new-d2 (vec (rest d2))]
+              (recur
+                new-d1
+                new-d2))))
       (> (first d1) (first d2))
         (let [new-d1 (conj (vec (rest d1)) (first d1) (first d2))
               new-d2 (vec (rest d2))]
           (recur
             new-d1
-            new-d2
-            (conj history (vector new-d1 new-d2))))
+            new-d2))
       (> (first d2) (first d1))
         (let [new-d1 (vec (rest d1))
               new-d2 (conj (vec (rest d2)) (first d2) (first d1))]
           (recur
             new-d1
-            new-d2
-            (conj history (vector new-d1 new-d2))))
+            new-d2))
       :else
         (println "war!"))))
 
 
-(let [return (play p1 p2 false)
-      winner (if (return 2)
-               (return 0)
-               (first (filter #(not (empty? %)) (list (return 0) (return 1)))))]
-  (println winner)
-  (println (loop [d (reverse winner)
+(let [winner (filter #(not (empty? %)) (play p1 p2 1))]
+  (println (first winner))
+  (println (loop [d (reverse (first winner))
                   i 1
                   accum 0]
          (if (empty? d)
@@ -73,6 +63,5 @@
 
 
 ;; 17923
-;; 9353 too low
 
 
