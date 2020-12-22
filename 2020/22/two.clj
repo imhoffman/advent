@@ -17,10 +17,11 @@
   (loop [d1 deck1
          d2 deck2
          history #{}]
-    ;(when (contains? history (vector d1 d2)) (println "Yes."))
     (cond
       (contains? history (vector d1 d2))
-        (vector d1 d2 true)
+        (do 
+          (println "Short-circuit.")
+          (vector d1 d2 true))
       (or (empty? d1) (empty? d2))
         (vector d1 d2 false)
       (and (> (count d1) (first d1)) (> (count d2) (first d2)))
@@ -31,27 +32,28 @@
               (recur
                 new-d1
                 new-d2
-                (conj history (vector new-d1 new-d2))))
+                (conj history (vector d1 d2))))
+                ;(conj history (vector (vec (rest d1)) (vec (rest d2))))))
             (let [new-d1 (vec (rest d1))
                   new-d2 (conj (vec (rest d2)) (first d2) (first d1))]
               (recur
                 new-d1
                 new-d2
-                (conj history (vector new-d1 new-d2))))))
+                (conj history (vector d1 d2))))))
       (> (first d1) (first d2))
         (let [new-d1 (conj (vec (rest d1)) (first d1) (first d2))
               new-d2 (vec (rest d2))]
           (recur
             new-d1
             new-d2
-            (conj history (vector new-d1 new-d2))))
+            (conj history (vector d1 d2))))
       (> (first d2) (first d1))
         (let [new-d1 (vec (rest d1))
               new-d2 (conj (vec (rest d2)) (first d2) (first d1))]
           (recur
             new-d1
             new-d2
-            (conj history (vector new-d1 new-d2))))
+            (conj history (vector d1 d2))))
       :else
         (println "war!"))))
 
