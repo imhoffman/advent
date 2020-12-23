@@ -16,13 +16,13 @@
 (defn play [deck1 deck2]
   (loop [d1 deck1
          d2 deck2
-         h  #{}]
-    (if (contains? h (vector d1 d2))
-      (do
-        (println "Short-circuit.")
-        (vector d1 d2 true))
-      (let [history (conj h (vector d1 d2))]
+         history #{}]
     (cond
+      (contains? history (vector d1 d2))
+        (do
+          (println "Short-circuit.")
+          (println "Player 1's hand:" d1)
+          (vector d1 d2 true))
       (or (empty? d1) (empty? d2))
         (vector d1 d2 false)
       (and (> (count d1) (first d1)) (> (count d2) (first d2)))
@@ -55,7 +55,7 @@
             new-d2
             (conj history (vector d1 d2))))
       :else
-        (println "war!"))))))
+        (println "war!"))))
 
 
 (let [return (play p1 p2)
