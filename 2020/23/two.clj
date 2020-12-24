@@ -3,7 +3,7 @@
 (require '[clojure.set :as set])
 
 (def num-cups (inc 9))
-(def num-moves 100000)
+(def num-moves 3000000)
 
 (def input-short
   (->> "puzzle.txt"
@@ -73,7 +73,7 @@
                               (+ ci 4 (- (count circle) 4)))))
           [dest di] (loop [stack leave
                            d     (if (= 0 (dec current)) (count input) (dec current))]
-                      (println " looping...")
+                      ;(println " looping...")
                       (let [found (.indexOf stack d)]
                         (cond
                           (empty? stack) (println " crashed looking for destination")
@@ -84,15 +84,15 @@
                       pickup
                       (subvec leave (+ 1 di))))
           new-curr  (new-circ (mod (inc (.indexOf new-circ current)) (count new-circ)))]
-      (println "     move:" moves)
-      (println "  current:" current)
+      ;(println "     move:" moves)
+      ;(println "  current:" current)
       ;(println "   circle:" circle)
-      (println "   pickup:" pickup)
+      ;(println "   pickup:" pickup)
       ;(println "    leave:" leave)
-      (println "     dest:" dest)
+      ;(println "     dest:" dest)
       ;(println " put down:" new-circ)
-      (println " next cur:" new-curr)
-      (println)
+      ;(println " next cur:" new-curr)
+      ;(println)
       (if (= moves (dec nmoves))
         (let [final-wrap (vec (concat new-circ new-circ))
               i1  (.indexOf final-wrap 1)
