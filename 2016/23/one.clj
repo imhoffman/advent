@@ -1,0 +1,48 @@
+
+(require '[clojure.string :as str])
+
+(def program (->> "puzzle.txt"
+                  slurp
+                  (#(str/split % #"\n") ,,)
+                  (map #(str/split % #"\s") ,,)
+                  (map #(map
+                          (fn [e]
+                            (let [rev (re-matches #"(-?\d+)" e)]
+                              (if rev (Integer/parseInt (rev 1)) e))) %) ,,)
+                  (map vec ,,)
+                  vec))
+
+
+
+(defn operate [d]
+  (letfn [(de-ref [x] (if (integer? x) x (d x)))]
+    (let [op ((d :ram) (d :ip))]
+      (case (op 0)
+        "cpy" (if (integer? (op 2))           ;; if tgl broke it
+                (assoc d :ip (inc (d :ip)))   ;; then skip it
+                (assoc d
+                       (op 2) (de-ref (op 1))
+                       :ip (inc (d :ip))))
+        "inc" (if (integer? (op 1))           ;; tgl might become inc
+                (assoc d :ip (inc (d :ip)))   ;; skip it
+                (assoc d
+                       (op 1) (inc (d (op 1)))
+                       :ip (inc (d :ip))))
+        "dec" (if (integer? (op 1))           ;; tgl->inc->dec could happen
+                (assoc d :ip (inc (d :ip)))   ;; skip it
+                (assoc d
+                       (op 1) (dec (d (op 1)))
+                       :ip (inc (d :ip))))
+        "jnz" (let [arg1 (de-ref (op 1))]
+                (assoc d :ip (+ (d :ip) (if (zero? arg1) 1 (de-ref (op 2))))))
+        "tgl" nil))))
+
+
+
+(loop [d {"a" 0, "b" 0, "c" 0, "d" 0, :ip 0, :ram program}]
+  (if (>= (d :ip) (count (d :ram)))
+    (println " register a at halt:" (d "a"))
+    (recur (operate d))))
+
+
+
