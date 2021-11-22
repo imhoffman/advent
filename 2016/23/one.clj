@@ -15,6 +15,7 @@
 
 
 (defn operate [d]
+  ;(println (d :ram))
   (letfn [(de-ref [x] (if (integer? x) x (d x)))]
     (let [op ((d :ram) (d :ip))]
       (case (op 0)
@@ -35,11 +36,51 @@
                        :ip (inc (d :ip))))
         "jnz" (let [arg1 (de-ref (op 1))]
                 (assoc d :ip (+ (d :ip) (if (zero? arg1) 1 (de-ref (op 2))))))
-        "tgl" nil))))
+        "tgl" (let [arg1 (+ (d :ip) (de-ref (op 1)))]
+                (if (or (>= arg1 (count (d :ram))) (< arg1 0))
+                  (assoc d :ip (inc (d :ip)))              ;; "nothing happens"
+                  (let [tgl-op ((d :ram) arg1)]            ;; else
+                    (case (count tgl-op)
+                      3 (case (tgl-op 0)
+                          "jnz" (assoc d
+                                       :ram                ;; write to ram
+                                       (assoc (d :ram)     ;; the ram entry
+                                              arg1         ;; at vec index target
+                                              (assoc
+                                                ((d :ram) arg1)
+                                                0 "cpy"))
+                                       :ip (inc (d :ip)))
+                          (assoc d              ;; default case
+                                 :ram
+                                 (assoc (d :ram)
+                                        arg1
+                                        (assoc
+                                          ((d :ram) arg1)
+                                          0 "jnz"))
+                                 :ip (inc (d :ip))))
+                      2 (case (tgl-op 0)
+                          "inc" (assoc d
+                                       :ram                ;; write to ram
+                                       (assoc (d :ram)     ;; the ram entry
+                                              arg1         ;; at vec index targeta
+                                              (assoc
+                                                ((d :ram) arg1)
+                                                0 "dec"))
+                                       :ip (inc (d :ip)))
+                          (assoc d :ram              ;; default case
+                                 (assoc (d :ram)
+                                        arg1
+                                        (assoc
+                                          ((d :ram) arg1)
+                                          0 "inc"))
+                                 :ip (inc (d :ip))))
+                      (println " 3/2 case failed")))))
+        (println " op 0 case failed")))))
 
 
 
-(loop [d {"a" 0, "b" 0, "c" 0, "d" 0, :ip 0, :ram program}]
+
+(loop [d {"a" 7, "b" 0, "c" 0, "d" 0, :ip 0, :ram program}]
   (if (>= (d :ip) (count (d :ram)))
     (println " register a at halt:" (d "a"))
     (recur (operate d))))
