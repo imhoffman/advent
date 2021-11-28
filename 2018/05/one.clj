@@ -1,22 +1,25 @@
 
-(require '[clojure.string as :str])
+(require '[clojure.string :as str])
 
 (def polymer (->> "puzzle.txt"
-                  slurp))
+                  slurp
+                  butlast))
 
-(reduce (fn [a b]
-          (cond
-            (empty? b)
-            (println (count a))
+(defn react [s]
+  (reduce (fn [a b]
+            (let [v (re-matches #"(\w)(\w)" (str (last a) b))]
+              (if (and v
+                       (= (str/upper-case (v 1)) (str/upper-case (v 2)))
+                       (or
+                         (re-matches #"[a-z][A-Z]" (v 0))
+                         (re-matches #"[A-Z][a-z]" (v 0))))
+                (apply str (butlast a))
+                (conj (vec (apply str a)) b))))
+          (vector (first s))
+          (rest s)))
 
-            (or
-              (re-matches #"([a-z])([A-Z])" (apply str (last a) (first b)))
-              (re-matches #"([A-Z])([a-z])" (apply str (last a) (first b))))
-            (conj (vec a) ... xor upper/lower)))
 
-            :else
-            (conj a (first b)))
-
+(println (count (react polymer)))
 
 
 
