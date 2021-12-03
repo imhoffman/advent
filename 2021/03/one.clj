@@ -10,18 +10,17 @@
 
 
 (loop [index 0
-       gamma-bits (list)
-       epsilon-bits (list)]
+       gamma-bits (vector)
+       epsilon-bits (vector)]
   (if (= index (count (first input)))
-    (do (prn (apply str (reverse gamma-bits))) (prn (apply str (reverse epsilon-bits))))
+    (println (* (Integer/parseInt (apply str epsilon-bits) 2) (Integer/parseInt (apply str gamma-bits) 2)))
     (let [freqs (frequencies (reduce #(conj %1 ((vec %2) index)) (list) input))
           most  (if (> (freqs \0) (freqs \1)) \0 \1)
           least (if (> (freqs \0) (freqs \1)) \1 \0)]
-      (do (println "freqs for index" index freqs)
       (recur
         (inc index)
         (conj gamma-bits most)
-        (conj epsilon-bits least))))))
+        (conj epsilon-bits least)))))
 
 
 
