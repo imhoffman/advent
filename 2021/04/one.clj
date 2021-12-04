@@ -17,12 +17,12 @@
 (def boards
   (->> (rest inputs)
        (mapv #(str/split % #"\n") ,,)
-       (mapv (fn [e] (mapv #(str/split % #"\s+") e)) ,,)
-       (mapv (fn [rows] (for [row rows] (mapv #(Integer/parseInt %) row)) rows) ,,)))
+       (mapv (fn [board] (mapv #(str/split (str/trim %) #"\s+") board)) ,,)
+       (mapv (fn [board] (mapv (fn [row] (mapv #(Integer/parseInt %) row)) board)) ,,)))
 
 (def board-dicts
   (->> boards
-       (map #(hash-map :board %, :hits (list)) ,,)))
+       (map #(hash-map :board %, :hits {}) ,,)))
 
 
 ;(println calls)
@@ -30,23 +30,56 @@
 
 
 (defn mark-board [call board-dict]
-  (if (some #(= call %) (flatten (board-dict :board)))
-    (assoc board-dict :hits (conj (board-dict :hits) call))
-    board-dict))
+  (let [b    (board-dict :board)
+        cols (count b)
+        rows (count (first b))]
+    (loop [r 0
+           c 0]
+      (cond
+        (= r rows)
+          board-dict
+        (= call ((b r) c))
+          (assoc board-dict :hits (assoc (board-dict :hits) call (vector r c)))
+        (< c (dec cols))
+          (recur r (inc c))
+        :else
+          (recur (inc r) 0)))))
 
 
-(defn winner? [board call]
-  true)
+(defn winner? [board-dict]
+  (let [b    (board-dict :board)
+        cols (count b)
+        rows (count (first b))]
+    (loop [r 0
+           c 0]
+      (cond
+        (= r rows) false
+        (= cols (count (filter #(= r (first %)) (vals (board-dict :hits))))) true  ;; across
+        :else nil))))   ;; still need down
 
 
+(defn score [board-dict call]
+  (* call
+     (apply + (remove
+                #(contains? (board-dict :hits) %)
+                (flatten (board-dict :board))))))
+
+
+
+;;
+;;  play the game
+;;
 (loop [cs calls
-       bds board-dicts]
-  (if (some true? (for [bd bds] (winner? bd (first cs))))
-    ;; return the winner and the recent call
-    (list (filter #(winner? % (first cs)) bds) (first cs))
-    (recur
-      (rest cs)
-      (map #(mark-board (first cs) %) bds))))
+       bds board-dicts
+       last-call nil]
+  ;(doseq [bd bds] (println (bd :hits)))
+  (let [winner (first (filter some? (for [bd bds] (if (winner? bd) bd nil))))]
+    (if winner
+      (println (score winner last-call))
+      (recur
+        (rest cs)
+        (map #(mark-board (first cs) %) bds)
+        (first cs)))))
 
 
 
