@@ -50,12 +50,11 @@
   (let [b    (board-dict :board)
         cols (count b)
         rows (count (first b))]
-    (loop [r 0
-           c 0]
+    (loop [r 0]
       (cond
         (= r rows) false
         (= cols (count (filter #(= r (first %)) (vals (board-dict :hits))))) true  ;; across
-        :else nil))))   ;; still need down
+        :else (recur (inc r))))))   ;; still need down
 
 
 (defn score [board-dict call]
@@ -82,6 +81,7 @@
         (first cs)))))
 
 
+;;  15260 too low
 
 
 
