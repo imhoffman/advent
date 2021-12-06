@@ -12,21 +12,12 @@
 
 
 
-(loop [day 1
-       timers input]
-  (if (= day 257)
-    (println (count timers))
-    (recur
-      (inc day)
-      (let [f (frequencies timers)
-            times (keys f)]
-        (reduce
-          (fn [a t]
-            (if (= t 0)
-              (concat a (take (f t) (repeat 6)) (take (f t) (repeat 8)))
-              (apply conj a (take (f t) (repeat (dec t))))))
-          (list)
-          times)))))
-
+(let [f (frequencies input)
+      ts (keys f)]
+  (println
+    (apply +
+           (for [t ts] (* (f t) (quot 256 t)))
+           ;; some other term with the additional 8s
+           )))
 
 
