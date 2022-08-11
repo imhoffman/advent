@@ -1,0 +1,7 @@
+{:src ["."]
+ :deps {org.clojure/math.combinatorics {:mvn/version "0.1.6"}
+        ;org.clojure/core.logic         {:mvn/version "1.0.0"}
+        ;org.clojure/clojure            {:mvn/version "1.10.1"}
+        }
+ ;:jvm-opts ["-Xms2048M -Xmx8192M -Xss8192K"]
+ }
