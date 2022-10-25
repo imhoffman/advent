@@ -14,24 +14,41 @@
 
 
 ;;
-;;  make sense of the regex groups
-;;   return the dictionary entry
+;;  make sense of the regex groups in a single input line; parsing
+;;   any literals alongs with the op, etc.
+;;   return the dict-of-dicts entry
 ;;   for NOT, enter the argument as an input
-;;    that is, for "NOT a -> b" enter {:in1 "a", :in2 nil, :op "NOT", :out "b"}
-;(defn parser [s]
-;  (cond
-;       (#(Integer/parseInt (second %)) ,,))
+;;
+(defn parser [rev]
+  (let [v  (vec (rest rev))
+        pd (cond
+             ;;  NOT is the only leading op
+             (= (v 0) "NOT")
+             {:inputs (vector (v 1)), :op (v 0), :output (v 2)}
+
+             ;;  numerical literal assigmments
+             ;;   there are also literal inputs to binary OPs...
+             (and (= 2 (count v)) (re-matches #"\d+.*" (v 0)))
+             {:inputs (vector (v 0)), :op nil, :output (v 1)}
+
+             ;;  normal val OP val structure
+             :else
+             {:inputs (vector (v 0) (v 2)), :op (v 1), :output (v 3)})]
+    ;; find the numbers ...
+    ;;(#(Integer/parseInt (second %)) ,,))
+    pd))
 
 
 (def input
   (->> "puzzle.txt"
        slurp
-       (#(str/split % #"\n") ,,)))
-       ;(re-matches #"([a-z]*)\s*([A-Z]+)\s([0-9a-z]+) -> ([a-z]+)" ,,)))
+       (#(str/split % #"\n") ,,)
+       (map #(re-matches #"([0-9a-z]*?)\s*([A-Z]*)\s*([0-9a-z]+) -> ([a-z]+)" %) ,,)
+       (map parser ,,)))
 
 
 ;;
 ;;  main
 ;;
 
-
+(println input)
