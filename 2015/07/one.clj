@@ -70,34 +70,40 @@
     :fail))
 
 
-(def values
-  (reduce
-    (fn [a b]
-      (let [ins (b :inputs)]
-        (assoc
-          a
-          (b :output)
-          (cond
-            (every? number? ins)
-            (op ins (b :op))
-
-            :else
-            nil))))
-    {} input))
-
 
 ;;
 ;;  main
 ;;
 
-(println input)
+(let [outputs (reduce
+                (fn [a b]
+                  (let [ins (b :inputs)]
+                    (assoc
+                      a
+                      (b :output)
+                      (if (every? number? ins)
+                        (op ins (b :op))
+                        nil))))
+                {} input)]
+  (loop [d outputs]
+    (let [known (reduce
+                  (fn [a b]
+                    (if (every?
+                          #(or (% 0) (number? (% 1)))
+                          ;#(or (not (% 0)) (number? (% 1)))
+                          (map vector (map d (b :inputs)) (b :inputs)))
+                      (conj a b) a))
+                  (list) input)]
+      (if (every? (complement nil?) (vals d))
+        (println (d "a"))
 
-(println values)
-
-
-
-
-
-
-
+        (recur
+          (reduce
+            (fn [a b]
+              (assoc
+                a (b :output)
+                ;(op (mapv d (b :inputs))
+                (op (mapv #(or (% 0) (% 1)) (map vector (map d (b :inputs)) (b :inputs)))
+                    (b :op))))
+            d known))))))
 
