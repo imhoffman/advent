@@ -13,23 +13,19 @@
 ;(println input)
 
 (def d
-  {"A" {"Y" :win, "Z" :lose, "X" :draw},
-   "B" {"Z" :win, "X" :lose, "Y" :draw},
-   "C" {"X" :win, "Y" :lose, "Z" :draw}})
+  {"A" {"X" 3, "Y" 1, "Z" 2},
+   "B" {"X" 1, "Y" 2, "Z" 3},
+   "C" {"X" 2, "Y" 3, "Z" 1}})
 
   (println
     (reduce
       (fn [score round]
         (let [one (round :1)
-              two (round :2)
-              outcome ((d one) two)]
-          ;println " score:" score "processing" round "with outcome" outcome)
+              two (round :2)]
           (+ score
-             (case two, "X" 1, "Y" 2, "Z" 3, 0)
-             (case outcome, :win 6, :draw 3, :lose 0, 0))))
+             (case two, "X" 0, "Y" 3, "Z" 6, 0)
+             ((d one) two))))
       0 input))
 
 
-;;  7722 too low
-;;  13712 too high
 
