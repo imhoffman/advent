@@ -7,8 +7,15 @@
                 slurp
                 (#(str/split % #"\n\n") ,,)))
 
+(def stack-names  
+  (map str/trim (str/split (last (str/split (first input) #"\n")) #"   ")))
+
+(def num-stacks
+  (count stack-names))
 
 (def stacks (->> (first input)
+
+
                  ))
 
 
