@@ -17,6 +17,11 @@
 (prn input)
 (prn d)
 
+(defn insert [v value index]
+  (let [[front back] (split-at index v)]
+    (vec (concat front [value] back))))
+
+
 
 
 
