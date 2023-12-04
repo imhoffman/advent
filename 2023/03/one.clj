@@ -31,9 +31,8 @@
   (into #{} (flatten (for [n s] (list (dec n) n)))))
   ;(into #{} (flatten (for [n s] (list (dec n) n (inc n))))))
 
-(println line-dict)
+;(println line-dict)
 
-(doseq [i (range (count line-dict))] (println i (make-diagonals ((line-dict i) :symbols))))
 
 (defn make-substring [s n]
   (let [v (vec s)
@@ -43,14 +42,26 @@
           (if (and (= 1 leading-period) (not= (v 0) \.)) (dec leading-period) leading-period)
           trailing-period)))
 
+(println
+  (apply +
+         (for [i (range 1 (count line-dict))]
+           (let [symbols (make-diagonals ((line-dict i) :symbols))]
+             (apply +
+                    (apply conj
+                           (map #(Integer/parseInt %) (into #{} (filter #(not= "" %) (for [j symbols] (make-substring (nth input (dec i)) j)))))
+                           (map #(Integer/parseInt %) (into #{} (filter #(not= "" %) (for [j symbols] (make-substring (nth input (inc i)) j)))))))))))
 
-(doseq [i (range 1 (count line-dict))]
-  (let [symbols (make-diagonals ((line-dict i) :symbols))]
-    (println i
-             (for [j symbols] (make-substring (nth input (dec i)) j))
-             (for [j symbols] (make-substring (nth input (inc i)) j))))
-  (println))
+(println
+  (apply +
+         (flatten (for [i (range (count line-dict))]
+           (map #(Integer/parseInt %)
+                (into #{} (apply conj
+                                 (map #(if (some? %) (second %) "0") (re-seq #"(\d+)[^\d\.]" (nth input i)))
+                                 (map #(if (some? %) (second %) "0") (re-seq #"[^\d\.](\d+)" (nth input i))))))))))
 
 
+;; 516051 too low
+
+;;  the sets will undercount if the same number appears more than once on the same line, etc.
 
 
