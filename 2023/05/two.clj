@@ -1,6 +1,7 @@
 
 (require '[clojure.string :as str])
 (require '[clojure.set :as set])
+(require '[clojure.core.reducers :as r])
 
 (def input (->> "puzzle.txt"
                 slurp
@@ -9,13 +10,6 @@
                 (map rest ,,)
                 (reduce (fn [a b] (assoc a (first b) (second b))) {} ,,)))
 
-
-(def seeds
-  (->> (input "seeds")
-       (re-seq #"\d+" ,,)
-       (map #(Long/parseLong %) ,,)
-       (partition 2 2 ,,)
-       (reduce (fn [a b] (apply conj a (range (first b) (+ (first b) (second b))))) [] ,,)))
 
 
 (def parsed-ds
@@ -40,18 +34,14 @@
   (let [ranges (parsed-ds (str map-string " map"))]
     (loop [vs ranges]
       (let [v (first vs)]
-        ;(println n v)
         (cond
           (not v) n
           (and (>= n (v 1)) (< n (+ (v 1) (v 2)))) (+ (- n (v 1)) (v 0)) 
           :default (recur (rest vs)))))))
 
 
-;(println "seed" "soil")
-;(doseq [n (range 100)] (println n (seed-to-soil n)))
-
 (println
-  (reduce (fn [a b] (let [temp
+  (r/reduce (fn [a b] (let [temp
                           (->> b
                                (mapper "seed-to-soil" ,,)
                                (mapper "soil-to-fertilizer" ,,)
@@ -62,7 +52,12 @@
                                (mapper "humidity-to-location" ,,))]
                       (if (< temp a) temp a)))
           Long/MAX_VALUE 
-          seeds))
+          (->> (input "seeds")
+               (re-seq #"\d+" ,,)
+               (map #(Long/parseLong %) ,,)
+               (partition 2 2 ,,)
+               (r/reduce (fn [a b] (apply conj a (range (first b) (+ (first b) (second b))))) [] ,,))))
+
 
 
 
