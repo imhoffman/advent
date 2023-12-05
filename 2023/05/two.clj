@@ -40,24 +40,32 @@
           :default (recur (rest vs)))))))
 
 
+
+(defn total-map [n]
+  (->> n
+       (mapper "seed-to-soil" ,,)
+       (mapper "soil-to-fertilizer" ,,)
+       (mapper "fertilizer-to-water" ,,)
+       (mapper "water-to-light" ,,)
+       (mapper "light-to-temperature" ,,)
+       (mapper "temperature-to-humidity" ,,)
+       (mapper "humidity-to-location" ,,)))
+
+
+(defn my-min
+  ([] Long/MAX_VALUE)
+  ([& args] (apply min args)))
+
+
 (println
-  (r/reduce (fn [a b] (let [temp
-                          (->> b
-                               (mapper "seed-to-soil" ,,)
-                               (mapper "soil-to-fertilizer" ,,)
-                               (mapper "fertilizer-to-water" ,,)
-                               (mapper "water-to-light" ,,)
-                               (mapper "light-to-temperature" ,,)
-                               (mapper "temperature-to-humidity" ,,)
-                               (mapper "humidity-to-location" ,,))]
-                      (if (< temp a) temp a)))
-          Long/MAX_VALUE 
+  (r/fold my-min
           (->> (input "seeds")
                (re-seq #"\d+" ,,)
                (map #(Long/parseLong %) ,,)
                (partition 2 2 ,,)
-               (r/reduce (fn [a b] (apply conj a (range (first b) (+ (first b) (second b))))) [] ,,))))
-
-
+               (reduce (fn [a b]
+                           (apply conj a (vec (range (first b) (+ (first b) (second b))))))
+                         (vector) ,,)
+               (r/map total-map ,,))))
 
 
