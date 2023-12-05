@@ -34,87 +34,31 @@
 ;(prn parsed-ds)
 ;(prn seeds)
 
-(defn seed-to-soil [n]
-  (let [ranges (parsed-ds "seed-to-soil map")]
+(defn mapper [map-string n]
+  (let [ranges (parsed-ds (str map-string " map"))]
     (loop [vs ranges]
       (let [v (first vs)]
+        ;(println n v)
         (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
+          (not v) n
+          (and (>= n (v 1)) (< n (+ (v 1) (v 2)))) (+ (- n (v 1)) (v 0)) 
           :default (recur (rest vs)))))))
 
 
-(defn soil-to-fertilizer [n]
-  (let [ranges (parsed-ds "soil-to-fertilizer map")]
-    (loop [vs ranges]
-      (let [v (first vs)]
-        (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
-          :default (recur (rest vs)))))))
-
-
-(defn fertilizer-to-water [n]
-  (let [ranges (parsed-ds "fertilizer-to-water map")]
-    (loop [vs ranges]
-      (let [v (first vs)]
-        (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
-          :default (recur (rest vs)))))))
-
-
-(defn water-to-light [n]
-  (let [ranges (parsed-ds "water-to-light map")]
-    (loop [vs ranges]
-      (let [v (first vs)]
-        (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
-          :default (recur (rest vs)))))))
-
-
-(defn light-to-temperature [n]
-  (let [ranges (parsed-ds "light-to-temperature map")]
-    (loop [vs ranges]
-      (let [v (first vs)]
-        (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
-          :default (recur (rest vs)))))))
-
-
-(defn temperature-to-humidity [n]
-  (let [ranges (parsed-ds "temperature-to-humidity map")]
-    (loop [vs ranges]
-      (let [v (first vs)]
-        (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
-          :default (recur (rest vs)))))))
-
-
-(defn humidity-to-location [n]
-  (let [ranges (parsed-ds "humidity-to-location map")]
-    (loop [vs ranges]
-      (let [v (first vs)]
-        (cond
-          (empty? vs) n
-          (and (> n (v 1)) (< n (+ (v 1) (v 2)))) (+ (v 0) (v 2))
-          :default (recur (rest vs)))))))
-
+;(println "seed" "soil")
+;(doseq [n (range 100)] (println n (seed-to-soil n)))
 
 (println
   (apply min
          (for [seed seeds]
            (->> seed
-                seed-to-soil
-                soil-to-fertilizer
-                fertilizer-to-water
-                water-to-light
-                light-to-temperature
-                temperature-to-humidity
-                humidity-to-location))))
+                (mapper "seed-to-soil" ,,)
+                (mapper "soil-to-fertilizer" ,,)
+                (mapper "fertilizer-to-water" ,,)
+                (mapper "water-to-light" ,,)
+                (mapper "light-to-temperature" ,,)
+                (mapper "temperature-to-humidity" ,,)
+                (mapper "humidity-to-location" ,,)))))
 
 
 ;;  2232050638 too high
