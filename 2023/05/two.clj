@@ -66,6 +66,6 @@
                (reduce (fn [a b]
                            (apply conj a (vec (range (first b) (+ (first b) (second b))))))
                          (vector) ,,)
-               (r/map total-map ,,))))
+               (mapv total-map ,,))))
 
 
