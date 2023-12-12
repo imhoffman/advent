@@ -1,0 +1,5 @@
+{:src ["."]
+ :deps {org.clojure/math.combinatorics {:mvn/version "0.2.0"}
+        }
+ ;:jvm-opts ["-Xms2048M -Xmx8192M -Xss8192K"]
+ }
