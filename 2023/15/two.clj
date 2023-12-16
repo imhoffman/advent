@@ -12,7 +12,7 @@
                 (map vec ,,)))
 
 
-(prn input)
+;(prn input)
 
 (defn hasher [string]
   (loop [s (vec string)
@@ -29,15 +29,13 @@
 
 
 (defn my-remove [v e]
-  (let [i (reduce (fn [a b] (if (= e (first b)) (.indexOf v b) nil)) nil v)]
+  (let [i (reduce (fn [a b] (or a (if (= e (first b)) (.indexOf v b) nil))) nil v)]
     (if i
       (into (subvec v 0 i) (subvec v (inc i)))
       v)))
 
 (defn my-replace [v e]
-  (println "looking for" (first e) "among" (map first v))
-  (let [i (reduce (fn [a b] (if (= (first e) (first b)) (.indexOf v b) nil)) nil v)]
-    (println "found" (first e) "at" i)
+  (let [i (reduce (fn [a b] (or a (if (= (first e) (first b)) (.indexOf v b) nil))) nil v)]
     (if i
       (assoc v i e)
       (conj v e))))
@@ -47,7 +45,6 @@
 (defn process [instructions]
   (loop [in instructions
          o (into {} (map vector (range 256) (repeat (vector))))]
-    (println o)
     (if (empty? in)
       o
       (let [v (first in)
@@ -58,7 +55,6 @@
         (recur
           (rest in)
           (cond
-            ;(= op "=") (assoc o box (conj (o box) (vector s f)))
             (= op "=") (assoc o box (my-replace (o box) (vector s f)))
             (= op "-") (assoc o box (my-remove (o box) s))
             :default   o))))))
@@ -68,6 +64,22 @@
 
 ;(println (apply + (for [s input] (hasher s))))
 
-(process input)
+(println
+  (let [p (process input)
+        d (into {} (filter #(not (empty? (second %))) p))]
+    (loop [h d
+           o 0]
+      (if (empty? h)
+        o
+        (let [[k,v] (first h)
+              box (inc k)
+              c (count v)]
+          (recur
+            (rest h)
+            (+ o
+               (* box (apply +
+                             (map #(* (first %) (second %))
+                                  (for [i (range c)] (vector (inc i) (Integer/parseInt (second (v i)))))))))))))))
+
 
 
