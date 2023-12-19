@@ -25,42 +25,60 @@
         m2 (apply max (vals f2))
         v1 (vec h1)
         v2 (vec h2)]
-    ;;  tie-break routine should really be letfn'ed ...
-    ;    (loop [i 0]
-    ;              (cond
-    ;                (> (ranks (v1 i)) (ranks (v2 i))) +1
-    ;                (< (ranks (v1 i)) (ranks (v2 i))) -1
-    ;                :default (recur (inc i)))))))
-    (cond
-      ;;  full-house possiblities
-      (and (= '(2 3) (sort (vals f1))) (not= '(2 3) (sort (vals f2)))) +1
+    (letfn [(tie-break [v1 v2]
+              (loop [i 0]
+                (cond
+                  (= i 5) 0
+                  (> (ranks (v1 i)) (ranks (v2 i))) +1
+                  (< (ranks (v1 i)) (ranks (v2 i))) -1
+                  :default (recur (inc i)))))]
+      (cond
+        (or (= m1 5) (= m2 5))
+        (cond
+          (> m1 m2) +1
+          (< m1 m2) -1
+          :default (tie-break v1 v2))
 
-      (and (= '(2 3) (sort (vals f2))) (not= '(2 3) (sort (vals f1)))) -1
+        (or (= m1 4) (= m2 4))
+        (cond
+          (> m1 m2) +1
+          (< m1 m2) -1
+          :default (tie-break v1 v2))
 
-      (and (= '(2 3) (sort (vals f2))) (= '(2 3) (sort (vals f1))))
-      (if (> (apply min (map ranks v1)) (apply min (map ranks v2))) -1 +1)
+        ;;  full-house possiblities
+        (and (= '(2 3) (sort (vals f1))) (not= '(2 3) (sort (vals f2)))) +1
+        (and (= '(2 3) (sort (vals f2))) (not= '(2 3) (sort (vals f1)))) -1
+        (and (= '(2 3) (sort (vals f2))) (= '(2 3) (sort (vals f1))))
+        (tie-break v1 v2)
 
-      ;;  five-of-a-kind beats four- beats three- beats two-
-      (> m1 m2) +1
+        (or (= m1 3) (= m2 3))
+        (cond
+          (> m1 m2) +1
+          (< m1 m2) -1
+          :default (tie-break v1 v2))
 
-      (< m1 m2) -1
+        ;;  two pair in one or both
+        (and (= '(1 2 2) (sort (vals f1))) (not= '(1 2 2) (sort (vals f2)))) +1
+        (and (= '(1 2 2) (sort (vals f2))) (not= '(1 2 2) (sort (vals f1)))) -1
+        (and (= '(1 2 2) (sort (vals f2))) (= '(1 2 2) (sort (vals f1))))
+        (tie-break v1 v2)
 
-      ;;  two pair in each
-      (and (= '(1 2 2) (sort (vals f2))) (= '(1 2 2) (sort (vals f1))))
-      ;; tie-break, but what follows is wrong, use the letfn
-      (if (> (apply min (map ranks v1)) (apply min (map ranks v2))) -1 +1)
+        ;;  one pair in each
+        ;(and (= '(1 1 1 2) (sort (vals f2))) (= '(1 1 1 2) (sort (vals f1))))
+        ;(tie-break v1 v2)
 
-      ;;  one pair in each
-      (and (= '(1 1 1 2) (sort (vals f2))) (= '(1 1 1 2) (sort (vals f1))))
-      ;; tie-break, but what follows is wrong, use the letfn
-      (if (> (apply min (map ranks v1)) (apply min (map ranks v2))) -1 +1)
+        ;;  one pair possibilities
+        (or (= m1 2) (= m2 2))
+        (cond
+          (> m1 m2) +1
+          (< m1 m2) -1
+          :default (tie-break v1 v2))
 
-      ;;  high card in each
-      (and (= 1 m1) (= 1 m2))  ;;  or simply (= 1 m1)
-      ;; tie-break, but what follows is wrong, use the letfn
-      (if (> (apply min (map ranks v1)) (apply min (map ranks v2))) -1 +1)
+        ;;  high card in each
+        (and (= 1 m1) (= 1 m2))  ;;  or simply (= 1 m1)
+        (tie-break v1 v2)
 
-      :default 0)))
+        :default 0))))
 
 
 (println
@@ -78,5 +96,9 @@
 ;;  254609753 too high
 ;;  247280583 too high
 ;;  246390747 too low
+
+;;  247242050 wrong
+;;  246955966 wrong
+;;  246548099 wrong
 
 
