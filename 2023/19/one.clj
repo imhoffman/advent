@@ -19,7 +19,7 @@
         (vector k d)
         (let [p (or (re-matches #"([^\<\>]+)" (first rules))
                     (vec (rest (re-matches #"([xmas])([\<\>])(\d+):([a-zAR]+)" (first rules)))))]
-          (println (first rules) p)
+          ;(println (first rules) p)
           (recur
             (rest rules)
             (if (= 2 (count p))
@@ -31,7 +31,7 @@
                 (map #(parse-rules %) ,,)
                 (into {} ,,)))
 
-(prn rules)
+;(prn rules)
 
 
 (defn parse-part [bracketed]
@@ -42,7 +42,33 @@
 (def parts (->> (second input)
                 (#(str/split % #"\n") ,,)
                 (map #(parse-part %) ,,)))
-(prn parts)
+;(prn parts)
+
+
+(defn accept? [part & rule]
+  (let [k (or rule "in")
+        r (or (re-matches #"[AR]" k) (rules k))]
+    (cond
+      (= r "R") false
+      (= r "A") true
+      :default
+      (recur part
+             (loop [rv r]
+               (letfn [(f [a b] (if (= "<" ((rv 0) :op)) (< a b) (> a b)))]
+                 (cond
+                   (= 1 (count rv)) ((rv 0) :dest)
+                   (f (part ((rv 0) :attr)) ((rv 0) :val)) ((rv 0) :dest)
+                   :default (recur (vec (rest rv))))))))))
+
+
+
+(println
+  (apply +
+         (for [part parts]
+           (if (accept? part)
+             (apply + (vals part))
+             0))))
+
 
 
 
