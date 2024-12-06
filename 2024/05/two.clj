@@ -33,9 +33,15 @@
       (recur
         (let [swaps (filter (complement empty?)
                             (for [p ps]
-                              (when (> (.indexOf pages (first p)) (.indexOf pages (second p)))
+                              (when
+                                (> (.indexOf pages (first p)) (.indexOf pages (second p)))
                                 (vector (.indexOf pages (first p)) (.indexOf pages (second p))))))]
-          (reduce (fn [a b] (assoc (assoc a (first b) (a (second b))) (second b) (a (first b)))) pages swaps))))))
+          (reduce (fn [a b]
+                    (assoc
+                      (assoc a (first b) (a (second b)))
+                      (second b) (a (first b))))
+                  pages (take 1 swaps)))))))
+          ;(reduce (fn [a b] (assoc (assoc a (first b) (a (second b))) (second b) (a (first b)))) pages swaps))))))
 
 
 
