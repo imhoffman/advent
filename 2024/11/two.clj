@@ -14,6 +14,14 @@
   (let [[beginning end] (split-at v idx)]
     (vec (apply concat beginning x end))))
 
+
+;;
+;;  change this to [v i] and recur over only the first number, then move on;
+;;  the main loop below will still also be over the blink number, but this
+;;   routine will also consume it;
+;;  not sure that this is a win, since maybe this is a number-theory game,
+;;   but at least it will clean up the consumption;
+;;
 (defn blink [v]
   (vec (flatten
          (reduce
@@ -44,7 +52,7 @@
       (empty? v)
       T
 
-      (= i 75)
+      (= i 25)
       (recur
         (vec (rest v))
         (vector (first (rest v)))
